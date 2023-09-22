@@ -1,2 +1,2 @@
 # SE-weekend-vaerelser
-sut en klunk
+Dette bliver en hjemmeside til at vælge hvem sover hvor, om weekednerne.
