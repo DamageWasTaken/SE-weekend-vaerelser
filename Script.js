@@ -1,4 +1,7 @@
 console.log("Script Loaded");
+[].forEach.call(document.querySelectorAll(`.container`), function (el) {
+    el.style.visibility = 'collapse';
+});
 
 function selectGroup(group) {
     if (group == "Alle"){
@@ -7,7 +10,7 @@ function selectGroup(group) {
         });
     } else {
         [].forEach.call(document.querySelectorAll('.image'), function (el) {
-            el.style.visibility = 'hidden';
+            el.style.visibility = 'collapse';
         });
         console.log(group);
 
