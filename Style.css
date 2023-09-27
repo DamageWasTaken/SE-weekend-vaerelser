@@ -107,7 +107,7 @@ h2 {
     gap: 4em;
 }
 
-.image {
+.image, .image-list {
     position: relative;
     width: 150px;
     height: 150px;
