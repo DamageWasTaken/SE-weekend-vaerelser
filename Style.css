@@ -24,6 +24,7 @@ main {
     justify-content: flex-start;
     gap: 8em;
     margin: 3em 0;
+    width: 100%;
 }
 
 body {
@@ -86,25 +87,13 @@ h2 {
     cursor: pointer;
 }
 
-.container {
-    display: flex;
-    position: relative;
-    flex-wrap: wrap;
-    gap: 4em;
-}
-
-#container {
-    display: flex;
-    position: relative;
-    flex-wrap: wrap;
-    gap: 4em;
-}
-
 .full-container {
     display: flex;
     position: relative;
     flex-wrap: wrap;
     gap: 4em;
+    justify-content: flex-start;
+    width: 100%;
 }
 
 .image, .image-list {
