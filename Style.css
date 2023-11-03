@@ -5,6 +5,10 @@
     --p: 18px;
     --sub: 16px;
     --small: 14px;
+    --green: #428d2a;
+    --blue: #0000fe;
+    --red: #d31919;
+    --orange: #e78514;
 }
 
 html {
@@ -22,7 +26,6 @@ main {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 8em;
     margin: 3em 0;
     width: 100%;
 }
@@ -33,17 +36,25 @@ body {
     align-items: center;
     justify-content: flex-start;
     height: 100vh;
-    margin: 0 15%;
+    margin: 0 10%;
     gap: 4em;
     width: auto !important;
     font-family: 'Inter', sans-serif;
     color: var(--text);
     background-color: var(--bg);
+    background-image: url('images/photo-1543837173-6c26bc89937b.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center; 
     scroll-behavior: smooth;
 }
 
 nav {
+    width: 90vw;
     display: flex;
+    flex-basis: 0;
+    justify-content: space-between;
+    padding-top: 6px;
 }
 
 * {
@@ -82,23 +93,68 @@ h2 {
 
 .nav-button {
     color: var(--bg);
-    padding: 10px;
+    flex-grow: 1;
+    margin: 0.3%;
     border: none;
+    border-radius: 6px;
     cursor: pointer;
+    background-color: rgba(200, 200, 200, 0.7);
+    color: var(--text);
 }
 
 .full-container {
     display: flex;
     position: relative;
     flex-wrap: wrap;
+    align-content: flex-start;
+    height: 100vh;
     gap: 4em;
     justify-content: flex-start;
     width: 100%;
+    overflow: auto;
 }
 
 .image, .image-list {
     position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 75px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+}
+
+#side-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.selector {
+    display: flex;
+    height: 100px;
+    width: 100px;
+    border-radius: 50px;
+    flex-direction: column;
+    align-items: center;
+}
+
+#ikke-valgt {
+    background-color: var(--red);
+}
+
+#sover-andet-varelse {
+    background-color: var(--blue);
+}
+
+#sover-eget-vaerelse {
+    background-color: var(--green);
+}
+
+.selector-text {
+    line-height: 0;
+    font-size: 12px;
+    z-index: 1;
+}
+
+.large-number {
+    line-height: 0;
+    font-size: 28px;
+    z-index: 1;
 }
