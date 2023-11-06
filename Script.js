@@ -12,3 +12,8 @@ function selectGroup(group) {
         });
     }
 }
+
+function openPopup(person) {
+    var popup = document.getElementById("popup");
+    popup.classList.toggle("show");
+  }

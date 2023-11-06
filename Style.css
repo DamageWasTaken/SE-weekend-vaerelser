@@ -9,10 +9,11 @@
     --blue: #0000fe;
     --red: #d31919;
     --orange: #e78514;
+    --fadded: rgba(200, 200, 200, 0.7);
 }
 
 html {
-    --text: #fedce8;
+    --text: #faeff3;
     --bg: #190009;
     --primary: #e3004f;
     --secondary: #5a3c60;
@@ -36,7 +37,7 @@ body {
     align-items: center;
     justify-content: flex-start;
     height: 100vh;
-    margin: 0 10%;
+    margin: 0 5%;
     gap: 4em;
     width: auto !important;
     font-family: 'Inter', sans-serif;
@@ -98,7 +99,7 @@ h2 {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    background-color: rgba(200, 200, 200, 0.7);
+    background-color: var(--fadded);
     color: var(--text);
 }
 
@@ -108,13 +109,14 @@ h2 {
     flex-wrap: wrap;
     align-content: flex-start;
     height: 100vh;
-    gap: 4em;
+    gap: 4.5em;
     justify-content: flex-start;
     width: 100%;
     overflow: auto;
+    padding: 0 0 6% 12%;
 }
 
-.image, .image-list {
+.image {
     position: relative;
     width: 100px;
     height: 100px;
@@ -122,8 +124,12 @@ h2 {
 }
 
 #side-nav {
+    position: fixed;
     display: flex;
     flex-direction: column;
+    gap: 2em;
+    left: 0;
+    padding-left: 1.5%;
 }
 
 .selector {
@@ -157,4 +163,39 @@ h2 {
     line-height: 0;
     font-size: 28px;
     z-index: 1;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+#popup {
+    display: none;
+    z-index: 2;
+    position: fixed;
+    top: 35%;
+    border-radius: 12px;
+}
+
+.name-text {
+    font-size: 12px;
+    line-height: 0;
+}
+
+.show {
+    display: inline !important;
+}
+
+.popup-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fadded);
+}
+
+.popup-buttons {
+    display: flex;
+    flex-direction: row;
 }
