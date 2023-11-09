@@ -9,11 +9,14 @@
     --blue: #0000fe;
     --red: #d31919;
     --orange: #e78514;
+    --cyan: #157fa4;
     --fadded: rgba(200, 200, 200, 0.7);
+    --faddedBlack: rgba(0, 0, 0, 0.7);
 }
 
 html {
     --text: #faeff3;
+    --text2: #000;
     --bg: #190009;
     --primary: #e3004f;
     --secondary: #5a3c60;
@@ -174,10 +177,12 @@ h2 {
 
 #popup {
     display: none;
+    justify-content: center;
+    align-items: center;
     z-index: 2;
     position: fixed;
-    top: 35%;
-    border-radius: 12px;
+    width: 100vw;
+    height: 100vh;
 }
 
 .name-text {
@@ -186,16 +191,53 @@ h2 {
 }
 
 .show {
-    display: inline !important;
+    display: flex !important;
+}
+
+.blur-bg {
+    background-color: var(--faddedBlack);
 }
 
 .popup-container {
     display: flex;
     flex-direction: column;
-    background-color: var(--fadded);
+    width: 35%;
+}
+
+.popup-inner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--text);
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.popup-top-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-text {
+    line-height: 0;
 }
 
 .popup-buttons {
     display: flex;
     flex-direction: row;
+}
+
+.alt-name-text {
+    color: var(--text2);
+}
+
+.x-icon {
+    transform: rotate(45deg);
+}
+
+.x-icon:active {
+    transform: scale(0.95);
 }
