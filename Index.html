@@ -37,12 +37,10 @@
             <button class="nav-button" onclick="selectGroup('Z')">Z</button>
             <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
         </nav>
-        <div id="myData"></div>
-        <div id="configurationdetails"></div>
         <div id="popup">
             <div class="popup-container">
                 <div class="popup-top-container">
-                    <p class="top-text">Hvor sover du?</p>
+                    <p class="top-text">Vælg Soveplads</p>
                     <svg class="x-icon" width="23" height="23" viewBox="0 0 23 23" fill="none" onclick="closePopup()">
                         <path d="M11.5 0L11.5 23" fill="none" stroke="var(--text)" stroke-width="2"></path>
                         <path d="M23 11.5L-2.38419e-07 11.5" fill="none" stroke="var(--text)" stroke-width="2"></path>
@@ -50,16 +48,70 @@
                 </div>
                 <div class="popup-inner-container">
                     <p id="replaceableText" class="alt-name-text">Navn Navnsen</p>
-                    <div class="popup-buttons">
+                    <div id="buttons-stage-1" class="popup-buttons">
                         <div>
-                            <button>På eget værelse</button>
+                            <button class="popup-button" onclick="selectorButton('Eget')">På eget værelse</button>
                         </div>
                         <div>
-                            <button>På andet værelse</button>
+                            <button class="popup-button" onclick="selectorButton('Andet')">På andet værelse</button>
+                        </div>
+                    </div>
+                    <div id="buttons-stage-2" class="popup-buttons">
+                        <div>
+                            <button class="popup-button" onclick="selectHouse('Valhal')">Valhal</button>
+                        </div>
+                        <div>
+                            <button class="popup-button" onclick="selectHouse('Udgård')">Udgård</button>
+                        </div>
+                        <div>
+                            <button class="popup-button" onclick="selectHouse('Asgård')">Asgård</button>
+                        </div>
+                        <div>
+                            <button class="popup-button" onclick="selectHouse('Midgård')">Midgård</button>
+                        </div>
+                    </div>
+                    <div id="buttons-stage-3" class="popup-buttons">
+                        <div>
+                            <button id="btn-0" class="popup-button alt" onclick="selectRoom('1')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-1" class="popup-button alt" onclick="selectRoom('2')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-2" class="popup-button alt" onclick="selectRoom('3')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-3" class="popup-button alt" onclick="selectRoom('4')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-4" class="popup-button alt" onclick="selectRoom('5')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-5" class="popup-button alt" onclick="selectRoom('6')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-6" class="popup-button alt extra-btn" onclick="selectRoom('7')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-7" class="popup-button alt extra-btn" onclick="selectRoom('8')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-8" class="popup-button alt extra-btn" onclick="selectRoom('9')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-9" class="popup-button alt extra-btn" onclick="selectRoom('10')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-10" class="popup-button alt extra-btn" onclick="selectRoom('11')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-11" class="popup-button alt extra-btn" onclick="selectRoom('12')">x</button>
+                        </div>
+                        <div>
+                            <button id="btn-12" class="popup-button alt extra-btn" onclick="selectRoom('13')">x</button>
                         </div>
                     </div>
                 </div>
-                
             </div>
         </div>
         <main>
@@ -78,6 +130,7 @@
                 </div>
             </div>
             <div id="container" class="full-container">
+
             </div>
         </main>
     </body>
