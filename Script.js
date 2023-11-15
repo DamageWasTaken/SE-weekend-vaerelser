@@ -1,103 +1,75 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
-houseMidgaard = [{
-    room:"1a"
-}, {
-    room:"1b"
-}, {
-    room:2
-}, {
-    room:3
-}, {
-    room:4
-}, {
-    room:5
-}, {
-    room:6
-}, {
-    room:7
-}, {
-    room:8
-}, {
-    room:9
-}, {
-    room:10
-}, {
-    room:11
-}, {
-    room:12
-}]
 
-houseAsgaard = [{
-    room:14
-}, {
-    room:15
-}, {
-    room:16
-}, {
-    room:17
-}, {
-    room:18
-}, {
-    room:19
-}, {
-    room:20
-}, {
-    room:21
-}, {
-    room:22
-}, {
-    room:23
-}, {
-    room:24
-}, {
-    room:25
-}, {
-    room:26
-}]
+//Declaring global varibles
+const allowedExtraValue = 1;
+var noChoise = 0;
+var ownRoom = 0;
+var otherRoom = 0;
+var buttonsHidden = false;
+var houseButtonsShown = false;
+var roomButtonsShown = false;
+var smallButtons = false;
+var namePosition = 0;
 
-houseUdgaard = [{
-    room:27
-}, {
-    room:28
-}, {
-    room:29
-}, {
-    room:30
-}, {
-    room:31
-}, {
-    room:32
-}, {
-    room:33
-}, {
-    room:34
-}, {
-    room:35
-}, {
-    room:36
-}, {
-    room:37
-}, {
-    room:38
-}, {
-    room:39
-}]
+//Declaring all houses & rooms
+houseMidgaard = [
+    {room:"1a",sex:"f",space:2},
+    {room:"1b",sex:"f",space:2},
+    {room:2,sex:"m",space:4},
+    {room:3,sex:"m",space:3},
+    {room:4,sex:"f",space:3},
+    {room:5,sex:"f",space:3},
+    {room:6,sex:"m",space:3},
+    {room:7,sex:"m",space:3},
+    {room:8,sex:"f",space:3},
+    {room:9,sex:"f",space:3},
+    {room:10,sex:"m",space:3},
+    {room:11,sex:"m",space:3},
+    {room:12,sex:"f",space:3}
+]
 
-houseValhal = [{
-    room:40
-}, {
-    room:41
-}, {
-    room:42
-}, {
-    room:43
-}, {
-    room:44
-}, {
-    room:45
-}]
+houseAsgaard = [
+    {room:14,sex:"f",space:3},
+    {room:15,sex:"m",space:4},
+    {room:16,sex:"m",space:3},
+    {room:17,sex:"f",space:3},
+    {room:18,sex:"f",space:3},
+    {room:19,sex:"m",space:3},
+    {room:20,sex:"m",space:3},
+    {room:21,sex:"f",space:3},
+    {room:22,sex:"f",space:3},
+    {room:23,sex:"m",space:3},
+    {room:24,sex:"m",space:3},
+    {room:25,sex:"f",space:3},
+    {room:26,sex:"f",space:3}
+]
 
+houseUdgaard = [
+    {room:27,sex:"m",space:3},
+    {room:28,sex:"m",space:4},
+    {room:29,sex:"f",space:3},
+    {room:30,sex:"f",space:3},
+    {room:31,sex:"m",space:3},
+    {room:32,sex:"m",space:3},
+    {room:33,sex:"f",space:3},
+    {room:34,sex:"f",space:3},
+    {room:35,sex:"m",space:3},
+    {room:36,sex:"m",space:3},
+    {room:37,sex:"f",space:3},
+    {room:38,sex:"f",space:3},
+    {room:39,sex:"f",space:3}
+]
 
+houseValhal = [
+    {room:40,sex:"f",space:3},
+    {room:41,sex:"m",space:3},
+    {room:42,sex:"m",space:3},
+    {room:43,sex:"f",space:3},
+    {room:44,sex:"f",space:3},
+    {room:45,sex:"m",space:3}
+]
+
+//List of all profiles to be rendered
 displayName = [
 {number:133,name:"Adelina Høst Johnsen",img:"viggo-billeder/A/Adelina.jpg",room:26,choice:"ikke valgt"},
 {number:7,name:"Albert Damsgaard Grønnerup",img:"viggo-billeder/A/Albert.jpg",room:10,choice:"ikke valgt"},
@@ -235,12 +207,15 @@ displayName = [
 {number:13,name:"Zenia Karen Van Der Plas",img:"viggo-billeder/Z/Zenia.jpg",room:22,choice:"ikke valgt"}
 ]
 
+//Make the top group selector work
 function selectGroup(group) {
     if (group == "Alle"){
+        //If all is selected show all images/profiles
         [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
             el.style.display = 'flex';
         });
     } else {
+        //Otherwise hide all images/profiles, and un-hide all images in a certain letter group
         [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
             el.style.display = 'none';
         });
@@ -250,14 +225,7 @@ function selectGroup(group) {
     }
 }
 
-var noChoise = 0;
-var ownRoom = 0;
-var otherRoom = 0;
-var buttonsHidden = false;
-var houseButtonsShown = false;
-var roomButtonsShown = false;
-var smallButtons = false;
-
+//Opens the popup menu
 function openPopup(i) {
     var popup = document.getElementById("popup");
     popup.classList.toggle("show");
@@ -266,6 +234,7 @@ function openPopup(i) {
     closeButtons();
 }
 
+//Closes the popup menu
 function closePopup() {
     var popup = document.getElementById("popup");
     popup.classList.toggle("show");
@@ -273,33 +242,54 @@ function closePopup() {
     closeButtons();
 }
 
+
+//Checks if person selected own room or other room, if they selected own room - do prep, otherwise send to next menu
 function selectorButton(place) {
+    //Grabs the name from the person selected
     var nameText = document.getElementById("replaceableText")
+    //Grabs the name text itself from the person selected
     var currentName = e => e.name === document.getElementById("replaceableText").textContent
-    var namePosition = displayName.findIndex(currentName);
+    //Finds out what number in the array the person is
+    namePosition = displayName.findIndex(currentName);
+    //Finds out what ID to target
     var currentPerson = document.getElementById("pers-" + namePosition);
+    //Finds the persons current room number
+    var roomNumber = displayName[namePosition].room;
+    //Defines webpage elements
     var mainButtons = document.getElementById("buttons-stage-1");
     var houseButtons = document.getElementById("buttons-stage-2");
+    //If OwnRoom is selected prep the person to be added to the room array
     if (place == "Eget") {
-        var profile = [{
-            number: displayName[namePosition].number,
-            name: displayName[namePosition].name,
-            img: displayName[namePosition].img,
-            room: displayName[namePosition].room,
-            choice: "eget vaerelse"
-        }]
-        profile.forEach(element => {
-            const itemIndex = displayName.findIndex(o => o.number === element.number);
-            if(itemIndex > -1) {
-                displayName[itemIndex] = element;
-            } else {
-                displayName = displayName.push(element);
-            }       
-        });
-        currentPerson.classList.toggle("Ikke-Valgt");
-        currentPerson.classList.toggle("Eget");
-        countData();
-        closePopup();
+        
+        //Check if the selected room is available
+        if (checkRoomAvailability(roomNumber) == true) {
+            //Define the dummy profile to be added the displayName array
+            var profile = [{
+                //Finds the details and adds them to the dummy profile
+                number: displayName[namePosition].number,
+                name: displayName[namePosition].name,
+                img: displayName[namePosition].img,
+                room: displayName[namePosition].room,
+                choice: "eget vaerelse"
+            }]
+            //Goes down the array finds the person in the array, deletes them, and inserts the dummy profile to the array
+            profile.forEach(element => {
+                const itemIndex = displayName.findIndex(o => o.number === element.number);
+                if(itemIndex > -1) {
+                    displayName[itemIndex] = element;
+                } else {
+                    displayName = displayName.push(element);
+                }       
+            });
+            //Removes and adds a class to be able to select person by group
+            currentPerson.classList.toggle("Ikke-Valgt");
+            currentPerson.classList.toggle("Eget");
+            //Call the data to be counted and close the popup.
+            countData();
+            closePopup();
+        } else {
+            console.log("!!!NO ROOM!!!")
+        }
     } else {
         mainButtons.classList.toggle("hide");
         nameText.classList.toggle("hide");
@@ -309,16 +299,53 @@ function selectorButton(place) {
     }
 }
 
+//Check if a room is available, if it is, return true
+function checkRoomAvailability(room) {
+    var roomAmount = 0;
+    var roomPosition = 0;
+    //Check what house - then find what room the person lives in
+    if (room < 13 || room == "1a" || room == "1b") {
+        //Find the room position in the array
+        roomPosition = houseMidgaard.findIndex(e => e.room === room);
+        //Find the amount of people in the room
+        roomAmount = Object.keys(houseMidgaard[roomPosition]).length-3;
+        //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
+        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+    } else if (room < 27) {
+        roomPosition = houseAsgaard.findIndex(e => e.room === room);
+        roomAmount = Object.keys(houseAsgaard[roomPosition]).length-3;
+        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+    } else if (room < 40) {
+        roomPosition = houseUdgaard.findIndex(e => e.room === room);
+        roomAmount = Object.keys(houseUdgaard[roomPosition]).length-3;
+        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+    } else if (room < 46) {
+        roomPosition = houseValhal.findIndex(e => e.room === room);
+        roomAmount = Object.keys(houseValhal[roomPosition]).length-3;
+        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+    }
+    //Return value based on if there's room or not
+    if (allowedAmount > roomAmount) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+//Opens up the house select menu
 function selectHouse(house) {
     var houseButtons = document.getElementById("buttons-stage-2");
     var roomButtons = document.getElementById("buttons-stage-3");
+    //Removes the house selects buttons & adds the room select buttons.
     houseButtons.classList.toggle("show");
     houseButtonsShown = false;
     roomButtons.classList.toggle("show");
     roomButtonsShown = true;
+    //Makes sure that the extra buttons are added as well
     [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
         el.style.display = 'inline';
     });
+    //Chekcs what house is selected and adds the room numbers to the buttons
     if (house == "Asgård") {
         for (var i = 0; i < houseAsgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseAsgaard[i].room;
@@ -332,6 +359,7 @@ function selectHouse(house) {
             document.getElementById("btn-" + i ).innerHTML = houseUdgaard[i].room;
         }
     } else if (house == "Valhal") {
+        //Removes the extra buttons because there are less rooms
         roomButtons.classList.toggle("small");
         smallButtons = true;
         for (var i = 0; i < houseValhal.length; i++) {
@@ -343,18 +371,22 @@ function selectHouse(house) {
     }
 }
 
+//Send the values to the HTMl page
 function updateCount() {
     document.getElementById("eget-vaerelse-number").innerHTML = ownRoom;
     document.getElementById("andet-vaerelse-number").innerHTML = otherRoom;
     document.getElementById("ikke-valgt-number").innerHTML = noChoise;
 }
 
+//Make sure all the buttons are closed and returned to default
 function closeButtons() {
+    //Define the elements that are to be used
     var nameText = document.getElementById("replaceableText")
     var mainButtons = document.getElementById("buttons-stage-1");
     var houseButtons = document.getElementById("buttons-stage-2");
     var roomButtons = document.getElementById("buttons-stage-3");
 
+    //Go down the list and check if something is in the default state, if not, return to default
     if (houseButtonsShown == true) {
         houseButtons.classList.toggle("show");
         houseButtonsShown = false;
@@ -374,12 +406,15 @@ function closeButtons() {
     }
 }
 
+//Profiles are first loaded once the website and DOM is loaded to not conflict
 window.onload = () => {
+    //Call the function
     appendData(displayName)
-
+    //Load all profiles named in "displayName"
     function appendData(displayName) {
-        window.data = displayName
+        //Grabs the outer shell for where the profiles are to be loaded to
         var mainContainer = document.getElementById("container");
+        //Loads each profle one by one, giving assets as well
         for (var i = 0; i < displayName.length; i++) {
             mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + displayName[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + displayName[i].img + '" class="image"> <p class="name-text">' + displayName[i].name + '</p> </div>',);
         }
@@ -388,10 +423,13 @@ window.onload = () => {
     countData();
 }
 
+//Count the number of each value
 function countData() {
+    //Set count to 0
     noChoise = 0;
     ownRoom = 0;
     otherRoom = 0;
+    //Count each type & add to value
     for (var i = 0; i < displayName.length; i++) {
         if (displayName[i].choice == "eget vaerelse") {
             ownRoom++;
@@ -401,5 +439,6 @@ function countData() {
             noChoise++;
         }
     }
+    //Call the values to be rendered to the website
     updateCount();
 }

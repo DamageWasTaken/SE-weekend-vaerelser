@@ -118,7 +118,7 @@ h2 {
     flex-wrap: wrap;
     align-content: flex-start;
     height: 80vh;
-    gap: 4.5em;
+    gap: 3.8em;
     justify-content: flex-start;
     width: 100%;
     overflow: auto;
@@ -140,6 +140,7 @@ h2 {
     gap: 2em;
     left: 0;
     padding-left: 1.5%;
+    z-index: 2;
 }
 
 .selector {
