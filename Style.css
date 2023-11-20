@@ -42,9 +42,10 @@ body {
     align-items: center;
     justify-content: flex-start;
     height: 100vh;
-    margin: 0 5%;
+    margin: 0 2%;
     gap: 4em;
     width: auto !important;
+    overflow: hidden;
     font-family: 'Arimo', sans-serif;
     color: var(--text);
     background-color: var(--bg);
@@ -56,7 +57,7 @@ body {
 }
 
 nav {
-    width: 90vw;
+    width: 98vw;
     display: flex;
     flex-basis: 0;
     justify-content: space-between;
@@ -101,8 +102,7 @@ h2 {
 }
 
 .nav-button {
-    color: var(--bg);
-    flex-grow: 1;
+    width: 10%;
     margin: 0.3%;
     border: none;
     border-radius: 6px;
@@ -113,17 +113,16 @@ h2 {
 }
 
 .full-container {
-    display: flex;
+    display: grid;
+    margin-left: 15%;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     position: relative;
-    flex-wrap: wrap;
-    align-content: flex-start;
     height: 80vh;
-    gap: 3.8em;
-    justify-content: flex-start;
-    width: 100%;
-    overflow: auto;
+    column-gap: 4%;
+    row-gap: 100px;
+    width: 85%;
+    overflow-y: scroll;
     margin-bottom: 6%;
-    padding-left: 13.5%;
 }
 
 .image {

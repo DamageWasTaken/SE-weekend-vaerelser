@@ -10,6 +10,11 @@ var houseButtonsShown = false;
 var roomButtonsShown = false;
 var smallButtons = false;
 var namePosition = 0;
+var roomAmount = 0;
+var allowedAmount = 0;
+var roomPosition = 0;
+var selectedHouse = "";
+var personSelected = 0;
 
 //Declaring all houses & rooms
 houseMidgaard = [
@@ -287,6 +292,7 @@ function selectorButton(place) {
             //Call the data to be counted and close the popup.
             countData();
             closePopup();
+            addPersonToRoom(displayName[namePosition].number, displayName[namePosition].room);
         } else {
             console.log("!!!NO ROOM!!!")
         }
@@ -296,13 +302,13 @@ function selectorButton(place) {
         buttonsHidden = true;
         houseButtons.classList.toggle("show");
         houseButtonsShown = true;
+        //Sets the person selected
+        personSelected = displayName[namePosition].number;
     }
 }
 
 //Check if a room is available, if it is, return true
 function checkRoomAvailability(room) {
-    var roomAmount = 0;
-    var roomPosition = 0;
     //Check what house - then find what room the person lives in
     if (room < 13 || room == "1a" || room == "1b") {
         //Find the room position in the array
@@ -310,19 +316,22 @@ function checkRoomAvailability(room) {
         //Find the amount of people in the room
         roomAmount = Object.keys(houseMidgaard[roomPosition]).length-3;
         //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
-        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
     } else if (room < 27) {
+        //Repeat the same for the other houses
         roomPosition = houseAsgaard.findIndex(e => e.room === room);
         roomAmount = Object.keys(houseAsgaard[roomPosition]).length-3;
-        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
     } else if (room < 40) {
+        //Repeat the same for the other houses
         roomPosition = houseUdgaard.findIndex(e => e.room === room);
         roomAmount = Object.keys(houseUdgaard[roomPosition]).length-3;
-        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
     } else if (room < 46) {
+        //Repeat the same for the other houses
         roomPosition = houseValhal.findIndex(e => e.room === room);
         roomAmount = Object.keys(houseValhal[roomPosition]).length-3;
-        var allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
+        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
     }
     //Return value based on if there's room or not
     if (allowedAmount > roomAmount) {
@@ -330,6 +339,335 @@ function checkRoomAvailability(room) {
     } else {
         return false;
     }
+}
+
+//Adds a person to the room specified
+function addPersonToRoom(person, room) {
+    //Check what house to add to
+    if (room < 13 || room == "1a" || room == "1b") {
+        //Check how many are assaigned to the room and define the profile to be added
+        if (roomAmount == 0) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:person
+            }]
+        } else if (roomAmount == 1) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:houseMidgaard[roomPosition].slot1,
+                slot2:person
+            }]
+        } else if (roomAmount == 2) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:houseMidgaard[roomPosition].slot1,
+                slot2:houseMidgaard[roomPosition].slot2,
+                slot3:person
+            }]
+        } else if (roomAmount == 3 && allowedAmount > 3) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:houseMidgaard[roomPosition].slot1,
+                slot2:houseMidgaard[roomPosition].slot2,
+                slot3:houseMidgaard[roomPosition].slot3,
+                slot4:person
+            }]
+        } else if (roomAmount == 4 && allowedAmount > 4) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:houseMidgaard[roomPosition].slot1,
+                slot2:houseMidgaard[roomPosition].slot2,
+                slot3:houseMidgaard[roomPosition].slot3,
+                slot4:houseMidgaard[roomPosition].slot4,
+                slot5:person
+            }]
+        } else if (roomAmount == 5 && allowedAmount > 5) {
+            var profile = [{
+                room:room,
+                sex:houseMidgaard[roomPosition].sex,
+                space:houseMidgaard[roomPosition].space,
+                slot1:houseMidgaard[roomPosition].slot1,
+                slot2:houseMidgaard[roomPosition].slot2,
+                slot3:houseMidgaard[roomPosition].slot3,
+                slot4:houseMidgaard[roomPosition].slot4,
+                slot5:houseMidgaard[roomPosition].slot5,
+                slot6:person
+            }]
+        }
+        //Add the profile to the house array
+        profile.forEach(element => {
+            const itemIndex = houseMidgaard.findIndex(o => o.room === element.room);
+            if(itemIndex > -1) {
+                houseMidgaard[itemIndex] = element;
+            } else {
+                houseMidgaard = houseMidgaard.push(element);
+            }
+        });
+    } else if (room < 27) {
+        if (roomAmount == 0) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:person
+            }]
+        } else if (roomAmount == 1) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:houseAsgaard[roomPosition].slot1,
+                slot2:person
+            }]
+        } else if (roomAmount == 2) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:houseAsgaard[roomPosition].slot1,
+                slot2:houseAsgaard[roomPosition].slot2,
+                slot3:person
+            }]
+        } else if (roomAmount == 3 && allowedAmount > 3) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:houseAsgaard[roomPosition].slot1,
+                slot2:houseAsgaard[roomPosition].slot2,
+                slot3:houseAsgaard[roomPosition].slot3,
+                slot4:person
+            }]
+        } else if (roomAmount == 4 && allowedAmount > 4) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:houseAsgaard[roomPosition].slot1,
+                slot2:houseAsgaard[roomPosition].slot2,
+                slot3:houseAsgaard[roomPosition].slot3,
+                slot4:houseAsgaard[roomPosition].slot4,
+                slot5:person
+            }]
+        } else if (roomAmount == 5 && allowedAmount > 5) {
+            var profile = [{
+                room:room,
+                sex:houseAsgaard[roomPosition].sex,
+                space:houseAsgaard[roomPosition].space,
+                slot1:houseAsgaard[roomPosition].slot1,
+                slot2:houseAsgaard[roomPosition].slot2,
+                slot3:houseAsgaard[roomPosition].slot3,
+                slot4:houseAsgaard[roomPosition].slot4,
+                slot5:houseAsgaard[roomPosition].slot5,
+                slot6:person
+            }]
+        }
+        profile.forEach(element => {
+            const itemIndex = houseAsgaard.findIndex(o => o.room === element.room);
+            if(itemIndex > -1) {
+                houseAsgaard[itemIndex] = element;
+            } else {
+                houseAsgaard = houseAsgaard.push(element);
+            }
+        });
+    } else if (room < 40) {
+        if (roomAmount == 0) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:person
+            }]
+        } else if (roomAmount == 1) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:houseUdgaard[roomPosition].slot1,
+                slot2:person
+            }]
+        } else if (roomAmount == 2) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:houseUdgaard[roomPosition].slot1,
+                slot2:houseUdgaard[roomPosition].slot2,
+                slot3:person
+            }]
+        } else if (roomAmount == 3 && allowedAmount > 3) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:houseUdgaard[roomPosition].slot1,
+                slot2:houseUdgaard[roomPosition].slot2,
+                slot3:houseUdgaard[roomPosition].slot3,
+                slot4:person
+            }]
+        } else if (roomAmount == 4 && allowedAmount > 4) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:houseUdgaard[roomPosition].slot1,
+                slot2:houseUdgaard[roomPosition].slot2,
+                slot3:houseUdgaard[roomPosition].slot3,
+                slot4:houseUdgaard[roomPosition].slot4,
+                slot5:person
+            }]
+        } else if (roomAmount == 5 && allowedAmount > 5) {
+            var profile = [{
+                room:room,
+                sex:houseUdgaard[roomPosition].sex,
+                space:houseUdgaard[roomPosition].space,
+                slot1:houseUdgaard[roomPosition].slot1,
+                slot2:houseUdgaard[roomPosition].slot2,
+                slot3:houseUdgaard[roomPosition].slot3,
+                slot4:houseUdgaard[roomPosition].slot4,
+                slot5:houseUdgaard[roomPosition].slot5,
+                slot6:person
+            }]
+        }
+        profile.forEach(element => {
+            const itemIndex = houseUdgaard.findIndex(o => o.room === element.room);
+            if(itemIndex > -1) {
+                houseUdgaard[itemIndex] = element;
+            } else {
+                houseUdgaard = houseUdgaard.push(element);
+            }
+        });
+    } else if (room < 46) {
+        if (roomAmount == 0) {
+            var profile = [{
+                room:room,
+                sex:houseValhal[roomPosition].sex,
+                space:houseValhal[roomPosition].space,
+                slot1:person
+            }]
+        } else if (roomAmount == 1) {
+            var profile = [{
+                room:room,
+                sex:houseValhal[roomPosition].sex,
+                space:houseValhal[roomPosition].space,
+                slot1:houseValhal[roomPosition].slot1,
+                slot2:person
+            }]
+        } else if (roomAmount == 2) {
+            var profile = [{
+                room:room,
+                sex:houseValhal[roomPosition].sex,
+                space:houseValhal[roomPosition].space,
+                slot1:houseValhal[roomPosition].slot1,
+                slot2:houseValhal[roomPosition].slot2,
+                slot3:person
+            }]
+        } else if (roomAmount == 3 && allowedAmount > 3) {
+            var profile = [{
+                room:room,
+                sex:houseValhal[roomPosition].sex,
+                space:houseValhal[roomPosition].space,
+                slot1:houseValhal[roomPosition].slot1,
+                slot2:houseValhal[roomPosition].slot2,
+                slot3:houseValhal[roomPosition].slot3,
+                slot4:person
+            }]
+        } else if (roomAmount == 4 && allowedAmount > 4) {
+            var profile = [{
+                room:room,
+                sex:houseValhal[roomPosition].sex,
+                space:houseValhal[roomPosition].space,
+                slot1:houseValhal[roomPosition].slot1,
+                slot2:houseValhal[roomPosition].slot2,
+                slot3:houseValhal[roomPosition].slot3,
+                slot4:houseValhal[roomPosition].slot4,
+                slot5:person
+            }]
+        }
+        profile.forEach(element => {
+            const itemIndex = houseValhal.findIndex(o => o.room === element.room);
+            if(itemIndex > -1) {
+                houseValhal[itemIndex] = element;
+            } else {
+                houseValhal = houseValhal.push(element);
+            }
+        });
+    }
+}
+
+function selectRoom(setRoom) {
+    //Grabs the name text itself from the person selected
+    var currentName = e => e.name === document.getElementById("replaceableText").textContent;
+    //Finds out what number in the array the person is
+    namePosition = displayName.findIndex(currentName);
+    //Finds out what ID to target
+    var currentPerson = document.getElementById("pers-" + namePosition);
+    if (selectedHouse == "Midgaard") {
+        //Correct the value so that the rooms match
+        if (setRoom == 0) {
+            setRoom = "1a";
+        } else if (setRoom == 1) {
+            setRoom = "1b";
+        }
+        if (checkRoomAvailability(setRoom) == true) {
+            addPersonToRoom(personSelected, setRoom);
+        } else {
+            return false;
+        }
+    } else if (selectedHouse == "Asgaard") {
+        console.log(setRoom);
+        if (checkRoomAvailability(setRoom + 14) == true) {
+            addPersonToRoom(personSelected, setRoom + 14);
+        } else {
+            return false;
+        }
+    } else if (selectedHouse == "Udgaard") {
+        console.log(setRoom);
+        if (checkRoomAvailability(setRoom + 27) == true) {
+            addPersonToRoom(personSelected, setRoom + 27);
+        } else {
+            return false;
+        }
+    } else if (selectedHouse == "Valhal") {
+        console.log(setRoom);
+        if (checkRoomAvailability(setRoom + 40) == true) {
+            addPersonToRoom(personSelected, setRoom + 40);
+        } else {
+            return false;
+        }
+    }
+    //Define the dummy profile to be added the displayName array
+    var profile = [{
+        //Finds the details and adds them to the dummy profile
+        number: displayName[namePosition].number,
+        name: displayName[namePosition].name,
+        img: displayName[namePosition].img,
+        room: displayName[namePosition].room,
+        choice: "andet vaerelse"
+    }]
+    //Goes down the array finds the person in the array, deletes them, and inserts the dummy profile to the array
+    profile.forEach(element => {
+        const itemIndex = displayName.findIndex(o => o.number === element.number);
+        if(itemIndex > -1) {
+            displayName[itemIndex] = element;
+        } else {
+            displayName = displayName.push(element);
+        }       
+    });
+    currentPerson.classList.toggle("Ikke-Valgt");
+    currentPerson.classList.toggle("Andet");
+    closePopup();
+    countData();
 }
 
 //Opens up the house select menu
@@ -347,18 +685,22 @@ function selectHouse(house) {
     });
     //Chekcs what house is selected and adds the room numbers to the buttons
     if (house == "Asgård") {
+        selectedHouse = "Asgaard";
         for (var i = 0; i < houseAsgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseAsgaard[i].room;
         }
     } else if (house == "Midgård") {
+        selectedHouse = "Midgaard";
         for (var i = 0; i < houseMidgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseMidgaard[i].room;
         }
     } else if (house == "Udgård") {
+        selectedHouse = "Udgaard";
         for (var i = 0; i < houseUdgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseUdgaard[i].room;
         }
     } else if (house == "Valhal") {
+        selectedHouse = "Valhal";
         //Removes the extra buttons because there are less rooms
         roomButtons.classList.toggle("small");
         smallButtons = true;
