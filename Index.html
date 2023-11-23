@@ -37,6 +37,14 @@
             <button class="nav-button" onclick="selectGroup('Z')">Z</button>
             <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
         </nav>
+        <div id="alert-container" class="alert-container">
+            <div id="top-alert" class="top-alert">
+                  <span class="overlay"></span>
+            </div>
+            <div id="alert-content" class="alert-bg">
+                <p id="alertText">Hello World</p>
+            </div>
+        </div>
         <div id="popup">
             <div class="popup-container">
                 <div class="popup-top-container">
@@ -47,6 +55,14 @@
                     </svg>
                 </div>
                 <div class="popup-inner-container">
+                    <div id="header" style="display: none;">
+                        <svg id="return-arrow" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="var(--text2)" fill="none" stroke-linecap="round" stroke-linejoin="round" onclick="returnBack()">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M9 13l-4 -4l4 -4m-4 4h11a4 4 0 0 1 0 8h-1"/>
+                        </svg>
+                        <p id="replaceableTextHeader">texttext</p>
+                    </div>
+                    <img id="replaceableImage" class="image" src="viggo-billeder/Dummy.svg" style="margin-top: 15px;">
                     <p id="replaceableText" class="alt-name-text">Navn Navnsen</p>
                     <div id="buttons-stage-1" class="popup-buttons">
                         <div>
