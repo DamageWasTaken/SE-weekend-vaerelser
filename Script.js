@@ -262,23 +262,31 @@ function returnBack() {
 
 //Shows the top alert
 function showAlert(alertMessage, param) {
+    //Grab the elements needed
     var alert = document.getElementById("alert-container");
     var alertContent = document.getElementById("alert-content");
     var alertEffect = document.getElementById("top-alert");
+    //Check if we just want to close the alert
     if (param == "Close") {
         alert.style.height = "0";
         alertContent.style.height = "0";
         alertEffect.style.height = "0";
+        return;
     } else {
+        //Activate the effect
         document.getElementById("top-alert").classList.toggle("active")
+        //Set the message in the alert to the specified text
         document.getElementById("alertText").innerHTML = alertMessage;
+        //Open the alert
         alert.style.height = "45px";
         alertContent.style.height = "43px";
         alertEffect.style.height = "45px";
+        //After 2s close the alert
         setTimeout(function() {
             alert.style.height = "0";
             alertContent.style.height = "0";
             alertEffect.style.height = "0";
+            //Stop the effect
             document.getElementById("top-alert").classList.toggle("active")
         }, 2000)
     }
@@ -304,7 +312,7 @@ function selectorButton(place) {
     var houseButtons = document.getElementById("buttons-stage-2");
     //If OwnRoom is selected prep the person to be added to the room array
     if (place == "Eget") {
-        
+        //NEEDS TO BE REDESIGNED
         //Check if the selected room is available
         if (checkRoomAvailability(roomNumber) == true) {
             //Define the dummy profile to be added the displayName array
@@ -328,11 +336,14 @@ function selectorButton(place) {
             //Removes and adds a class to be able to select person by group
             currentPerson.classList.toggle("Ikke-Valgt");
             currentPerson.classList.toggle("Eget");
+            //
+            
             //Call the data to be counted and close the popup.
             countData();
             closePopup();
             addPersonToRoom(displayName[namePosition].number, displayName[namePosition].room);
         } else {
+            closePopup();
             showAlert("Ingen plads på værelset");
         }
     } else {
@@ -668,6 +679,8 @@ function selectRoom(setRoom) {
         if (checkRoomAvailability(setRoom) == true) {
             addPersonToRoom(personSelected, setRoom);
         } else {
+            closePopup();
+            showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Asgaard") {
@@ -675,6 +688,8 @@ function selectRoom(setRoom) {
         if (checkRoomAvailability(setRoom + 14) == true) {
             addPersonToRoom(personSelected, setRoom + 14);
         } else {
+            closePopup();
+            showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Udgaard") {
@@ -682,6 +697,8 @@ function selectRoom(setRoom) {
         if (checkRoomAvailability(setRoom + 27) == true) {
             addPersonToRoom(personSelected, setRoom + 27);
         } else {
+            closePopup();
+            showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Valhal") {
@@ -689,6 +706,8 @@ function selectRoom(setRoom) {
         if (checkRoomAvailability(setRoom + 40) == true) {
             addPersonToRoom(personSelected, setRoom + 40);
         } else {
+            closePopup();
+            showAlert("Valgt værelse er fuldt");
             return false;
         }
     }
@@ -811,7 +830,7 @@ window.onload = () => {
         var mainContainer = document.getElementById("container");
         //Loads each profle one by one, giving assets as well
         for (var i = 0; i < displayName.length; i++) {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + displayName[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + displayName[i].img + '" class="image"> <p class="name-text">' + displayName[i].name + '</p> </div>',);
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + displayName[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + displayName[i].img + '" class="image"> <p class="name-text">' + displayName[i].name + '</p> <div class="room-overlay">Værelse xx</div> </div>',);
         }
     }
     //Count the data

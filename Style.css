@@ -275,6 +275,28 @@ h2 {
     scroll-snap-align: start;
 }
 
+.room-overlay {
+    display: none;
+    font-size: 11px;
+    text-align: center;
+    padding-top: 6px;
+    position: absolute;
+    width: 55px;
+    height: 35px;
+    border-radius: 6px;
+    margin-left: 90px;
+}
+
+.image-container.Eget > .room-overlay {
+    display: inline;
+    background-color: var(--green);
+}
+
+.image-container.Andet > .room-overlay {
+    display: inline;
+    background-color: var(--blue);
+}
+
 .name-text {
     font-size: 12px;
     line-height: 0;
@@ -378,7 +400,7 @@ h2 {
 
 /*═══════════════════════*/
 /*  Laptop & other styling*/
-@media only screen and (min-width: 1000px) {
+@media only screen and (min-width: 1025px) {
 
 body {
     background-repeat: no-repeat;
@@ -399,7 +421,7 @@ body {
     row-gap: 100px;
     width: 85%;
     overflow-y: scroll;
-    overflow-x: hidden;
+    overflow-x: clip;
     margin-bottom: 6%;
     scroll-snap-type: y proximity;
 }
@@ -431,7 +453,7 @@ body {
 
 /*═══════════════════════*/
 /*  Ipad styling*/
-@media only screen and (max-width: 999px) {
+@media only screen and (max-width: 1025px) {
 
 body {
     background-repeat: no-repeat;
@@ -455,7 +477,7 @@ body {
     row-gap: 100px;
     width: 85%;
     overflow-y: scroll;
-    overflow-x: hidden;
+    overflow-x: clip;
     margin-bottom: 6%;
     scroll-snap-type: y proximity;
 }
