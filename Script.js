@@ -400,6 +400,28 @@ function checkRoomAvailability(room) {
     }
 }
 
+//Checks if a person is in a room
+function personInRoom(id, room) {
+    var roomObj = e => e.room === room;
+    var roomPos = 0;
+    var roomContent;
+    if (room < 13 || room == "1a" || room == "1b") {
+        roomPos = houseMidgaard.findIndex(roomObj);
+        roomContent = houseMidgaard[roomPos];
+    } else if (room < 27) {
+        roomPos = houseAsgaard.findIndex(roomObj);
+        roomContent = houseAsgaard[roomPos];
+    } else if (room < 40) {
+        roomPos = houseUdgaard.findIndex(roomObj);
+        roomContent = houseUdgaard[roomPos];
+    } else if (room < 46) {
+        roomPos = houseValhal.findIndex(roomObj);
+        roomContent = houseValhal[roomPos];
+    }
+
+    return Object.values(roomContent).includes(id)
+}
+
 //Adds a person to the room specified
 function addPersonToRoom(person, room) {
     //Check what house to add to
@@ -739,6 +761,7 @@ function selectRoom(setRoom) {
     countData();
 }
 
+//Grays out the room button
 function grayOutButton(buttonNumber, param) {
     var button = document.getElementById("btn-" + buttonNumber )
     if (param && !button.classList.contains("not-available")) {
@@ -774,6 +797,12 @@ function selectHouse(house) {
             } else {
                 grayOutButton(i, false);
             }
+            //Check if the person is already assaigned to the room.
+            if (personInRoom(personSelected, i + 14)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
     } else if (house == "Midgård") {
         selectedHouse = "Midgaard";
@@ -791,12 +820,22 @@ function selectHouse(house) {
             } else {
                 grayOutButton(i, false);
             }
+            if (personInRoom(personSelected, i)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
     } else if (house == "Udgård") {
         selectedHouse = "Udgaard";
         for (var i = 0; i < houseUdgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseUdgaard[i].room;
             if (!checkRoomAvailability(i + 27)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
+            if (personInRoom(personSelected, i + 27)) {
                 grayOutButton(i, true);
             } else {
                 grayOutButton(i, false);
@@ -810,6 +849,11 @@ function selectHouse(house) {
         for (var i = 0; i < houseValhal.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseValhal[i].room;
             if (!checkRoomAvailability(i + 40)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
+            if (personInRoom(personSelected, i + 40)) {
                 grayOutButton(i, true);
             } else {
                 grayOutButton(i, false);
