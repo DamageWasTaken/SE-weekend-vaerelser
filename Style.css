@@ -15,6 +15,7 @@
     --red: #d31919;
     --orange: #e78514;
     --cyan: #157fa4;
+    --faddedCyan: #185063;
     --fadded: rgba(200, 200, 200, 0.7);
     --faddedBlack: rgba(0, 0, 0, 0.7);
 }
@@ -102,6 +103,10 @@ h2 {
 
 .hide {
     display: none !important;
+}
+
+.not-available {
+    background-color: var(--faddedCyan) !important;
 }
 
 .small {
@@ -277,14 +282,19 @@ h2 {
 
 .room-overlay {
     display: none;
-    font-size: 11px;
-    text-align: center;
-    padding-top: 6px;
     position: absolute;
     width: 55px;
     height: 35px;
     border-radius: 6px;
     margin-left: 90px;
+}
+
+.overlay-text {
+    font-size: 11px;
+    line-height: 0;
+    width: 100%;
+    text-align: center;
+    padding: 1px 0 1px 0;
 }
 
 .image-container.Eget > .room-overlay {

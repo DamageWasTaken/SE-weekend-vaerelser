@@ -336,12 +336,14 @@ function selectorButton(place) {
             //Removes and adds a class to be able to select person by group
             currentPerson.classList.toggle("Ikke-Valgt");
             currentPerson.classList.toggle("Eget");
+            removeTag(currentPerson, "Andet");
             //
             
             //Call the data to be counted and close the popup.
             countData();
             closePopup();
             addPersonToRoom(displayName[namePosition].number, displayName[namePosition].room);
+            updateDisplayedRoom("pers-" + namePosition, displayName[namePosition].room);
         } else {
             closePopup();
             showAlert("Ingen plads på værelset");
@@ -678,33 +680,34 @@ function selectRoom(setRoom) {
         }
         if (checkRoomAvailability(setRoom) == true) {
             addPersonToRoom(personSelected, setRoom);
+            updateDisplayedRoom("pers-" + namePosition, setRoom);
         } else {
             closePopup();
             showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Asgaard") {
-        console.log(setRoom);
         if (checkRoomAvailability(setRoom + 14) == true) {
             addPersonToRoom(personSelected, setRoom + 14);
+            updateDisplayedRoom("pers-" + namePosition, setRoom + 14);
         } else {
             closePopup();
             showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Udgaard") {
-        console.log(setRoom);
         if (checkRoomAvailability(setRoom + 27) == true) {
             addPersonToRoom(personSelected, setRoom + 27);
+            updateDisplayedRoom("pers-" + namePosition, setRoom + 27);
         } else {
             closePopup();
             showAlert("Valgt værelse er fuldt");
             return false;
         }
     } else if (selectedHouse == "Valhal") {
-        console.log(setRoom);
         if (checkRoomAvailability(setRoom + 40) == true) {
             addPersonToRoom(personSelected, setRoom + 40);
+            updateDisplayedRoom("pers-" + namePosition, setRoom + 40);
         } else {
             closePopup();
             showAlert("Valgt værelse er fuldt");
@@ -731,8 +734,18 @@ function selectRoom(setRoom) {
     });
     currentPerson.classList.toggle("Ikke-Valgt");
     currentPerson.classList.toggle("Andet");
+    removeTag(currentPerson, "Eget");
     closePopup();
     countData();
+}
+
+function grayOutButton(buttonNumber, param) {
+    var button = document.getElementById("btn-" + buttonNumber )
+    if (param && !button.classList.contains("not-available")) {
+        button.classList.toggle("not-available");
+    } else if (!param && button.classList.contains("not-available")) {
+        button.classList.toggle("not-available");
+    }
 }
 
 //Opens up the house select menu
@@ -755,16 +768,39 @@ function selectHouse(house) {
         selectedHouse = "Asgaard";
         for (var i = 0; i < houseAsgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseAsgaard[i].room;
+            //Check if the room is full, if so change the color.
+            if (!checkRoomAvailability(i + 14)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
     } else if (house == "Midgård") {
         selectedHouse = "Midgaard";
         for (var i = 0; i < houseMidgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseMidgaard[i].room;
+            if (i == 0) {
+                var n = "1a";
+            } else if (i == 1) {
+                var n = "1b";
+            } else {
+                var n = i;
+            }
+            if (!checkRoomAvailability(n)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
     } else if (house == "Udgård") {
         selectedHouse = "Udgaard";
         for (var i = 0; i < houseUdgaard.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseUdgaard[i].room;
+            if (!checkRoomAvailability(i + 27)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
     } else if (house == "Valhal") {
         selectedHouse = "Valhal";
@@ -773,6 +809,11 @@ function selectHouse(house) {
         smallButtons = true;
         for (var i = 0; i < houseValhal.length; i++) {
             document.getElementById("btn-" + i ).innerHTML = houseValhal[i].room;
+            if (!checkRoomAvailability(i + 40)) {
+                grayOutButton(i, true);
+            } else {
+                grayOutButton(i, false);
+            }
         }
         [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
             el.style.display = 'none';
@@ -820,6 +861,21 @@ function closeButtons() {
     }
 }
 
+//Function to remove a present tag
+function removeTag(element, tag) {
+    if (element.classList.contains(tag)) {
+        element.classList.toggle(tag);
+    }
+}
+
+//
+function updateDisplayedRoom(personId, room) {
+    var parentElement = document.getElementById(personId);
+    var childElement = parentElement.children[2];
+    var replaceText = childElement.children[1];
+    replaceText.innerHTML = room;
+}
+
 //Profiles are first loaded once the website and DOM is loaded to not conflict
 window.onload = () => {
     //Call the function
@@ -830,7 +886,7 @@ window.onload = () => {
         var mainContainer = document.getElementById("container");
         //Loads each profle one by one, giving assets as well
         for (var i = 0; i < displayName.length; i++) {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + displayName[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + displayName[i].img + '" class="image"> <p class="name-text">' + displayName[i].name + '</p> <div class="room-overlay">Værelse xx</div> </div>',);
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + displayName[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + displayName[i].img + '" class="image"> <p class="name-text">' + displayName[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
         }
     }
     //Count the data
