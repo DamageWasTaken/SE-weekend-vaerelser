@@ -418,73 +418,33 @@ function personInRoom(id, room) {
         roomPos = houseValhal.findIndex(roomObj);
         roomContent = houseValhal[roomPos];
     }
-
-    return Object.values(roomContent).includes(id)
+    try {
+        return Object.values(roomContent).includes(id);
+    } catch(err) {
+        return false;
+    }
+    
 }
 
 //Adds a person to the room specified
 function addPersonToRoom(person, room) {
     //Check what house to add to
     if (room < 13 || room == "1a" || room == "1b") {
-        //Check how many are assaigned to the room and define the profile to be added
-        if (roomAmount == 0) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:person
-            }]
-        } else if (roomAmount == 1) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:houseMidgaard[roomPosition].slot1,
-                slot2:person
-            }]
-        } else if (roomAmount == 2) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:houseMidgaard[roomPosition].slot1,
-                slot2:houseMidgaard[roomPosition].slot2,
-                slot3:person
-            }]
-        } else if (roomAmount == 3 && allowedAmount > 3) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:houseMidgaard[roomPosition].slot1,
-                slot2:houseMidgaard[roomPosition].slot2,
-                slot3:houseMidgaard[roomPosition].slot3,
-                slot4:person
-            }]
-        } else if (roomAmount == 4 && allowedAmount > 4) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:houseMidgaard[roomPosition].slot1,
-                slot2:houseMidgaard[roomPosition].slot2,
-                slot3:houseMidgaard[roomPosition].slot3,
-                slot4:houseMidgaard[roomPosition].slot4,
-                slot5:person
-            }]
-        } else if (roomAmount == 5 && allowedAmount > 5) {
-            var profile = [{
-                room:room,
-                sex:houseMidgaard[roomPosition].sex,
-                space:houseMidgaard[roomPosition].space,
-                slot1:houseMidgaard[roomPosition].slot1,
-                slot2:houseMidgaard[roomPosition].slot2,
-                slot3:houseMidgaard[roomPosition].slot3,
-                slot4:houseMidgaard[roomPosition].slot4,
-                slot5:houseMidgaard[roomPosition].slot5,
-                slot6:person
-            }]
+        //Grab the current profile of the room
+        var currentProfile = houseMidgaard[roomPosition];
+        //Find out what slot the person should be added to
+        var slotPos = "Slot" + (Object.keys(houseMidgaard[roomPosition]).length - 2);
+        //Define the object that should be added
+        var addedContent = {
+            [slotPos]:person
         }
+        //Add the new object to the profile
+        Object.assign(currentProfile, addedContent);
+        
+        //Incase the object in a array
+        var profile = [];
+        profile.push(currentProfile);
+
         //Add the profile to the house array
         profile.forEach(element => {
             const itemIndex = houseMidgaard.findIndex(o => o.room === element.room);
@@ -495,64 +455,17 @@ function addPersonToRoom(person, room) {
             }
         });
     } else if (room < 27) {
-        if (roomAmount == 0) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:person
-            }]
-        } else if (roomAmount == 1) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:houseAsgaard[roomPosition].slot1,
-                slot2:person
-            }]
-        } else if (roomAmount == 2) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:houseAsgaard[roomPosition].slot1,
-                slot2:houseAsgaard[roomPosition].slot2,
-                slot3:person
-            }]
-        } else if (roomAmount == 3 && allowedAmount > 3) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:houseAsgaard[roomPosition].slot1,
-                slot2:houseAsgaard[roomPosition].slot2,
-                slot3:houseAsgaard[roomPosition].slot3,
-                slot4:person
-            }]
-        } else if (roomAmount == 4 && allowedAmount > 4) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:houseAsgaard[roomPosition].slot1,
-                slot2:houseAsgaard[roomPosition].slot2,
-                slot3:houseAsgaard[roomPosition].slot3,
-                slot4:houseAsgaard[roomPosition].slot4,
-                slot5:person
-            }]
-        } else if (roomAmount == 5 && allowedAmount > 5) {
-            var profile = [{
-                room:room,
-                sex:houseAsgaard[roomPosition].sex,
-                space:houseAsgaard[roomPosition].space,
-                slot1:houseAsgaard[roomPosition].slot1,
-                slot2:houseAsgaard[roomPosition].slot2,
-                slot3:houseAsgaard[roomPosition].slot3,
-                slot4:houseAsgaard[roomPosition].slot4,
-                slot5:houseAsgaard[roomPosition].slot5,
-                slot6:person
-            }]
+        //Repeat same code for the other houses
+        var currentProfile = houseAsgaard[roomPosition];
+        var slotPos = "Slot" + (Object.keys(houseAsgaard[roomPosition]).length - 2);
+        var addedContent = {
+            [slotPos]:person
         }
+        Object.assign(currentProfile, addedContent);
+        
+        var profile = [];
+        profile.push(currentProfile);
+
         profile.forEach(element => {
             const itemIndex = houseAsgaard.findIndex(o => o.room === element.room);
             if(itemIndex > -1) {
@@ -562,64 +475,17 @@ function addPersonToRoom(person, room) {
             }
         });
     } else if (room < 40) {
-        if (roomAmount == 0) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:person
-            }]
-        } else if (roomAmount == 1) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:houseUdgaard[roomPosition].slot1,
-                slot2:person
-            }]
-        } else if (roomAmount == 2) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:houseUdgaard[roomPosition].slot1,
-                slot2:houseUdgaard[roomPosition].slot2,
-                slot3:person
-            }]
-        } else if (roomAmount == 3 && allowedAmount > 3) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:houseUdgaard[roomPosition].slot1,
-                slot2:houseUdgaard[roomPosition].slot2,
-                slot3:houseUdgaard[roomPosition].slot3,
-                slot4:person
-            }]
-        } else if (roomAmount == 4 && allowedAmount > 4) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:houseUdgaard[roomPosition].slot1,
-                slot2:houseUdgaard[roomPosition].slot2,
-                slot3:houseUdgaard[roomPosition].slot3,
-                slot4:houseUdgaard[roomPosition].slot4,
-                slot5:person
-            }]
-        } else if (roomAmount == 5 && allowedAmount > 5) {
-            var profile = [{
-                room:room,
-                sex:houseUdgaard[roomPosition].sex,
-                space:houseUdgaard[roomPosition].space,
-                slot1:houseUdgaard[roomPosition].slot1,
-                slot2:houseUdgaard[roomPosition].slot2,
-                slot3:houseUdgaard[roomPosition].slot3,
-                slot4:houseUdgaard[roomPosition].slot4,
-                slot5:houseUdgaard[roomPosition].slot5,
-                slot6:person
-            }]
+        //Repeat same code for the other houses
+        var currentProfile = houseUdgaard[roomPosition];
+        var slotPos = "Slot" + (Object.keys(houseUdgaard[roomPosition]).length - 2);
+        var addedContent = {
+            [slotPos]:person
         }
+        Object.assign(currentProfile, addedContent);
+        
+        var profile = [];
+        profile.push(currentProfile);
+
         profile.forEach(element => {
             const itemIndex = houseUdgaard.findIndex(o => o.room === element.room);
             if(itemIndex > -1) {
@@ -629,52 +495,17 @@ function addPersonToRoom(person, room) {
             }
         });
     } else if (room < 46) {
-        if (roomAmount == 0) {
-            var profile = [{
-                room:room,
-                sex:houseValhal[roomPosition].sex,
-                space:houseValhal[roomPosition].space,
-                slot1:person
-            }]
-        } else if (roomAmount == 1) {
-            var profile = [{
-                room:room,
-                sex:houseValhal[roomPosition].sex,
-                space:houseValhal[roomPosition].space,
-                slot1:houseValhal[roomPosition].slot1,
-                slot2:person
-            }]
-        } else if (roomAmount == 2) {
-            var profile = [{
-                room:room,
-                sex:houseValhal[roomPosition].sex,
-                space:houseValhal[roomPosition].space,
-                slot1:houseValhal[roomPosition].slot1,
-                slot2:houseValhal[roomPosition].slot2,
-                slot3:person
-            }]
-        } else if (roomAmount == 3 && allowedAmount > 3) {
-            var profile = [{
-                room:room,
-                sex:houseValhal[roomPosition].sex,
-                space:houseValhal[roomPosition].space,
-                slot1:houseValhal[roomPosition].slot1,
-                slot2:houseValhal[roomPosition].slot2,
-                slot3:houseValhal[roomPosition].slot3,
-                slot4:person
-            }]
-        } else if (roomAmount == 4 && allowedAmount > 4) {
-            var profile = [{
-                room:room,
-                sex:houseValhal[roomPosition].sex,
-                space:houseValhal[roomPosition].space,
-                slot1:houseValhal[roomPosition].slot1,
-                slot2:houseValhal[roomPosition].slot2,
-                slot3:houseValhal[roomPosition].slot3,
-                slot4:houseValhal[roomPosition].slot4,
-                slot5:person
-            }]
+        //Repeat same code for the other houses
+        var currentProfile = houseValhal[roomPosition];
+        var slotPos = "Slot" + (Object.keys(houseValhal[roomPosition]).length - 2);
+        var addedContent = {
+            [slotPos]:person
         }
+        Object.assign(currentProfile, addedContent);
+        
+        var profile = [];
+        profile.push(currentProfile);
+
         profile.forEach(element => {
             const itemIndex = houseValhal.findIndex(o => o.room === element.room);
             if(itemIndex > -1) {

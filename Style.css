@@ -107,6 +107,7 @@ h2 {
 
 .not-available {
     background-color: var(--faddedCyan) !important;
+    pointer-events: none;
 }
 
 .small {
