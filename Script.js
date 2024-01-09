@@ -307,6 +307,8 @@ function selectorButton(place) {
     var currentPerson = document.getElementById("pers-" + namePosition);
     //Finds the persons current room number
     var roomNumber = displayName[namePosition].room;
+    //Finds the persons id number
+    var personNumber = displayName[namePosition].number;
     //Defines webpage elements
     var mainButtons = document.getElementById("buttons-stage-1");
     var houseButtons = document.getElementById("buttons-stage-2");
@@ -345,7 +347,7 @@ function selectorButton(place) {
             addPersonToRoom(displayName[namePosition].number, displayName[namePosition].room);
             updateDisplayedRoom("pers-" + namePosition, displayName[namePosition].room);
         } else {
-            relocate(POI, TR, )
+            relocate(personNumber, roomNumber, "", true)
             closePopup();
         }
     } else {
@@ -368,44 +370,81 @@ function selectorButton(place) {
 
 //Relocates someone based on some parameters
 function relocate(person, targetLocation, previousLocation, forceRelocate) {
-    // ARGS
-    // - person: the person that should be relocated to that room
-    // - targetLocation: the room they should be added to
-    // - perviousLocation: if they had a previous location they should be removed from it
-    // - forceReLocate (bool): force relocate specifes if they should be forced in the room resulting in removing someone else
-
-    //This is just a hub to relocate someone by removing them from one room and adding them to another
-    //We know theres not room in the room we're trying to place the person at.
-    //Therefore we need to check each slot of the room to see if that person is a original member of the room.
-    //If the person in the current slot is not an original member of the room this function should place them in their own room and give this person that slot.
-    //Relocate function can be used in one of two ways:
-    // 1. Force relocate someone if for an example a room is full.
-    // 2. Standard relocation if for an example if the person is already in a room.
-    
-    //-----
-    //Force Relocate
-    //Find 
-    
-    var roomLength;
-    var roomSlotPos;
-    if (targetLocation < 13 || targetLocation == "1a" || targetLocation == "1b") {
-        roomSlotPos = houseMidgaard.findIndex(e => e.room === room);
-        roomLength = Object.keys(houseMidgaard[roomPosition]).length
-    } else if (targetLocation < 27) {
-        roomSlotPos = houseAsgaard.findIndex(e => e.room === room);
-        roomLength = Object.keys(houseAsgaard[roomPosition]).length
-    } else if (targetLocation < 40) {
-        roomSlotPos = houseUdgaard.findIndex(e => e.room === room);
-        roomLength = Object.keys(houseUdgaard[roomPosition]).length
-    } else if (targetLocation < 46) {
-        roomSlotPos = houseValhal.findIndex(e => e.room === room);
-        roomLength = Object.keys(houseValhal[roomPosition]).length
-    }
-    for (var i = 0; i < roomLength; i++) {
-
+    if (forceRelocate === true) {
+        var roomLength;
+        var roomSlotPos;
+        var currentRoom;
+        var memberList;
+        var personToBeReplaced = {};
+        if (targetLocation < 13 || targetLocation == "1a" || targetLocation == "1b") {
+            roomSlotPos = houseMidgaard.findIndex(e => e.room === targetLocation);
+            roomLength = Object.keys(houseMidgaard[roomSlotPos]).length
+            memberList = Object.assign({}, houseMidgaard[roomSlotPos]);
+            currentRoom = houseMidgaard[roomSlotPos];
+        } else if (targetLocation < 27) {
+            roomSlotPos = houseAsgaard.findIndex(e => e.room === targetLocation);
+            roomLength = Object.keys(houseAsgaard[roomSlotPos]).length
+            memberList = Object.assign({}, houseAsgaard[roomSlotPos]);
+            currentRoom = houseAsgaard[roomSlotPos];
+        } else if (targetLocation < 40) {
+            roomSlotPos = houseUdgaard.findIndex(e => e.room === targetLocation);
+            roomLength = Object.keys(houseUdgaard[roomSlotPos]).length
+            memberList = Object.assign({}, houseUdgaard[roomSlotPos]);
+            currentRoom = houseUdgaard[roomSlotPos];
+        } else if (targetLocation < 46) {
+            roomSlotPos = houseValhal.findIndex(e => e.room === targetLocation);
+            roomLength = Object.keys(houseValhal[roomSlotPos]).length
+            memberList = Object.assign({}, houseValhal[roomSlotPos]);
+            currentRoom = houseValhal[roomSlotPos];
+        }
+        delete memberList.room;
+        delete memberList.sex;
+        delete memberList.space;
+        memberList = Object.values(memberList);
+        for (var i = 0; i < roomLength; i++) {
+            //Check if their an original member of the room. If they are store the name and break the loop
+            if (!originalMember(memberList[i], targetLocation)) {
+                Object.assign(personToBeReplaced, {id: memberList[i]})
+                break
+            }
+        }
+        Object.assign(personToBeReplaced, {ownRoom: displayName[displayName.findIndex(e => e.number === personToBeReplaced.id)].room})
+        removePersonFromRoom(personToBeReplaced.id, currentRoom);
+        addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
+        addPersonToRoom(person, targetLocation);
+    } else {
+        if (!checkRoomAvailability(targetLocation)) {
+            return;
+        }
+        if (previousLocation < 13 || previousLocation == "1a" || previousLocation == "1b") {
+            roomSlotPos = houseMidgaard.findIndex(e => e.room === previousLocation);
+            previousRoom = houseMidgaard[roomSlotPos];
+        } else if (previousLocation < 27) {
+            roomSlotPos = houseAsgaard.findIndex(e => e.room === previousLocation);
+            previousRoom = houseAsgaard[roomSlotPos];
+        } else if (previousLocation < 40) {
+            roomSlotPos = houseUdgaard.findIndex(e => e.room === targetLocation);
+            previousRoom = houseUdgaard[roomSlotPos];
+        } else if (previousLocation < 46) {
+            roomSlotPos = houseValhal.findIndex(e => e.room === targetLocation);
+            previousRoom = houseValhal[roomSlotPos];
+        }
+        removePersonFromRoom(person, previousRoom);
+        addPersonToRoom(person, targetLocation);
     }
 }
 
+//Checks if a person is an orginal member of a room
+function originalMember(person, room) {
+    //Get their index position
+    personPosition = displayName.findIndex(e => e.number === person);
+    //Check if the room entered is equal to their original room
+    if (room === displayName[personPosition].room) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 //Check if a room is available, if it is, return true
 function checkRoomAvailability(room) {
@@ -509,14 +548,15 @@ function personInRoom(id, room) {
 function addPersonToRoom(person, room) {
     //Check if the person is in a room, if so remove them from their previous room.
     if (personInRoom(person) !== false) {
-        setTimeout(() => {
-            removePersonFromRoom(person, personInRoom(person));
-        },2000)
+        relocate(person, room, displayName[displayName.findIndex(e => e.number === personToBeReplaced.id)], false);
+        return;
     }
     //Check what house to add to
     if (room < 13 || room == "1a" || room == "1b") {
+        //Set the room position to the index of the room
+        roomPosition = houseMidgaard.findIndex(e => e.room === room);
         //Grab the current profile of the room
-        var currentProfile = houseMidgaard[roomPosition];
+        var currentProfile = Object.assign({}, houseMidgaard[roomPosition]);
         //Find out what slot the person should be added to
         var slotPos = "Slot" + (Object.keys(houseMidgaard[roomPosition]).length - 2);
         //Define the object that should be added
@@ -541,6 +581,7 @@ function addPersonToRoom(person, room) {
         });
     } else if (room < 27) {
         //Repeat same code for the other houses
+        roomPosition = houseAsgaard.findIndex(e => e.room === room);
         var currentProfile = houseAsgaard[roomPosition];
         var slotPos = "Slot" + (Object.keys(houseAsgaard[roomPosition]).length - 2);
         var addedContent = {
@@ -561,6 +602,7 @@ function addPersonToRoom(person, room) {
         });
     } else if (room < 40) {
         //Repeat same code for the other houses
+        roomPosition = houseUdgaard.findIndex(e => e.room === room);
         var currentProfile = houseUdgaard[roomPosition];
         var slotPos = "Slot" + (Object.keys(houseUdgaard[roomPosition]).length - 2);
         var addedContent = {
@@ -581,6 +623,7 @@ function addPersonToRoom(person, room) {
         });
     } else if (room < 46) {
         //Repeat same code for the other houses
+        roomPosition = houseValhal.findIndex(e => e.room === room);
         var currentProfile = houseValhal[roomPosition];
         var slotPos = "Slot" + (Object.keys(houseValhal[roomPosition]).length - 2);
         var addedContent = {
@@ -602,10 +645,11 @@ function addPersonToRoom(person, room) {
     }
 }
 
+//Removes a person from a room !!! Requires the room object as the param "room"
 function removePersonFromRoom(person, room) {
     //Set the room number so we can check for it
     var roomNumber = room.room;
-    //Set a var that is used later
+    //Set a variable that is used later
     var minusVal = 0;
     //Create a temp object thats set to the current room
     var currentRoom = Object.assign({}, room);
@@ -619,15 +663,14 @@ function removePersonFromRoom(person, room) {
     delete currentRoom.room;
     delete currentRoom.sex;
     delete currentRoom.space;
-    //Set a var to the length of the room
+    //Set a variable to the length of the room
     var lengthOfRoom = Object.keys(currentRoom).length;
-    console.log(lengthOfRoom);
     //If there's only one person in the room then don't run the loop
     if (lengthOfRoom > 1) {
         //For each of the elements in the temp room
         for (var i = 0; i < lengthOfRoom; i++) {
             //Set the slot they are in depending on the loop status
-            var slotNumber = "slot" + (i + 1);
+            var slotNumber = "Slot" + (i + 1);
             //Set the slot they should be in depending on if there's been a person removed
             var slot = "slot" + (i + 1 - minusVal);
             //Check if the person is the person we should remove
@@ -940,6 +983,8 @@ window.onload = () => {
     countData();
     //Close the alert once the window is loaded
     showAlert(" ", "Close");
+
+    addPersonToRoom()
 }
 
 //Count the number of each value
