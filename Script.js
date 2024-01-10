@@ -17,7 +17,7 @@ var selectedHouse = "";
 var personSelected = 0;
 
 //Declaring all houses & rooms
-houseMidgaard = [
+rooms = [
     {room:"1a",sex:"f",space:2},
     {room:"1b",sex:"f",space:2},
     {room:2,sex:"m",space:4},
@@ -30,10 +30,7 @@ houseMidgaard = [
     {room:9,sex:"f",space:3},
     {room:10,sex:"m",space:3},
     {room:11,sex:"m",space:3},
-    {room:12,sex:"f",space:3}
-]
-
-houseAsgaard = [
+    {room:12,sex:"f",space:3},
     {room:14,sex:"f",space:3},
     {room:15,sex:"m",space:4},
     {room:16,sex:"m",space:3},
@@ -46,10 +43,7 @@ houseAsgaard = [
     {room:23,sex:"m",space:3},
     {room:24,sex:"m",space:3},
     {room:25,sex:"f",space:3},
-    {room:26,sex:"f",space:3}
-]
-
-houseUdgaard = [
+    {room:26,sex:"f",space:3},
     {room:27,sex:"m",space:3},
     {room:28,sex:"m",space:4},
     {room:29,sex:"f",space:3},
@@ -62,10 +56,7 @@ houseUdgaard = [
     {room:36,sex:"m",space:3},
     {room:37,sex:"f",space:3},
     {room:38,sex:"f",space:3},
-    {room:39,sex:"f",space:3}
-]
-
-houseValhal = [
+    {room:39,sex:"f",space:3},
     {room:40,sex:"f",space:3},
     {room:41,sex:"m",space:3},
     {room:42,sex:"m",space:3},
@@ -336,10 +327,9 @@ function selectorButton(place) {
                 }       
             });
             //Removes and adds a class to be able to select person by group
-            currentPerson.classList.toggle("Ikke-Valgt");
-            currentPerson.classList.toggle("Eget");
+            addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
-            //
+            removeTag(currentPerson, "Ikke-Valgt");
             
             //Call the data to be counted and close the popup.
             countData();
@@ -371,66 +361,56 @@ function selectorButton(place) {
 //Relocates someone based on some parameters
 function relocate(person, targetLocation, previousLocation, forceRelocate) {
     if (forceRelocate === true) {
+        //Declare variables
         var roomLength;
         var roomSlotPos;
         var currentRoom;
         var memberList;
+        var previousRoom;
         var personToBeReplaced = {};
-        if (targetLocation < 13 || targetLocation == "1a" || targetLocation == "1b") {
-            roomSlotPos = houseMidgaard.findIndex(e => e.room === targetLocation);
-            roomLength = Object.keys(houseMidgaard[roomSlotPos]).length
-            memberList = Object.assign({}, houseMidgaard[roomSlotPos]);
-            currentRoom = houseMidgaard[roomSlotPos];
-        } else if (targetLocation < 27) {
-            roomSlotPos = houseAsgaard.findIndex(e => e.room === targetLocation);
-            roomLength = Object.keys(houseAsgaard[roomSlotPos]).length
-            memberList = Object.assign({}, houseAsgaard[roomSlotPos]);
-            currentRoom = houseAsgaard[roomSlotPos];
-        } else if (targetLocation < 40) {
-            roomSlotPos = houseUdgaard.findIndex(e => e.room === targetLocation);
-            roomLength = Object.keys(houseUdgaard[roomSlotPos]).length
-            memberList = Object.assign({}, houseUdgaard[roomSlotPos]);
-            currentRoom = houseUdgaard[roomSlotPos];
-        } else if (targetLocation < 46) {
-            roomSlotPos = houseValhal.findIndex(e => e.room === targetLocation);
-            roomLength = Object.keys(houseValhal[roomSlotPos]).length
-            memberList = Object.assign({}, houseValhal[roomSlotPos]);
-            currentRoom = houseValhal[roomSlotPos];
-        }
+
+        //Find out what index position the room is
+        roomSlotPos = rooms.findIndex(e => e.room === targetLocation);
+        //Find out the length of the room
+        roomLength = Object.keys(rooms[roomSlotPos]).length
+        //Find out who is in the room
+        memberList = Object.assign({}, rooms[roomSlotPos]);
+        //Grab the room from the array
+        currentRoom = rooms[roomSlotPos];
+
+        //Delete the decriptors from the room copy
         delete memberList.room;
         delete memberList.sex;
         delete memberList.space;
+        //Set the memberlist to the values of the room so that the slots are removed.
         memberList = Object.values(memberList);
         for (var i = 0; i < roomLength; i++) {
             //Check if their an original member of the room. If they are store the name and break the loop
             if (!originalMember(memberList[i], targetLocation)) {
+                //Grab the person and place them into an object
                 Object.assign(personToBeReplaced, {id: memberList[i]})
+                //Stop the loop
                 break
             }
         }
+        //Find the persons own room and add it to the object
         Object.assign(personToBeReplaced, {ownRoom: displayName[displayName.findIndex(e => e.number === personToBeReplaced.id)].room})
+        //Remove a person
         removePersonFromRoom(personToBeReplaced.id, currentRoom);
+        //Add people to their respective rooms.
         addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
         addPersonToRoom(person, targetLocation);
     } else {
         if (!checkRoomAvailability(targetLocation)) {
             return;
         }
-        if (previousLocation < 13 || previousLocation == "1a" || previousLocation == "1b") {
-            roomSlotPos = houseMidgaard.findIndex(e => e.room === previousLocation);
-            previousRoom = houseMidgaard[roomSlotPos];
-        } else if (previousLocation < 27) {
-            roomSlotPos = houseAsgaard.findIndex(e => e.room === previousLocation);
-            previousRoom = houseAsgaard[roomSlotPos];
-        } else if (previousLocation < 40) {
-            roomSlotPos = houseUdgaard.findIndex(e => e.room === targetLocation);
-            previousRoom = houseUdgaard[roomSlotPos];
-        } else if (previousLocation < 46) {
-            roomSlotPos = houseValhal.findIndex(e => e.room === targetLocation);
-            previousRoom = houseValhal[roomSlotPos];
-        }
+
+        roomSlotPos = rooms.findIndex(e => e.room === previousLocation);
+        previousRoom = rooms[roomSlotPos];
+
+        console.log(previousLocation);
         removePersonFromRoom(person, previousRoom);
-        addPersonToRoom(person, targetLocation);
+        addPersonToRoom(person, targetLocation, true);
     }
 }
 
@@ -448,30 +428,13 @@ function originalMember(person, room) {
 
 //Check if a room is available, if it is, return true
 function checkRoomAvailability(room) {
-    //Check what house - then find what room the person lives in
-    if (room < 13 || room == "1a" || room == "1b") {
-        //Find the room position in the array
-        roomPosition = houseMidgaard.findIndex(e => e.room === room);
-        //Find the amount of people in the room
-        roomAmount = Object.keys(houseMidgaard[roomPosition]).length-3;
-        //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
-        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
-    } else if (room < 27) {
-        //Repeat the same for the other houses
-        roomPosition = houseAsgaard.findIndex(e => e.room === room);
-        roomAmount = Object.keys(houseAsgaard[roomPosition]).length-3;
-        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
-    } else if (room < 40) {
-        //Repeat the same for the other houses
-        roomPosition = houseUdgaard.findIndex(e => e.room === room);
-        roomAmount = Object.keys(houseUdgaard[roomPosition]).length-3;
-        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
-    } else if (room < 46) {
-        //Repeat the same for the other houses
-        roomPosition = houseValhal.findIndex(e => e.room === room);
-        roomAmount = Object.keys(houseValhal[roomPosition]).length-3;
-        allowedAmount = houseMidgaard[roomPosition].space+allowedExtraValue;
-    }
+    //Find the room position in the array
+    roomPosition = rooms.findIndex(e => e.room === room);
+    //Find the amount of people in the room
+    roomAmount = Object.keys(rooms[roomPosition]).length-3;
+    //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
+    allowedAmount = rooms[roomPosition].space+allowedExtraValue;
+
     //Return value based on if there's room or not
     if (allowedAmount > roomAmount) {
         return true;
@@ -485,57 +448,28 @@ function personInRoom(id, room) {
     //Check if the room param is specified
     if (room == null || (typeof room === "string" && room.trim().length === 0)) {
         //If it is check all houses for the person
-        for (var i = 0; i < houseMidgaard.length; i++) {
+        for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
-            var roomContent = houseMidgaard[roomPos];
+            var roomContent = rooms[roomPos];
             if (Object.values(roomContent).includes(id, 1)) {
                 return roomContent;
             }
         }
-        for (var i = 0; i < houseAsgaard.length; i++) {
-            var roomPos = i;
-            var roomContent = houseAsgaard[roomPos];
-            if (Object.values(roomContent).includes(id, 1)) {
-                return roomContent;
-            }
-        }
-        for (var i = 0; i < houseUdgaard.length; i++) {
-            var roomPos = i;
-            var roomContent = houseUdgaard[roomPos];
-            if (Object.values(roomContent).includes(id, 1)) {
-                return roomContent;
-            }
-        }
-        for (var i = 0; i < houseValhal.length; i++) {
-            var roomPos = i;
-            var roomContent = houseValhal[roomPos];
-            if (Object.values(roomContent).includes(id, 1)) {
-                return roomContent;
-            }
-        }
+
         return false;
     } else {
         var roomObj = e => e.room === room;
         var roomPos = 0;
         var roomContent;
-        if (room < 13 || room == "1a" || room == "1b") {
-            if (room === 0) {
+
+        if (room === 0) {
                 room = "1a";
             } else if (room ==1) {
                 room = "1b";
             }
-            roomPos = houseMidgaard.findIndex(roomObj);
-            roomContent = houseMidgaard[roomPos];
-        } else if (room < 27) {
-            roomPos = houseAsgaard.findIndex(roomObj);
-            roomContent = houseAsgaard[roomPos];
-        } else if (room < 40) {
-            roomPos = houseUdgaard.findIndex(roomObj);
-            roomContent = houseUdgaard[roomPos];
-        } else if (room < 46) {
-            roomPos = houseValhal.findIndex(roomObj);
-            roomContent = houseValhal[roomPos];
-        }
+            roomPos = rooms.findIndex(roomObj);
+            roomContent = rooms[roomPos];
+
         try {
             return Object.values(roomContent).includes(id, 1);
         } catch(err) {
@@ -545,20 +479,19 @@ function personInRoom(id, room) {
 }
 
 //Adds a person to the room specified
-function addPersonToRoom(person, room) {
+function addPersonToRoom(person, room, bypass) {
     //Check if the person is in a room, if so remove them from their previous room.
-    if (personInRoom(person) !== false) {
-        relocate(person, room, displayName[displayName.findIndex(e => e.number === personToBeReplaced.id)], false);
+    if (personInRoom(person) !== false && bypass !== true) {
+        relocate(person, room, displayName[displayName.findIndex(e => e.number === person)].room, false);
         return;
     }
-    //Check what house to add to
-    if (room < 13 || room == "1a" || room == "1b") {
-        //Set the room position to the index of the room
-        roomPosition = houseMidgaard.findIndex(e => e.room === room);
+
+    //Set the room position to the index of the room
+        roomPosition = rooms.findIndex(e => e.room === room);
         //Grab the current profile of the room
-        var currentProfile = Object.assign({}, houseMidgaard[roomPosition]);
+        var currentProfile = Object.assign({}, rooms[roomPosition]);
         //Find out what slot the person should be added to
-        var slotPos = "Slot" + (Object.keys(houseMidgaard[roomPosition]).length - 2);
+        var slotPos = "Slot" + (Object.keys(rooms[roomPosition]).length - 2);
         //Define the object that should be added
         var addedContent = {
             [slotPos]:person
@@ -572,77 +505,16 @@ function addPersonToRoom(person, room) {
 
         //Add the profile to the house array
         profile.forEach(element => {
-            const itemIndex = houseMidgaard.findIndex(o => o.room === element.room);
+            const itemIndex = rooms.findIndex(o => o.room === element.room);
             if(itemIndex > -1) {
-                houseMidgaard[itemIndex] = element;
+                rooms[itemIndex] = element;
             } else {
-                houseMidgaard = houseMidgaard.push(element);
+                rooms = rooms.push(element);
             }
         });
-    } else if (room < 27) {
-        //Repeat same code for the other houses
-        roomPosition = houseAsgaard.findIndex(e => e.room === room);
-        var currentProfile = houseAsgaard[roomPosition];
-        var slotPos = "Slot" + (Object.keys(houseAsgaard[roomPosition]).length - 2);
-        var addedContent = {
-            [slotPos]:person
-        }
-        Object.assign(currentProfile, addedContent);
-        
-        var profile = [];
-        profile.push(currentProfile);
 
-        profile.forEach(element => {
-            const itemIndex = houseAsgaard.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseAsgaard[itemIndex] = element;
-            } else {
-                houseAsgaard = houseAsgaard.push(element);
-            }
-        });
-    } else if (room < 40) {
-        //Repeat same code for the other houses
-        roomPosition = houseUdgaard.findIndex(e => e.room === room);
-        var currentProfile = houseUdgaard[roomPosition];
-        var slotPos = "Slot" + (Object.keys(houseUdgaard[roomPosition]).length - 2);
-        var addedContent = {
-            [slotPos]:person
-        }
-        Object.assign(currentProfile, addedContent);
-        
-        var profile = [];
-        profile.push(currentProfile);
-
-        profile.forEach(element => {
-            const itemIndex = houseUdgaard.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseUdgaard[itemIndex] = element;
-            } else {
-                houseUdgaard = houseUdgaard.push(element);
-            }
-        });
-    } else if (room < 46) {
-        //Repeat same code for the other houses
-        roomPosition = houseValhal.findIndex(e => e.room === room);
-        var currentProfile = houseValhal[roomPosition];
-        var slotPos = "Slot" + (Object.keys(houseValhal[roomPosition]).length - 2);
-        var addedContent = {
-            [slotPos]:person
-        }
-        Object.assign(currentProfile, addedContent);
-        
-        var profile = [];
-        profile.push(currentProfile);
-
-        profile.forEach(element => {
-            const itemIndex = houseValhal.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseValhal[itemIndex] = element;
-            } else {
-                houseValhal = houseValhal.push(element);
-            }
-        });
-    }
+    var namePos = displayName.findIndex(e => e.number === person);
+    updateDisplayedRoom("pers-" + namePos, room);
 }
 
 //Removes a person from a room !!! Requires the room object as the param "room"
@@ -688,48 +560,16 @@ function removePersonFromRoom(person, room) {
     //Put the object into the array
     profile.push(newRoom);
 
-    //Add the room to the correct house
-    if (roomNumber < 13 || roomNumber == "1a" || roomNumber == "1b") {
-        //Standard code to add object to array / replace existing object in array
-        profile.forEach(element => {
-            const itemIndex = houseMidgaard.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseMidgaard[itemIndex] = element;
-            } else {
-                houseMidgaard = houseMidgaard.push(element);
-            }
-        });
-    } else if (roomNumber < 27) {
-        //Standard code to add object to array / replace existing object in array
-        profile.forEach(element => {
-            const itemIndex = houseAsgaard.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseAsgaard[itemIndex] = element;
-            } else {
-                houseAsgaard = houseAsgaard.push(element);
-            }
-        });
-    } else if (roomNumber < 40) {
-        //Standard code to add object to array / replace existing object in array
-        profile.forEach(element => {
-            const itemIndex = houseUdgaard.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseUdgaard[itemIndex] = element;
-            } else {
-                houseUdgaard = houseUdgaard.push(element);
-            }
-        });
-    } else if (roomNumber < 46) {
-        //Standard code to add object to array / replace existing object in array
-        profile.forEach(element => {
-            const itemIndex = houseValhal.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                houseValhal[itemIndex] = element;
-            } else {
-                houseValhal = houseValhal.push(element);
-            }
-        });
-    }
+    //Standard code to add object to array / replace existing object in array
+    profile.forEach(element => {
+        const itemIndex = rooms.findIndex(o => o.room === element.room);
+        if(itemIndex > -1) {
+            rooms[itemIndex] = element;
+        } else {
+            rooms = rooms.push(element);
+        }
+    });
+
 }
 
 function selectRoom(setRoom) {
@@ -800,9 +640,9 @@ function selectRoom(setRoom) {
             displayName = displayName.push(element);
         }       
     });
-    currentPerson.classList.toggle("Ikke-Valgt");
-    currentPerson.classList.toggle("Andet");
+    addTag(currentPerson, "Andet");
     removeTag(currentPerson, "Eget");
+    removeTag(currentPerson, "Ikke-Valgt");
     closePopup();
     countData();
 }
@@ -835,25 +675,24 @@ function selectHouse(house) {
     //Chekcs what house is selected and adds the room numbers to the buttons
     if (house == "Asgård") {
         selectedHouse = "Asgaard";
-        for (var i = 0; i < houseAsgaard.length; i++) {
-            document.getElementById("btn-" + i ).innerHTML = houseAsgaard[i].room;
-            //Check if the room is full, if so change the color.
-            if (!checkRoomAvailability(i + 14)) {
-                grayOutButton(i, true);
+        for (var i = 13; i < 26; i++) {
+            var minusI = i - 13;
+            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
+            if (!checkRoomAvailability(i + 1)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
-            //Check if the person is already assaigned to the room.
-            if (personInRoom(personSelected, i + 14)) {
-                grayOutButton(i, true);
+            if (personInRoom(personSelected, minusI)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
         }
     } else if (house == "Midgård") {
         selectedHouse = "Midgaard";
-        for (var i = 0; i < houseMidgaard.length; i++) {
-            document.getElementById("btn-" + i ).innerHTML = houseMidgaard[i].room;
+        for (var i = 0; i < 13; i++) {
+            document.getElementById("btn-" + i ).innerHTML = rooms[i].room;
             if (i == 0) {
                 var n = "1a";
             } else if (i == 1) {
@@ -874,17 +713,18 @@ function selectHouse(house) {
         }
     } else if (house == "Udgård") {
         selectedHouse = "Udgaard";
-        for (var i = 0; i < houseUdgaard.length; i++) {
-            document.getElementById("btn-" + i ).innerHTML = houseUdgaard[i].room;
-            if (!checkRoomAvailability(i + 27)) {
-                grayOutButton(i, true);
+        for (var i = 26; i < 39; i++) {
+            var minusI = i - 26;
+            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
+            if (!checkRoomAvailability(i)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
-            if (personInRoom(personSelected, i + 27)) {
-                grayOutButton(i, true);
+            if (personInRoom(personSelected, minusI)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
         }
     } else if (house == "Valhal") {
@@ -892,17 +732,18 @@ function selectHouse(house) {
         //Removes the extra buttons because there are less rooms
         roomButtons.classList.toggle("small");
         smallButtons = true;
-        for (var i = 0; i < houseValhal.length; i++) {
-            document.getElementById("btn-" + i ).innerHTML = houseValhal[i].room;
-            if (!checkRoomAvailability(i + 40)) {
-                grayOutButton(i, true);
+        for (var i = 39; i < 45; i++) {
+            var minusI = i - 39;
+            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
+            if (!checkRoomAvailability(i)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
-            if (personInRoom(personSelected, i + 40)) {
-                grayOutButton(i, true);
+            if (personInRoom(personSelected, minusI)) {
+                grayOutButton(minusI, true);
             } else {
-                grayOutButton(i, false);
+                grayOutButton(minusI, false);
             }
         }
         [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
@@ -958,6 +799,12 @@ function removeTag(element, tag) {
     }
 }
 
+function addTag(element, tag) {
+    if (!element.classList.contains(tag)) {
+        element.classList.toggle(tag);
+    }
+}
+
 //
 function updateDisplayedRoom(personId, room) {
     var parentElement = document.getElementById(personId);
@@ -983,8 +830,6 @@ window.onload = () => {
     countData();
     //Close the alert once the window is loaded
     showAlert(" ", "Close");
-
-    addPersonToRoom()
 }
 
 //Count the number of each value
