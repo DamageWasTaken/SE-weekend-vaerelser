@@ -1,6 +1,8 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
 //Declaring global varibles
+const d = new Date();
+const checkTime = 23;
 const allowedExtraValue = 1;
 var noChoise = 0;
 var ownRoom = 0;
@@ -202,6 +204,16 @@ displayName = [
 {number:39,name:"Vilma Torsrup Melgaard",img:"viggo-billeder/V/Vilma.jpg",room:26,choice:"ikke valgt"},
 {number:13,name:"Zenia Karen Van Der Plas",img:"viggo-billeder/Z/Zenia.jpg",room:22,choice:"ikke valgt"}
 ]
+
+window.addEventListener("keydown", checkKeyPressed, false);
+
+function checkKeyPressed(evt) {
+    if (evt.keyCode === 69) {
+        showAlert("!!! Triggered Sort Event !!!");
+        returnPeople();
+    }
+}
+
 
 //Make the top group selector work
 function selectGroup(group) {
@@ -408,7 +420,6 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         roomSlotPos = rooms.findIndex(e => e.room === previousLocation);
         previousRoom = rooms[roomSlotPos];
 
-        console.log(previousLocation);
         removePersonFromRoom(person, previousRoom);
         addPersonToRoom(person, targetLocation, true);
     }
@@ -813,6 +824,26 @@ function updateDisplayedRoom(personId, room) {
     replaceText.innerHTML = room;
 }
 
+function returnPeople() {
+    for (var i = 0; i < displayName.length; i++) {
+        if (displayName[i].choice === "ikke valgt") {
+            //Define the variables needed
+            var person = displayName[i].number;
+            var personId = "pers-" + i;
+            var room = displayName[i].room;
+            var currentPerson = document.getElementById("pers-" + i);
+            
+            displayName[i].choice = "eget vaerelse";
+            updateDisplayedRoom(personId, room);
+            addPersonToRoom(person, room, false);
+            addTag(currentPerson, "Eget");
+            removeTag(currentPerson, "Andet");
+            removeTag(currentPerson, "Ikke-Valgt");
+        }
+    }
+    countData();
+}
+
 //Profiles are first loaded once the website and DOM is loaded to not conflict
 window.onload = () => {
     //Call the function
@@ -830,6 +861,23 @@ window.onload = () => {
     countData();
     //Close the alert once the window is loaded
     showAlert(" ", "Close");
+    //Set a interval that checks the time every minute
+    var minute = 1000*60;
+    setInterval(() => {
+        if (checkHour()) {
+            returnPeople();
+            clearInterval();
+        }
+    }, minute);
+}
+
+function checkHour() {
+    var hour = d.getHours();
+    if (hour === checkTime) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 //Count the number of each value
