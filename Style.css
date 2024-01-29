@@ -138,6 +138,67 @@ h2 {
 }
 
 /*═══════════════════════*/
+/*  Print popup styling*/
+
+.header {
+	border: 1px solid black;
+	background-color: gray;
+    font-size: 10px;
+    text-align: center;
+}
+
+.blank {
+	height: 100%;
+	width: 100%;
+	background-color: gray;
+}
+
+.table {
+	display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+	width: 450px;
+	border: 1px solid black;
+	height: 700px;
+    color: black;
+}
+
+.table-part {
+	width: 100%;
+	height: 100px;
+	border: 1px solid black;
+    overflow: hidden;
+}
+
+.rows6 {
+	height: 600px;
+}
+
+.rows3 {
+	height: 300px;
+}
+
+.print {
+    display: none !important;
+}
+
+.generated-text{
+    font-size: 10px;
+    padding-left: 2px;
+}
+
+#print-popup {
+    display: none;
+    justify-content: space-between;
+    z-index: 10;
+    background-color: white;
+    padding: 10px;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/*═══════════════════════*/
 /*  Popup styling*/
 #popup {
     display: none;

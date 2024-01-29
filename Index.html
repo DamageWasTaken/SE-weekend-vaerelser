@@ -8,7 +8,7 @@
         <title>Weekend Vaerelser Skanderup</title>
         <link rel="icon" href="Images/Website icon.png">
     </head>
-    <body>
+    <body id="mainBody">
         <nav>
             <button class="nav-button" onclick="selectGroup('A')">A</button>
             <button class="nav-button" onclick="selectGroup('B')">B</button>
@@ -37,6 +37,12 @@
             <button class="nav-button" onclick="selectGroup('Z')">Z</button>
             <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
         </nav>
+        <div id="print-popup">
+            <div class="rows6 table" id="generated-table-1"></div>
+            <div class="table" id="generated-table-2"></div>
+            <div class="table" id="generated-table-3"></div>
+            <div class="rows3 table" id="generated-table-4"></div>
+        </div>
         <div id="alert-container" class="alert-container">
             <div id="top-alert" class="top-alert">
                   <span class="overlay"></span>

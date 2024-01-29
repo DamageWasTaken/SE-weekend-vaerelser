@@ -17,6 +17,7 @@ var allowedAmount = 0;
 var roomPosition = 0;
 var selectedHouse = "";
 var personSelected = 0;
+var runLock = false;
 
 //Declaring all houses & rooms
 var rooms = [
@@ -82,7 +83,6 @@ var displayName = [
 {number:44,name:"Anton Bissø Stausholm",img:"viggo-billeder/A/Anton 1.jpg",room:20,choice:"ikke valgt", sex:"m"},
 {number:65,name:"Anton Haukrog Møller",img:"viggo-billeder/A/Anton 2.jpg",room:6,choice:"ikke valgt", sex:"m"},
 {number:134,name:"Anton Hermansen",img:"viggo-billeder/A/Anton 3.jpg",room:41,choice:"ikke valgt", sex:"m"},
-{number:104,name:"Astrid Astrup Laursen",img:"viggo-billeder/A/Astrid 1.jpg",room:29,choice:"ikke valgt", sex:"f"},
 {number:6,name:"Astrid Marie Kirkegaard",img:"viggo-billeder/A/Astrid 2.jpg",room:"1b",choice:"ikke valgt", sex:"f"},
 {number:15,name:"Axel Christian Skovgaard Nielsen",img:"viggo-billeder/A/Axel.jpg",room:36,choice:"ikke valgt", sex:"m"},
 {number:131,name:"Baylee Halfdan Søgård Fink",img:"viggo-billeder/B/Baylee.jpg",room:2,choice:"ikke valgt", sex:"m"},
@@ -92,15 +92,12 @@ var displayName = [
 {number:52,name:"Carolina Aagaard",img:"viggo-billeder/C/Carolina.jpg",room:4,choice:"ikke valgt", sex:"f"},
 {number:47,name:"Caroline Flintholm Juelsgaard",img:"viggo-billeder/C/Caroline 1.jpg",room:25,choice:"ikke valgt", sex:"f"},
 {number:45,name:"Caroline Sax Riggelsen",img:"viggo-billeder/C/Caroline 2.jpg",room:30,choice:"ikke valgt", sex:"f"},
-{number:119,name:"Cecilia Manfeld-Ørtoft",img:"viggo-billeder/C/Cecilia.svg",room:25,choice:"ikke valgt", sex:"f"},
 {number:60,name:"Cecilie Damsgaard Paulsen",img:"viggo-billeder/C/Cecilie 1.jpg",room:39,choice:"ikke valgt", sex:"f"},
-{number:57,name:"Cecilie Jamilya Stolborg Mendes",img:"viggo-billeder/C/Cecilie 2.jpg",room:34,choice:"ikke valgt", sex:"f"},
 {number:108,name:"Cecilie Margrethe Christiansen",img:"viggo-billeder/C/Cecilie 3.jpg",room:26,choice:"ikke valgt", sex:"f"},
 {number:77,name:"Dicte Johanne Schultz",img:"viggo-billeder/D/Dicte.jpg",room:5,choice:"ikke valgt", sex:"f"},
 {number:136,name:"Ella Zwergius Moreno",img:"viggo-billeder/E/Ella.jpg",room:37,choice:"ikke valgt", sex:"f"},
 {number:3,name:"Emil Støttrup",img:"viggo-billeder/E/Emil.jpg",room:42,choice:"ikke valgt", sex:"m"},
 {number:113,name:"Emilie Christensen",img:"viggo-billeder/E/Emilie.jpg",room:9,choice:"ikke valgt", sex:"f"},
-{number:126,name:"Emily Aviaya Zimmermann",img:"viggo-billeder/E/Emily.svg",room:38,choice:"ikke valgt", sex:"f"},
 {number:116,name:"Emma Lindberg Jensen",img:"viggo-billeder/E/Emma.jpg",room:5,choice:"ikke valgt", sex:"f"},
 {number:75,name:"Esben Petersen",img:"viggo-billeder/E/Esben.jpg",room:3,choice:"ikke valgt", sex:"m"},
 {number:21,name:"Eva Ragauge Muntenjon",img:"viggo-billeder/E/Eva.jpg",room:14,choice:"ikke valgt", sex:"f"},
@@ -130,14 +127,12 @@ var displayName = [
 {number:128,name:"Jonas Staghøj Markussen",img:"viggo-billeder/J/Jonas 2.jpg",room:28,choice:"ikke valgt", sex:"m"},
 {number:88,name:"Julie Christensen Venø",img:"viggo-billeder/J/Julie 1.jpg",room:44,choice:"ikke valgt", sex:"f"},
 {number:54,name:"Julie Lykke Lolck",img:"viggo-billeder/J/Julie 2.jpg",room:40,choice:"ikke valgt", sex:"f"},
-{number:26,name:"Justin Vesterlund",img:"viggo-billeder/J/Justin.jpg",room:23,choice:"ikke valgt", sex:"m"},
 {number:1,name:"Karla Kobberø",img:"viggo-billeder/K/Karla 1.jpg",room:33,choice:"ikke valgt", sex:"f"},
 {number:53,name:"Karla Weimar Schousen",img:"viggo-billeder/K/Karla 2.jpg",room:22,choice:"ikke valgt", sex:"f"},
 {number:69,name:"Karoline Pagaard Christensen",img:"viggo-billeder/K/Karoline.jpg",room:22,choice:"ikke valgt", sex:"f"},
 {number:93,name:"Katja Nygaard-Larsen",img:"viggo-billeder/K/Katja.jpg",room:18,choice:"ikke valgt", sex:"f"},
 {number:94,name:"Katrine Brylle",img:"viggo-billeder/K/Katrine.jpg",room:17,choice:"ikke valgt", sex:"f"},
 {number:124,name:"Kirstine Ammiztbøll Christensen",img:"viggo-billeder/K/Kirstine.jpg",room:29,choice:"ikke valgt", sex:"f"},
-{number:70,name:"Knud Erik Mai Ding",img:"viggo-billeder/K/Knud.jpg",room:2,choice:"ikke valgt", sex:"m"},
 {number:91,name:"Kristoffer Rehhoff-Nør",img:"viggo-billeder/K/Kristoffer.jpg",room:27,choice:"ikke valgt", sex:"m"},
 {number:68,name:"Laura Vinther Jepsen",img:"viggo-billeder/L/Laura.jpg",room:44,choice:"ikke valgt", sex:"f"},
 {number:72,name:"Lina Høft Homilius",img:"viggo-billeder/L/Lina.jpg",room:18,choice:"ikke valgt", sex:"f"},
@@ -188,7 +183,6 @@ var displayName = [
 {number:30,name:"Simon Wonsild Krogsgaard Andersen",img:"viggo-billeder/S/Simon.jpg",room:7,choice:"ikke valgt", sex:"m"},
 {number:95,name:"Sofie Fynbo Christoffersen",img:"viggo-billeder/S/Sofie.jpg",room:12,choice:"ikke valgt", sex:"f"},
 {number:49,name:"Sofus Czeloth Steenskov",img:"viggo-billeder/S/Sofus.jpg",room:42,choice:"ikke valgt", sex:"m"},
-{number:137,name:"Stine Louise Clausen",img:"viggo-billeder/S/Stine.jpg",room:39,choice:"ikke valgt", sex:"f"},
 {number:5,name:"Svend Nilsen Korsholm",img:"viggo-billeder/S/Svend.jpg",room:28,choice:"ikke valgt", sex:"m"},
 {number:109,name:"Tea Bendixen",img:"viggo-billeder/T/Tea.jpg",room:"1b",choice:"ikke valgt", sex:"f"},
 {number:17,name:"Thea Dalsgaard Kallsø",img:"viggo-billeder/T/Thea.jpg",room:33,choice:"ikke valgt", sex:"f"},
@@ -197,7 +191,6 @@ var displayName = [
 {number:55,name:"Torbjørn Hornemann Nielsen",img:"viggo-billeder/T/Torbjørn.jpg",room:7,choice:"ikke valgt", sex:"m"},
 {number:19,name:"Tristian Alexander Hald",img:"viggo-billeder/T/Tristian.jpg",room:11,choice:"ikke valgt", sex:"m"},
 {number:33,name:"Troles Kragerup Lundin",img:"viggo-billeder/T/Troles.jpg",room:32,choice:"ikke valgt", sex:"m"},
-{number:59,name:"Tue Storm Mathiasen",img:"viggo-billeder/T/Tue.jpg",room:2,choice:"ikke valgt", sex:"m"},
 {number:2,name:"Victor Albert Christensen",img:"viggo-billeder/V/Victor.jpg",room:32,choice:"ikke valgt", sex:"m"},
 {number:121,name:"Victoria Roskvist",img:"viggo-billeder/V/Victoria.jpg",room:"1a",choice:"ikke valgt", sex:"f"},
 {number:48,name:"Vigga Burmeister Clausen",img:"viggo-billeder/V/Vigga.jpg",room:21,choice:"ikke valgt", sex:"f"},
@@ -213,8 +206,106 @@ function checkKeyPressed(evt) {
         returnPeople();
     }
     if (evt.keyCode === 80) {
-        print(rooms);
+        openPrintPopup();
+        generateList();
+        print();
     }
+    if (evt.keyCode === 27) {
+        closePrintPopup();
+    }
+    if (evt.keyCode === 82) {
+        generateList();
+    }
+}
+
+//Shortens name to a string less than 25
+function shortenName(name) {
+    for (var i = 0; i < 2; i++) {
+        var splitName = "";
+        if (name.length > 20) {
+            var nameArr = name.split(" ");
+            nameArr.splice(1, 1);
+            nameArr.forEach((e) => {
+                splitName += e + " ";
+            });
+            name = splitName;
+        } else {
+            return name;
+        }
+        
+    }
+    return name;
+}
+
+//Return a string that is used to generate the printable list
+function printRoom(room) {
+    var index = rooms.findIndex(e => e.room  === room);
+    var length = Object.keys(rooms[index]).length - 3;
+    var string = "";
+    if (length <= 0) {
+        return "";
+    }
+    for (var i = 0; i < length; i++) {
+        var slot = "Slot" + (i + 1)
+        var localRoom = rooms[index];
+        var name = displayName[displayName.findIndex(e => e.number  === localRoom[slot])].name;      
+        name = shortenName(name);
+        string += localRoom[slot] + " | " + name
+        if (length > 1 && i < (length - 1)) {
+            string += " <br> "
+        }
+    }
+    return string;
+}
+
+//Generate the room array showcase
+function generateList() {
+    var tableMidgaard = document.getElementById("generated-table-1");
+	var tableAsgaard = document.getElementById("generated-table-2");
+	var tableUdgaard = document.getElementById("generated-table-3");
+	var tableValhal = document.getElementById("generated-table-4");
+    if (runLock) {
+        tableMidgaard.innerHTML = '';
+        tableAsgaard.innerHTML = '';
+        tableUdgaard.innerHTML = '';
+        tableValhal.innerHTML = '';
+    }
+    runLock = true;
+    //-------
+    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Room 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
+    for (var i = 0; i < 11 ; i++) {
+        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
+    }
+    //-------
+    for (var i = 0; i < 13 ; i++) {
+        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
+    }
+    tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
+    //-------
+    for (var i = 0; i < 13 ; i++) {
+        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
+    }
+    tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
+    //-------
+    for (var i = 0; i < 6 ; i++) {
+        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
+    }
+}
+
+//Opens the popup menu
+function openPrintPopup() {
+    var popup = document.getElementById("print-popup");
+    var body = document.getElementById("container");
+    addTag(popup, "show");
+    addTag(body, "print");
+}
+
+//Closes the popup menu
+function closePrintPopup() {
+    var popup = document.getElementById("print-popup");
+    var body = document.getElementById("container");
+    removeTag(popup, "show");
+    removeTag(body, "print");
 }
 
 //Make the top group selector work
@@ -557,7 +648,7 @@ function removePersonFromRoom(person, room) {
             //Set the slot they are in depending on the loop status
             var slotNumber = "Slot" + (i + 1);
             //Set the slot they should be in depending on if there's been a person removed
-            var slot = "slot" + (i + 1 - minusVal);
+            var slot = "Slot" + (i + 1 - minusVal);
             //Check if the person is the person we should remove
             if (currentRoom[slotNumber] !== person) {
                 //If they're not just add them to the new room
@@ -934,3 +1025,5 @@ function countData() {
     //Call the values to be rendered to the website
     updateCount();
 }
+
+
