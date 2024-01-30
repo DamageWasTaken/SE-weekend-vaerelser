@@ -105,6 +105,10 @@ h2 {
     display: none !important;
 }
 
+.DONT-SHOW {
+    display: none !important;
+}
+
 .not-available {
     background-color: var(--faddedCyan) !important;
     pointer-events: none;
@@ -143,6 +147,8 @@ h2 {
 #file-input {
     display: flex;
     position: fixed;
+    top: 50%;
+    z-index: 1000;
 }
 
 /*═══════════════════════*/
