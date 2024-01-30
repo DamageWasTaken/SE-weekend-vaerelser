@@ -1027,3 +1027,30 @@ function countData() {
 }
 
 
+//EXPERIMENTAL DATA LOADING
+function previewFile() {
+    var [file] = document.querySelector("input[type=file]").files;
+    const reader = new FileReader();
+
+    reader.addEventListener("load", () => {
+        var res = reader.result;
+        var nameArray = [];
+        var delta = 2;
+        const splitArray = res.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
+        splitArray.splice(0,4);
+        for (var i = delta; i < splitArray.length; i += delta) {
+            splitArray.splice(i,1);
+        }
+        for (var i = 0; i < splitArray.length; i += delta) {
+            var cacheArray = [splitArray[i],splitArray[i+1]];
+            nameArray.push(cacheArray.join(' '));
+        }
+        console.log(nameArray);
+        },
+        false,
+    );
+
+    if (file) {
+        reader.readAsText(file);
+    }
+}
