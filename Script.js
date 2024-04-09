@@ -1,9 +1,18 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
-//Declaring global varibles
+//Declaring global time varibles
 const d = new Date();
 const checkTime = 23;
+
+//Import the student data
+console.log(data);
+var studentList = data.map((x) => x)
+console.log(studentList)
+
+//VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 const allowedExtraValue = 1;
+
+//General variables
 var noChoise = 0;
 var ownRoom = 0;
 var otherRoom = 0;
@@ -70,7 +79,8 @@ var rooms = [
 ]
 
 //List of all profiles to be rendered
-var studentList = [
+
+/*var studentList = [
 {number:133,name:"Adelina Høst Johnsen",img:"viggo-billeder/A/Adelina.jpg",room:26,choice:"NAN", sex:"f"},
 {number:7,name:"Albert Damsgaard Grønnerup",img:"viggo-billeder/A/Albert.jpg",room:10,choice:"NAN", sex:"m"},
 {number:81,name:"Alberte Holmgaard Grønfeldt",img:"viggo-billeder/A/Alberte.jpg",room:4,choice:"NAN", sex:"f"},
@@ -118,7 +128,7 @@ var studentList = [
 {number:67,name:"Harald Brøcker",img:"viggo-billeder/H/Harald.jpg",room:31,choice:"NAN", sex:"m"},
 {number:56,name:"Hjalte Wittek Sørensen",img:"viggo-billeder/H/Hjalte.jpg",room:32,choice:"NAN", sex:"m"},
 {number:34,name:"Hugo Qvist Tøpholm",img:"viggo-billeder/H/Hugo.jpg",room:11,choice:"NAN", sex:"m"},
-{number:92,name:"Ingeborg Brunn Hinrichsen",img:"viggo-billeder/I/Ingeborg.jpg",room:8,choice:"NAN", sex:"f"},
+{number:92,name:"Ingeborg Bruun Hinrichsen",img:"viggo-billeder/I/Ingeborg.jpg",room:8,choice:"NAN", sex:"f"},
 {number:112,name:"Isabella Kirstine Neuberg Rasmussen",img:"viggo-billeder/I/Isabella.jpg",room:"1a",choice:"NAN", sex:"f"},
 {number:76,name:"Jens Møller Martin",img:"viggo-billeder/J/Jens.jpg",room:3,choice:"NAN", sex:"m"},
 {number:120,name:"Jeppe Holm Jensen",img:"viggo-billeder/J/Jeppe.jpg",room:19,choice:"NAN", sex:"m"},
@@ -153,7 +163,7 @@ var studentList = [
 {number:87,name:"Marius Kjeld Finnerup",img:"viggo-billeder/M/Marius 2.jpg",room:23,choice:"NAN", sex:"m"},
 {number:107,name:"Marius Lykke Hansen",img:"viggo-billeder/M/Marius 3.jpg",room:22,choice:"NAN", sex:"m"},
 {number:40,name:"Mary Fischer Sloth",img:"viggo-billeder/M/Mary.jpg",room:18,choice:"NAN", sex:"f"},
-{number:66,name:"Mathias Bach Sølvberg Dolleris",img:"viggo-billeder/M/Mathias.jpg",room:15,choice:"NAN", sex:"m"},
+{number:66,name:"Mathias Bach Sølvbjerg Dolleris",img:"viggo-billeder/M/Mathias.jpg",room:15,choice:"NAN", sex:"m"},
 {number:85,name:"Mathilde Dræborg Evind",img:"viggo-billeder/M/Mathilde.jpg",room:5,choice:"NAN", sex:"f"},
 {number:130,name:"Merle Toft",img:"viggo-billeder/M/Merle.jpg",room:40,choice:"NAN", sex:"f"},
 {number:10,name:"Mette Kulby Rick",img:"viggo-billeder/M/Mette.jpg",room:44,choice:"NAN", sex:"f"},
@@ -197,7 +207,7 @@ var studentList = [
 {number:48,name:"Vigga Burmeister Clausen",img:"viggo-billeder/V/Vigga.jpg",room:21,choice:"NAN", sex:"f"},
 {number:39,name:"Vilma Tolstrup Melgaard",img:"viggo-billeder/V/Vilma.jpg",room:26,choice:"NAN", sex:"f"},
 {number:13,name:"Zenia Karen Van Der Plas",img:"viggo-billeder/Z/Zenia.jpg",room:22,choice:"NAN", sex:"f"}
-]
+]*/
 
 window.addEventListener("keydown", checkKeyPressed, false);
 
@@ -1046,24 +1056,37 @@ function hideInput() {
     addTag(input, "hide");
 }
 
+//Make sure that you get a warning before leaveing the page.
+window.onbeforeunload = function(event) {
+    event.preventDefault();
+    return event.returnValue = "Are you sure you want to leave the page?";
+}
 
-//EXPERIMENTAL DATA LOADING
+
+//Load the weekend file
 function previewFile() {
     var [file] = document.querySelector("input[type=file]").files;
     const reader = new FileReader();
 
     reader.addEventListener("load", () => {
+        //Set the result
         var res = reader.result;
+        //Set the delta of how often we need to remove parts of the array.
         var delta = 2;
+        //Split the result
         const splitArray = res.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
+        //Remove the first 4 items of the array
         splitArray.splice(0,4);
+        //Loop through the array where we delete every nth (delta) of the array
         for (var i = delta; i < splitArray.length; i += delta) {
             splitArray.splice(i,1);
         }
+        //Loop though the array were we join every 2 parts of the array.
         for (var i = 0; i < splitArray.length; i += delta) {
             var cacheArray = [splitArray[i],splitArray[i+1]];
             weekendList.push(cacheArray.join(' '));
         }
+        //Run the function to load the rest of the DOM
         loadDOM();
         },
         false,

@@ -122,6 +122,8 @@ h2 {
 /*  nav styling*/
 .nav-button {
     width: 10%;
+    height: 30px;
+    max-width: 30px;
     margin: 0.3%;
     border: none;
     border-radius: 6px;
