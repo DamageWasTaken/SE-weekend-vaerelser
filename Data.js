@@ -1,7 +1,7 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
 const data = [{"number":133,"name":"Adelina Høst Johnsen","img":"viggo-billeder/A/Adelina.jpg","room":44,"choice":"NAN","sex":"f"},
-{"number":7,"name":"Albert Damsgaard Grønnerup","img":"viggo-billeder/A/Albert.jpg","room":19,"choice":"NAN","sex":"f"},
+{"number":7,"name":"Albert Damsgaard Grønnerup","img":"viggo-billeder/A/Albert.jpg","room":19,"choice":"NAN","sex":"m"},
 {"number":81,"name":"Alberte Holmgaard Grønfeldt","img":"viggo-billeder/A/Alberte.jpg","room":38,"choice":"NAN","sex":"f"},
 {"number":14,"name":"Alexander Damgård","img":"viggo-billeder/A/Alexander.jpg","room":42,"choice":"NAN","sex":"m"},
 {"number":82,"name":"Alma Frøhlich Hougaard","img":"viggo-billeder/A/Alma.jpg","room":45,"choice":"NAN","sex":"f"},

@@ -31,52 +31,68 @@ var checkList = [];
 
 //Declaring all houses & rooms
 var rooms = [
-    {room:"1a",sex:"f",space:2},
-    {room:"1b",sex:"f",space:2},
-    {room:2,sex:"m",space:4},
-    {room:3,sex:"m",space:3},
-    {room:4,sex:"f",space:3},
-    {room:5,sex:"f",space:3},
-    {room:6,sex:"m",space:3},
-    {room:7,sex:"m",space:3},
-    {room:8,sex:"f",space:3},
-    {room:9,sex:"f",space:3},
-    {room:10,sex:"m",space:3},
-    {room:11,sex:"m",space:3},
-    {room:12,sex:"f",space:3},
-    {room:14,sex:"f",space:3},
-    {room:15,sex:"m",space:4},
-    {room:16,sex:"m",space:3},
-    {room:17,sex:"f",space:3},
-    {room:18,sex:"f",space:3},
-    {room:19,sex:"m",space:3},
-    {room:20,sex:"m",space:3},
-    {room:21,sex:"f",space:3},
-    {room:22,sex:"f",space:3},
-    {room:23,sex:"m",space:3},
-    {room:24,sex:"m",space:3},
-    {room:25,sex:"f",space:3},
-    {room:26,sex:"f",space:3},
-    {room:27,sex:"m",space:3},
-    {room:28,sex:"m",space:4},
-    {room:29,sex:"f",space:3},
-    {room:30,sex:"f",space:3},
-    {room:31,sex:"m",space:3},
-    {room:32,sex:"m",space:3},
-    {room:33,sex:"f",space:3},
-    {room:34,sex:"f",space:3},
-    {room:35,sex:"m",space:3},
-    {room:36,sex:"m",space:3},
-    {room:37,sex:"f",space:3},
-    {room:38,sex:"f",space:3},
-    {room:39,sex:"f",space:3},
-    {room:40,sex:"f",space:3},
-    {room:41,sex:"m",space:3},
-    {room:42,sex:"m",space:3},
-    {room:43,sex:"f",space:3},
-    {room:44,sex:"f",space:3},
-    {room:45,sex:"m",space:3}
+    {room:"1a",sex:"x",space:2},
+    {room:"1b",sex:"x",space:2},
+    {room:2,sex:"x",space:4},
+    {room:3,sex:"x",space:3},
+    {room:4,sex:"x",space:3},
+    {room:5,sex:"x",space:3},
+    {room:6,sex:"x",space:3},
+    {room:7,sex:"x",space:3},
+    {room:8,sex:"x",space:3},
+    {room:9,sex:"x",space:3},
+    {room:10,sex:"x",space:3},
+    {room:11,sex:"x",space:3},
+    {room:12,sex:"x",space:3},
+    {room:14,sex:"x",space:3},
+    {room:15,sex:"x",space:4},
+    {room:16,sex:"x",space:3},
+    {room:17,sex:"x",space:3},
+    {room:18,sex:"x",space:3},
+    {room:19,sex:"x",space:3},
+    {room:20,sex:"x",space:3},
+    {room:21,sex:"x",space:3},
+    {room:22,sex:"x",space:3},
+    {room:23,sex:"x",space:3},
+    {room:24,sex:"x",space:3},
+    {room:25,sex:"x",space:3},
+    {room:26,sex:"x",space:3},
+    {room:27,sex:"x",space:3},
+    {room:28,sex:"x",space:4},
+    {room:29,sex:"x",space:3},
+    {room:30,sex:"x",space:3},
+    {room:31,sex:"x",space:3},
+    {room:32,sex:"x",space:3},
+    {room:33,sex:"x",space:3},
+    {room:34,sex:"x",space:3},
+    {room:35,sex:"x",space:3},
+    {room:36,sex:"x",space:3},
+    {room:37,sex:"x",space:3},
+    {room:38,sex:"x",space:3},
+    {room:39,sex:"x",space:3},
+    {room:40,sex:"x",space:3},
+    {room:41,sex:"x",space:3},
+    {room:42,sex:"x",space:3},
+    {room:43,sex:"x",space:3},
+    {room:44,sex:"x",space:3},
+    {room:45,sex:"x",space:3}
 ]
+
+//Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
+for (let i = 0; i < rooms.length; i++) {
+    console.log(i)
+    if (i === 0) {
+        var index = studentList.findIndex(e => e.room  === "1a");
+    } else if (i === 1) {
+        var index = studentList.findIndex(e => e.room  === '1b');
+    } else {
+        var index = studentList.findIndex(e => e.room  === i);
+    }
+    if (index !== -1) {
+        var _sex = studentList[index].sex;
+        rooms[i].sex = _sex;
+    }
+}
 
 window.addEventListener("keydown", checkKeyPressed, false);
 
