@@ -313,24 +313,9 @@ function selectorButton(place) {
         //NEEDS TO BE REDESIGNED
         //Check if the selected room is available
         if (checkRoomAvailability(roomNumber) == true) {
-            //Define the dummy profile to be added the studentList array
-            var profile = [{
-                //Finds the details and adds them to the dummy profile
-                number: studentList[namePosition].number,
-                name: studentList[namePosition].name,
-                img: studentList[namePosition].img,
-                room: studentList[namePosition].room,
-                choice: "eget vaerelse"
-            }]
-            //Goes down the array finds the person in the array, deletes them, and inserts the dummy profile to the array
-            profile.forEach(element => {
-                const itemIndex = studentList.findIndex(o => o.number === element.number);
-                if(itemIndex > -1) {
-                    studentList[itemIndex] = element;
-                } else {
-                    studentList = studentList.push(element);
-                }       
-            });
+            //Update the persons choice 
+            studentList[namePosition].choice = 'eget vaerelse';
+
             //Removes and adds a class to be able to select person by group
             addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
@@ -340,7 +325,7 @@ function selectorButton(place) {
             countData();
             closePopup();
             addPersonToRoom(studentList[namePosition].number, studentList[namePosition].room);
-            updateDisplayedRoom("pers-" + namePosition, studentList[namePosition].room);
+            //updateDisplayedRoom("pers-" + namePosition, studentList[namePosition].room);
         } else {
             relocate(personNumber, roomNumber, "", true)
             closePopup();
@@ -687,7 +672,7 @@ function selectRoom(setRoom) {
             studentList[itemIndex] = element;
         } else {
             studentList = studentList.push(element);
-        }       
+        }  
     });
     addTag(currentPerson, "Andet");
     removeTag(currentPerson, "Eget");
@@ -696,14 +681,60 @@ function selectRoom(setRoom) {
     countData();
 }
 
-//Grays out the room button
-function grayOutButton(buttonNumber, param) {
-    var button = document.getElementById("btn-" + buttonNumber )
+//Check if the button should be grayed out, and does so if needed.
+function grayOutButton(buttonNumber, house, _pers) {
+    var button = document.getElementById("btn-" + buttonNumber );
+    var state = false;
+    var room = 0;
+    console.log(_pers);
+    switch (house) {
+        case 'Midgaard':
+            room = buttonNumber;
+            if (buttonNumber == 0) {
+                room = '1a';
+            } else if (buttonNumber == 1) {
+                room = '1b';
+            }
+            break;
+
+        case 'Asgaard':
+            room = buttonNumber + 14;
+            break;
+
+        case 'Udgaard':
+            room = buttonNumber + 27;
+            break;
+
+        case 'Valhal':
+            room = buttonNumber + 40;
+            break;
+    }
+
+    if (!checkRoomAvailability(room)) {
+        state = true;
+    }
+    if (!checkSex(_pers, room)) {
+        state = true;
+    }
+    if (personInRoom(_pers, room)) {
+        state = true;
+    }
+
+    switch (state) {
+        case true:
+            addTag(button,'not-available');
+            break;
+
+        case false:
+            removeTag(button,'not-available');
+            break;
+    }
+    /*var button = document.getElementById("btn-" + buttonNumber );
     if (param && !button.classList.contains("not-available")) {
         button.classList.toggle("not-available");
     } else if (!param && button.classList.contains("not-available")) {
         button.classList.toggle("not-available");
-    }
+    }*/
 }
 
 //Opens up the house select menu
@@ -727,54 +758,20 @@ function selectHouse(house) {
         for (var i = 13; i < 26; i++) {
             var minusI = i - 13;
             document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            if (!checkRoomAvailability(i + 1)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
-            if (personInRoom(personSelected, minusI)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
+            grayOutButton(minusI, 'Asgaard', personSelected);
         }
     } else if (house == "Midgård") {
         selectedHouse = "Midgaard";
         for (var i = 0; i < 13; i++) {
             document.getElementById("btn-" + i ).innerHTML = rooms[i].room;
-            if (i == 0) {
-                var n = "1a";
-            } else if (i == 1) {
-                var n = "1b";
-            } else {
-                var n = i;
-            }
-            if (!checkRoomAvailability(n)) {
-                grayOutButton(i, true);
-            } else {
-                grayOutButton(i, false);
-            }
-            if (personInRoom(personSelected, i)) {
-                grayOutButton(i, true);
-            } else {
-                grayOutButton(i, false);
-            }
+            grayOutButton(i, 'Midgaard', personSelected);
         }
     } else if (house == "Udgård") {
         selectedHouse = "Udgaard";
         for (var i = 26; i < 39; i++) {
             var minusI = i - 26;
             document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            if (!checkRoomAvailability(i)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
-            if (personInRoom(personSelected, minusI)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
+            grayOutButton(minusI, 'Udgaard', personSelected);
         }
     } else if (house == "Valhal") {
         selectedHouse = "Valhal";
@@ -784,16 +781,7 @@ function selectHouse(house) {
         for (var i = 39; i < 45; i++) {
             var minusI = i - 39;
             document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            if (!checkRoomAvailability(i)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
-            if (personInRoom(personSelected, minusI)) {
-                grayOutButton(minusI, true);
-            } else {
-                grayOutButton(minusI, false);
-            }
+            grayOutButton(minusI, 'Valhal', personSelected);
         }
         [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
             el.style.display = 'none';
