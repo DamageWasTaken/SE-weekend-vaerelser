@@ -5,9 +5,7 @@ const d = new Date();
 const checkTime = 23;
 
 //Import the student data
-console.log(data);
 var studentList = data.map((x) => x)
-console.log(studentList)
 
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 const allowedExtraValue = 2;
@@ -80,17 +78,23 @@ var rooms = [
 
 //Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
 for (let i = 0; i < rooms.length; i++) {
-    console.log(i)
-    if (i === 0) {
-        var index = studentList.findIndex(e => e.room  === "1a");
-    } else if (i === 1) {
-        var index = studentList.findIndex(e => e.room  === '1b');
-    } else {
-        var index = studentList.findIndex(e => e.room  === i);
+    var _i = i;
+    if (i > 12) {
+        _i = i+1;
     }
-    if (index !== -1) {
-        var _sex = studentList[index].sex;
-        rooms[i].sex = _sex;
+    //Allowing for manual adjustment of the room
+    if (rooms[i].sex === 'x'){
+        if (i === 0) {
+            var index = studentList.findIndex(e => e.room  === "1a");
+        } else if (i === 1) {
+            var index = studentList.findIndex(e => e.room  === '1b');
+        } else {
+            var index = studentList.findIndex(e => e.room  === _i);
+        }
+        if (index !== -1) {
+            var _sex = studentList[index].sex;
+            rooms[i].sex = _sex;
+        }
     }
 }
 
@@ -373,7 +377,7 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         //Find out what index position the room is
         roomSlotPos = rooms.findIndex(e => e.room === targetLocation);
         //Find out the length of the room
-        roomLength = Object.keys(rooms[roomSlotPos]).length
+        roomLength = Object.keys(rooms[roomSlotPos]).length;
         //Find out who is in the room
         memberList = Object.assign({}, rooms[roomSlotPos]);
         //Grab the room from the array
@@ -389,9 +393,9 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
             //Check if their an original member of the room. If they are store the name and break the loop
             if (!originalMember(memberList[i], targetLocation)) {
                 //Grab the person and place them into an object
-                Object.assign(personToBeReplaced, {id: memberList[i]})
+                Object.assign(personToBeReplaced, {id: memberList[i]});
                 //Stop the loop
-                break
+                break;
             }
         }
         //Find the persons own room and add it to the object
@@ -513,8 +517,19 @@ function addPersonToRoom(person, room, bypass) {
             }
         });
 
-    var namePos = studentList.findIndex(e => e.number === person);
-    updateDisplayedRoom("pers-" + namePos, room);
+        var namePos = studentList.findIndex(e => e.number === person);
+
+        //Update the persons profile
+        if (studentList[namePos].room === room) {
+            studentList[namePos].choice = "eget vaerelse";
+            console.log('Own');
+        } else {
+            studentList[namePos].choice = "andet vaerelse";
+            console.log('Other');
+        }
+
+        updateDisplayedRoom("pers-" + namePos, room);
+        countData();
 }
 
 //Removes a person from a room !!! Requires the room object as the param "room"
@@ -583,6 +598,7 @@ function checkSex(personId, room) {
     }
 }
 
+//Func for adding pers to the selected room based on the button
 function selectRoom(setRoom) {
     //Grabs the name text itself from the person selected
     var currentName = e => e.name === document.getElementById("replaceableText").textContent;
@@ -832,20 +848,31 @@ function removeTag(element, tag) {
     }
 }
 
+//Function to add a tag
 function addTag(element, tag) {
     if (!element.classList.contains(tag)) {
         element.classList.toggle(tag);
     }
 }
 
-//
+//Updates the displayed room is a person changes room
 function updateDisplayedRoom(personId, room) {
     var parentElement = document.getElementById(personId);
     var childElement = parentElement.children[2];
     var replaceText = childElement.children[1];
     replaceText.innerHTML = room;
+    if (room === studentList[personId.split('-')[1]].room) {
+        removeTag(parentElement, "Ikke-Valgt");
+        removeTag(parentElement, "Andet");
+        addTag(parentElement, "Eget");
+    } else {
+        removeTag(parentElement, "Ikke-Valgt");
+        removeTag(parentElement, "Eget");
+        addTag(parentElement, "Andet");
+    }
 }
 
+//Send everyone back to their original room if they're not allready in a room
 function returnPeople() {
     for (var i = 0; i < studentList.length; i++) {
         if (studentList[i].choice === "ikke valgt") {
@@ -861,6 +888,8 @@ function returnPeople() {
             addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
             removeTag(currentPerson, "Ikke-Valgt");
+        } else if (studentList[i].choice === "andet vaerelse") {
+            console.log('Here');
         }
     }
     countData();
