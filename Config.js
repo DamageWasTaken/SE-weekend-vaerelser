@@ -11,6 +11,6 @@ const config = [
 //Falgs: roomSpace, roomGender
 
 const roomConfig = [
-    [7,'roomSpace',0],
-    [28,'roomSpace',0],
+    [7,'roomSpace',3],
+    [28,'roomSpace',3],
 ]

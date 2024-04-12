@@ -109,8 +109,6 @@ function handleConfig() {
 
 handleConfig();
 
-console.log(allowedExtraValue);
-
 //Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
 for (let i = 0; i < rooms.length; i++) {
     var _i = i;
@@ -409,8 +407,6 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         delete memberList.space;
         //Set the memberlist to the values of the room so that the slots are removed.
         memberList = Object.values(memberList);
-        console.log(roomLength - 3);
-        console.log('Person: ' + person);
         if (roomLength - 3 > 0) {
             for (var i = 0; i < (roomLength - 3); i++) {
                 //Check if their an original member of the room. If they are store the name and break the loop
