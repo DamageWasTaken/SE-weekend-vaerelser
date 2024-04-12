@@ -507,10 +507,8 @@ function addPersonToRoom(person, room, bypass) {
         //Update the persons profile
         if (studentList[namePos].room === room) {
             studentList[namePos].choice = "eget vaerelse";
-            console.log('Own');
         } else {
             studentList[namePos].choice = "andet vaerelse";
-            console.log('Other');
         }
 
         updateDisplayedRoom("pers-" + namePos, room);
@@ -686,7 +684,6 @@ function grayOutButton(buttonNumber, house, _pers) {
     var button = document.getElementById("btn-" + buttonNumber );
     var state = false;
     var room = 0;
-    console.log(_pers);
     switch (house) {
         case 'Midgaard':
             room = buttonNumber;
@@ -878,6 +875,20 @@ function returnPeople() {
             removeTag(currentPerson, "Ikke-Valgt");
         } else if (studentList[i].choice === "andet vaerelse") {
             console.log('Here');
+            /*
+            After everyone has been put in their original room we check if there is any rooms exceding the cap
+            If the room exceeds the cap we move the first not original memeber of the room into their own room
+            We use this interpolation loop until there are no rooms exceeding the cap.
+            */
+            var roomsExceedingCap = 0;
+            while (roomsExceedingCap > 0) {
+                roomsExceedingCap = 0;
+                for (var i; i < rooms.length(); i++) {
+                    if (rooms[i].length() - 3 > rooms[i].space + allowedAmount) {
+                        roomsExceedingCap++;
+                    }
+                }
+            }
         }
     }
     countData();
