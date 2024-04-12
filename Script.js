@@ -2,13 +2,13 @@
 
 //Declaring global time varibles
 const d = new Date();
-const checkTime = 23;
+var checkTime = 23;
 
 //Import the student data
 var studentList = data.map((x) => x);
 
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
-const allowedExtraValue = 2;
+var allowedExtraValue = 2;
 
 //General variables
 var noChoise = 0;
@@ -75,6 +75,41 @@ var rooms = [
     {room:44,sex:"x",space:3},
     {room:45,sex:"x",space:3}
 ]
+
+//Handling the config file
+function handleConfig() {
+    if (config.length > 0) {
+        for (let i = 0; i < config.length; i++) {
+            switch (Object.keys(config[i])[0]) {
+                case 'checkTime':
+                    checkTime = Object.values(config[i])[0];
+                    break;
+            
+                case 'allowedRoomAmount':
+                    allowedExtraValue = Object.values(config[i])[0];
+                    break;
+            }
+        }
+    }
+    if (roomConfig.length > 0) {
+        for (let i = 0; i < roomConfig.length; i++) {
+            var slot = rooms.findIndex(x => x.room === roomConfig[i][0]);
+            switch (roomConfig[i][1]) {
+                case 'roomSpace':
+                    rooms[slot].space = roomConfig[i][2];
+                    break;
+            
+                case 'roomGender':
+                    rooms[slot].sex = roomConfig[i][2];
+                    break;
+            }    
+        }
+    }
+}
+
+handleConfig();
+
+console.log(allowedExtraValue);
 
 //Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
 for (let i = 0; i < rooms.length; i++) {
