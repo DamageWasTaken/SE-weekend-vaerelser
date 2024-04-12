@@ -5,7 +5,7 @@ const d = new Date();
 const checkTime = 23;
 
 //Import the student data
-var studentList = data.map((x) => x)
+var studentList = data.map((x) => x);
 
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 const allowedExtraValue = 2;
@@ -355,7 +355,7 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         var roomLength;
         var roomSlotPos;
         var currentRoom;
-        var memberList;
+        var memberList = {};
         var previousRoom;
         var personToBeReplaced = {};
 
@@ -374,22 +374,31 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         delete memberList.space;
         //Set the memberlist to the values of the room so that the slots are removed.
         memberList = Object.values(memberList);
-        for (var i = 0; i < roomLength; i++) {
-            //Check if their an original member of the room. If they are store the name and break the loop
-            if (!originalMember(memberList[i], targetLocation)) {
-                //Grab the person and place them into an object
-                Object.assign(personToBeReplaced, {id: memberList[i]});
-                //Stop the loop
-                break;
+        console.log(roomLength - 3);
+        console.log('Person: ' + person);
+        if (roomLength - 3 > 0) {
+            for (var i = 0; i < (roomLength - 3); i++) {
+                //Check if their an original member of the room. If they are store the name and break the loop
+                if (!originalMember(memberList[i], targetLocation)) {
+                    //Grab the person and place them into an object
+                    Object.assign(personToBeReplaced, {id: memberList[i]});
+                    //Stop the loop
+                    break;
+                }
+            }
+
+            if (Object.keys(personToBeReplaced).length > 0) {
+                //Find the persons own room and add it to the object
+                Object.assign(personToBeReplaced, {ownRoom: studentList[studentList.findIndex(e => e.number === personToBeReplaced.id)].room})
+                //Remove a person
+                removePersonFromRoom(personToBeReplaced.id, currentRoom);
+                //Add people to their respective rooms.
+                addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
             }
         }
-        //Find the persons own room and add it to the object
-        Object.assign(personToBeReplaced, {ownRoom: studentList[studentList.findIndex(e => e.number === personToBeReplaced.id)].room})
-        //Remove a person
-        removePersonFromRoom(personToBeReplaced.id, currentRoom);
-        //Add people to their respective rooms.
-        addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
-        addPersonToRoom(person, targetLocation);
+        if (person !== null || !(typeof person === 'string' && person.trim().length === 0)) {
+            addPersonToRoom(person, targetLocation);
+        } 
     } else {
         if (!checkRoomAvailability(targetLocation)) {
             return;
@@ -869,7 +878,8 @@ function returnPeople() {
             
             studentList[i].choice = "eget vaerelse";
             updateDisplayedRoom(personId, room);
-            addPersonToRoom(person, room, false);
+            //addPersonToRoom(person, room, false);
+            relocate(person, room, '', true);
             addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
             removeTag(currentPerson, "Ikke-Valgt");
