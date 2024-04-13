@@ -407,7 +407,7 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         delete memberList.space;
         //Set the memberlist to the values of the room so that the slots are removed.
         memberList = Object.values(memberList);
-        if (roomLength - 3 > 0) {
+        if (roomLength - 3 > 0 && roomLength - 3 > currentRoom.space + allowedExtraValue - 1) {
             for (var i = 0; i < (roomLength - 3); i++) {
                 //Check if their an original member of the room. If they are store the name and break the loop
                 if (!originalMember(memberList[i], targetLocation)) {
@@ -427,9 +427,8 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
                 addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
             }
         }
-        if (person !== null || !(typeof person === 'string' && person.trim().length === 0)) {
-            addPersonToRoom(person, targetLocation);
-        } 
+        addPersonToRoom(person, targetLocation);
+        return;
     } else {
         if (!checkRoomAvailability(targetLocation)) {
             return;
@@ -510,7 +509,7 @@ function personInRoom(id, room) {
 //Adds a person to the room specified
 function addPersonToRoom(person, room, bypass) {
     //Check if the person is in a room, if so remove them from their previous room.
-    if (personInRoom(person) !== false && bypass !== true) {
+    if (personInRoom(person) !== false && bypass === false) {
         relocate(person, room, studentList[studentList.findIndex(e => e.number === person)].room, false);
         return;
     }
@@ -914,22 +913,6 @@ function returnPeople() {
             addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
             removeTag(currentPerson, "Ikke-Valgt");
-        } else if (studentList[i].choice === "andet vaerelse") {
-            console.log('Here');
-            /*
-            After everyone has been put in their original room we check if there is any rooms exceding the cap
-            If the room exceeds the cap we move the first not original memeber of the room into their own room
-            We use this interpolation loop until there are no rooms exceeding the cap.
-            */
-            var roomsExceedingCap = 0;
-            while (roomsExceedingCap > 0) {
-                roomsExceedingCap = 0;
-                for (var i; i < rooms.length(); i++) {
-                    if (rooms[i].length() - 3 > rooms[i].space + allowedAmount) {
-                        roomsExceedingCap++;
-                    }
-                }
-            }
         }
     }
     countData();
