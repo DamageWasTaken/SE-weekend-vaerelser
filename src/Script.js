@@ -491,12 +491,13 @@ function personInRoom(id, room) {
         var roomContent;
 
         if (room === 0) {
-                room = "1a";
-            } else if (room ==1) {
-                room = "1b";
-            }
-            roomPos = rooms.findIndex(roomObj);
-            roomContent = rooms[roomPos];
+            room = "1a";
+        } else if (room ==1) {
+            room = "1b";
+        }
+
+        roomPos = rooms.findIndex(roomObj);
+        roomContent = rooms[roomPos];
 
         try {
             return Object.values(roomContent).includes(id, 1);
@@ -550,7 +551,7 @@ function addPersonToRoom(person, room, bypass) {
             studentList[namePos].choice = "andet vaerelse";
         }
 
-        updateDisplayedRoom("pers-" + namePos, room);
+        updateDisplayedRoom("pers-" + namePos, room);        
         countData();
 }
 
@@ -613,7 +614,7 @@ function removePersonFromRoom(person, room) {
 function checkSex(personId, room) {
     var sex = studentList[studentList.findIndex(e => e.number === personId)].sex;
     var roomSex = rooms[rooms.findIndex(e => e.room === room)].sex
-    if (sex == roomSex) {
+    if (sex === roomSex) {
         return true;
     } else {
         return false;
@@ -693,24 +694,10 @@ function selectRoom(setRoom) {
             return false;
         }
     }
-    //Define the dummy profile to be added the studentList array
-    var profile = [{
-        //Finds the details and adds them to the dummy profile
-        number: studentList[namePosition].number,
-        name: studentList[namePosition].name,
-        img: studentList[namePosition].img,
-        room: studentList[namePosition].room,
-        choice: "andet vaerelse"
-    }]
-    //Goes down the array finds the person in the array, deletes them, and inserts the dummy profile to the array
-    profile.forEach(element => {
-        const itemIndex = studentList.findIndex(o => o.number === element.number);
-        if(itemIndex > -1) {
-            studentList[itemIndex] = element;
-        } else {
-            studentList = studentList.push(element);
-        }  
-    });
+
+    //Chnages the students choice
+    studentList[namePosition].choice = 'andet vaerelse';
+
     addTag(currentPerson, "Andet");
     removeTag(currentPerson, "Eget");
     removeTag(currentPerson, "Ikke-Valgt");
