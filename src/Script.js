@@ -149,6 +149,9 @@ function checkKeyPressed(evt) {
     if (evt.keyCode === 82) {
         generateList();
     }
+    if (evt.keyCode === 76) {
+        console.log(rooms);
+    }
 }
 
 //Shortens name to a string less than 25
@@ -343,7 +346,6 @@ function selectorButton(place) {
     var houseButtons = document.getElementById("buttons-stage-2");
     //If OwnRoom is selected prep the person to be added to the room array
     if (place == "Eget") {
-        //NEEDS TO BE REDESIGNED
         //Check if the selected room is available
         if (checkRoomAvailability(roomNumber) == true) {
             //Update the persons choice 
@@ -357,12 +359,12 @@ function selectorButton(place) {
             //Call the data to be counted and close the popup.
             countData();
             closePopup();
-            addPersonToRoom(studentList[namePosition].number, studentList[namePosition].room);
-            //updateDisplayedRoom("pers-" + namePosition, studentList[namePosition].room);
+            addPersonToRoom(studentList[namePosition].number, studentList[namePosition].room, false);
         } else {
             relocate(personNumber, roomNumber, "", true)
             closePopup();
         }
+        
     } else {
         //Hide all the previous elements
         mainButtons.classList.toggle("hide");
@@ -424,20 +426,17 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
                 //Remove a person
                 removePersonFromRoom(personToBeReplaced.id, currentRoom);
                 //Add people to their respective rooms.
-                addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom);
+                addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom, false);
             }
         }
-        addPersonToRoom(person, targetLocation);
+        addPersonToRoom(person, targetLocation, false);
         return;
     } else {
         if (!checkRoomAvailability(targetLocation)) {
             return;
         }
-
-        roomSlotPos = rooms.findIndex(e => e.room === previousLocation);
-        previousRoom = rooms[roomSlotPos];
-
-        removePersonFromRoom(person, previousRoom);
+        
+        removePersonFromRoom(person, previousLocation);
         addPersonToRoom(person, targetLocation, true);
     }
 }
@@ -511,7 +510,7 @@ function personInRoom(id, room) {
 function addPersonToRoom(person, room, bypass) {
     //Check if the person is in a room, if so remove them from their previous room.
     if (personInRoom(person) !== false && bypass === false) {
-        relocate(person, room, studentList[studentList.findIndex(e => e.number === person)].room, false);
+        relocate(person, room, personInRoom(person), false);
         return;
     }
 
@@ -557,8 +556,7 @@ function addPersonToRoom(person, room, bypass) {
 
 //Removes a person from a room !!! Requires the room object as the param "room"
 function removePersonFromRoom(person, room) {
-    //Set the room number so we can check for it
-    var roomNumber = room.room;
+
     //Set a variable that is used later
     var minusVal = 0;
     //Create a temp object thats set to the current room
@@ -604,7 +602,8 @@ function removePersonFromRoom(person, room) {
         if(itemIndex > -1) {
             rooms[itemIndex] = element;
         } else {
-            rooms = rooms.push(element);
+            rooms.push(element);
+
         }
     });
 
@@ -740,6 +739,9 @@ function grayOutButton(buttonNumber, house, _pers) {
         state = true;
     }
     if (personInRoom(_pers, room)) {
+        state = true;
+    }
+    if (originalMember(_pers, room)) {
         state = true;
     }
 
