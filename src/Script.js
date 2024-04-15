@@ -509,7 +509,7 @@ function personInRoom(id, room) {
 //Adds a person to the room specified
 function addPersonToRoom(person, room, bypass) {
     //Check if the person is in a room, if so remove them from their previous room.
-    if (personInRoom(person) !== false && bypass === false) {
+    if (personInRoom(person) !== false && bypass !== true) {
         relocate(person, room, personInRoom(person), false);
         return;
     }
@@ -643,7 +643,7 @@ function selectRoom(setRoom) {
                 showAlert("Du må ikke sove på dette værelse");
                 return
             }
-            addPersonToRoom(personSelected, setRoom);
+            addPersonToRoom(personSelected, setRoom, false);
             updateDisplayedRoom("pers-" + namePosition, setRoom);
         } else {
             closePopup();
@@ -657,7 +657,7 @@ function selectRoom(setRoom) {
                 showAlert("Du må ikke sove på dette værelse");
                 return
             }
-            addPersonToRoom(personSelected, setRoom + 14);
+            addPersonToRoom(personSelected, setRoom + 14, false);
             updateDisplayedRoom("pers-" + namePosition, setRoom + 14);
         } else {
             closePopup();
@@ -671,7 +671,7 @@ function selectRoom(setRoom) {
                 showAlert("Du må ikke sove på dette værelse");
                 return
             }
-            addPersonToRoom(personSelected, setRoom + 27);
+            addPersonToRoom(personSelected, setRoom + 27, false);
             updateDisplayedRoom("pers-" + namePosition, setRoom + 27);
         } else {
             closePopup();
@@ -685,7 +685,7 @@ function selectRoom(setRoom) {
                 showAlert("Du må ikke sove på dette værelse");
                 return
             }
-            addPersonToRoom(personSelected, setRoom + 40);
+            addPersonToRoom(personSelected, setRoom + 40, false);
             updateDisplayedRoom("pers-" + namePosition, setRoom + 40);
         } else {
             closePopup();
