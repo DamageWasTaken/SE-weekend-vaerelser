@@ -114,7 +114,7 @@ const data = [{"number":133,"name":"Adelina Høst Johnsen","img":"viggo-billeder
 {"number":95,"name":"Sofie Fynbo Christoffersen","img":"viggo-billeder/S/Sofie.jpg","room":9,"choice":"NAN","sex":"f"},
 {"number":5,"name":"Svend Nielsen Korsholm","img":"viggo-billeder/S/Svend.jpg","room":42,"choice":"NAN","sex":"m"},
 {"number":109,"name":"Tea Bendixen","img":"viggo-billeder/T/Tea.jpg","room":37,"choice":"NAN","sex":"f"},
-{"number":17,"name":"Thea Dalsgaard Kallesø","img":"viggo-billeder/T/Thea.jpg","room":17,"choice":"NAN","sex":"f"},
+{"number":17,"name":"Thea Dalsgaard Kallesø","img":"viggo-billeder/T/Thea.jpg","room":25,"choice":"NAN","sex":"f"},
 {"number":29,"name":"Tobias Grønskov Hansen","img":"viggo-billeder/T/Tobias1.jpg","room":35,"choice":"NAN","sex":"m"},
 {"number":28,"name":"Tobias Høgh Veis","img":"viggo-billeder/T/Tobias2.jpg","room":41,"choice":"NAN","sex":"m"},
 {"number":55,"name":"Torbjørn Hornemann Nielsen","img":"viggo-billeder/T/Torbjørn.jpg","room":6,"choice":"NAN","sex":"m"},

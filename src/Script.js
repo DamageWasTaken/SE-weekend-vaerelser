@@ -154,11 +154,11 @@ function checkKeyPressed(evt) {
     }
 }
 
-//Shortens name to a string less than 25
-function shortenName(name) {
+//Shortens name to a string less than a provided length
+function shortenName(name, length) {
     for (var i = 0; i < 2; i++) {
         var splitName = "";
-        if (name.length > 20) {
+        if (name.length > length) {
             var nameArr = name.split(" ");
             nameArr.splice(1, 1);
             nameArr.forEach((e) => {
@@ -185,7 +185,7 @@ function printRoom(room) {
         var slot = "Slot" + (i + 1)
         var localRoom = rooms[index];
         var name = studentList[studentList.findIndex(e => e.number  === localRoom[slot])].name;      
-        name = shortenName(name);
+        name = shortenName(name, 20);
         string += localRoom[slot] + " | " + name
         if (length > 1 && i < (length - 1)) {
             string += " <br> "
@@ -478,28 +478,26 @@ function personInRoom(id, room) {
         for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
             var roomContent = rooms[roomPos];
-            if (Object.values(roomContent).includes(id, 1)) {
+            if (Object.values(roomContent).includes(id, 2)) {
                 return roomContent;
             }
         }
 
         return false;
     } else {
-        var roomObj = e => e.room === room;
-        var roomPos = 0;
-        var roomContent;
 
         if (room === 0) {
             room = "1a";
-        } else if (room ==1) {
+        } else if (room === 1) {
             room = "1b";
         }
 
-        roomPos = rooms.findIndex(roomObj);
-        roomContent = rooms[roomPos];
+        roomInQuestion = rooms.findIndex(e => e.room = room)
+
+        var currentRoom = Object.assign({}, roomInQuestion);
 
         try {
-            return Object.values(roomContent).includes(id, 1);
+            return Object.values(currentRoom).includes(id,2);
         } catch(err) {
             return false;
         }
@@ -731,18 +729,21 @@ function grayOutButton(buttonNumber, house, _pers) {
             room = buttonNumber + 40;
             break;
     }
-
     if (!checkRoomAvailability(room)) {
         state = true;
+        console.log('Space');
     }
     if (!checkSex(_pers, room)) {
         state = true;
+        console.log('Sex');
     }
     if (personInRoom(_pers, room)) {
         state = true;
+        console.log('InRoom');
     }
     if (originalMember(_pers, room)) {
         state = true;
+        console.log('Own');
     }
 
     switch (state) {
@@ -754,12 +755,6 @@ function grayOutButton(buttonNumber, house, _pers) {
             removeTag(button,'not-available');
             break;
     }
-    /*var button = document.getElementById("btn-" + buttonNumber );
-    if (param && !button.classList.contains("not-available")) {
-        button.classList.toggle("not-available");
-    } else if (!param && button.classList.contains("not-available")) {
-        button.classList.toggle("not-available");
-    }*/
 }
 
 //Opens up the house select menu

@@ -13,5 +13,4 @@ const config = [
 const roomConfig = [
     [7,'roomSpace',0],
     [28,'roomSpace',0],
-    [17,'roomSpace',4]
 ]
