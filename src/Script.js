@@ -26,6 +26,7 @@ var selectedHouse = "";
 var personSelected = 0;
 var runLock = false;
 var checkList = [];
+var weekendList = [];
 
 //Declaring all houses & rooms
 var rooms = [
@@ -391,7 +392,6 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         var roomSlotPos;
         var currentRoom;
         var memberList = {};
-        var previousRoom;
         var personToBeReplaced = {};
 
         //Find out what index position the room is
@@ -492,7 +492,7 @@ function personInRoom(id, room) {
             room = "1b";
         }
 
-        roomInQuestion = rooms.findIndex(e => e.room = room)
+        var roomInQuestion = rooms.findIndex(x => x.room === room);
 
         var currentRoom = Object.assign({}, roomInQuestion);
 
@@ -506,6 +506,7 @@ function personInRoom(id, room) {
 
 //Adds a person to the room specified
 function addPersonToRoom(person, room, bypass) {
+
     //Check if the person is in a room, if so remove them from their previous room.
     if (personInRoom(person) !== false && bypass !== true) {
         relocate(person, room, personInRoom(person), false);
@@ -525,19 +526,9 @@ function addPersonToRoom(person, room, bypass) {
         //Add the new object to the profile
         Object.assign(currentProfile, addedContent);
         
-        //Incase the object in a array
-        var profile = [];
-        profile.push(currentProfile);
-
-        //Add the profile to the house array
-        profile.forEach(element => {
-            const itemIndex = rooms.findIndex(o => o.room === element.room);
-            if(itemIndex > -1) {
-                rooms[itemIndex] = element;
-            } else {
-                rooms = rooms.push(element);
-            }
-        });
+        //Replace the room in the rooms array
+        const itemIndex = rooms.findIndex(o => o.room === room);
+        rooms[itemIndex] = currentProfile;
 
         var namePos = studentList.findIndex(e => e.number === person);
 
@@ -589,21 +580,10 @@ function removePersonFromRoom(person, room) {
             }
         }
     }
-    //Create an array to put the object into
-    var profile = [];
-    //Put the object into the array
-    profile.push(newRoom);
 
-    //Standard code to add object to array / replace existing object in array
-    profile.forEach(element => {
-        const itemIndex = rooms.findIndex(o => o.room === element.room);
-        if(itemIndex > -1) {
-            rooms[itemIndex] = element;
-        } else {
-            rooms.push(element);
-
-        }
-    });
+    //Update the room in the rooms array
+    const itemIndex = rooms.findIndex(o => o.room === room);
+    rooms[itemIndex] = newRoom;
 
 }
 
@@ -628,68 +608,39 @@ function selectRoom(setRoom) {
     var id = studentList[namePosition].number
     //Finds out what ID to target
     var currentPerson = document.getElementById("pers-" + namePosition);
-    if (selectedHouse == "Midgaard") {
-        //Correct the value so that the rooms match
-        if (setRoom == 0) {
-            setRoom = "1a";
-        } else if (setRoom == 1) {
-            setRoom = "1b";
-        }
-        if (checkRoomAvailability(setRoom) == true) {
-            if (!checkSex(id, setRoom)) {
-                closePopup();
-                showAlert("Du må ikke sove på dette værelse");
-                return
+    switch (selectedHouse) {
+        case 'Midgaard':
+            if (setRoom === 0) {
+                setRoom = "1a";
+            } else if (setRoom === 1) {
+                setRoom = "1b";
             }
-            addPersonToRoom(personSelected, setRoom, false);
-            updateDisplayedRoom("pers-" + namePosition, setRoom);
-        } else {
+            break;
+    
+        case 'Asgaard':
+            setRoom += 14;
+            break;
+        
+        case 'Udgaard':
+            setRoom += 27;
+            break;
+        case 'Valhal':
+            setRoom += 40;
+            break;
+    }
+
+    if (checkRoomAvailability(setRoom) === true) {
+        if (!checkSex(id, setRoom)) {
             closePopup();
-            showAlert("Valgt værelse er fuldt");
-            return false;
+            showAlert("Du må ikke sove på dette værelse");
+            return
         }
-    } else if (selectedHouse == "Asgaard") {
-        if (checkRoomAvailability(setRoom + 14) == true) {
-            if (!checkSex(id, setRoom + 14)) {
-                closePopup();
-                showAlert("Du må ikke sove på dette værelse");
-                return
-            }
-            addPersonToRoom(personSelected, setRoom + 14, false);
-            updateDisplayedRoom("pers-" + namePosition, setRoom + 14);
-        } else {
-            closePopup();
-            showAlert("Valgt værelse er fuldt");
-            return false;
-        }
-    } else if (selectedHouse == "Udgaard") {
-        if (checkRoomAvailability(setRoom + 27) == true) {
-            if (!checkSex(id, setRoom + 27)) {
-                closePopup();
-                showAlert("Du må ikke sove på dette værelse");
-                return
-            }
-            addPersonToRoom(personSelected, setRoom + 27, false);
-            updateDisplayedRoom("pers-" + namePosition, setRoom + 27);
-        } else {
-            closePopup();
-            showAlert("Valgt værelse er fuldt");
-            return false;
-        }
-    } else if (selectedHouse == "Valhal") {
-        if (checkRoomAvailability(setRoom + 40) == true) {
-            if (!checkSex(id, setRoom + 40)) {
-                closePopup();
-                showAlert("Du må ikke sove på dette værelse");
-                return
-            }
-            addPersonToRoom(personSelected, setRoom + 40, false);
-            updateDisplayedRoom("pers-" + namePosition, setRoom + 40);
-        } else {
-            closePopup();
-            showAlert("Valgt værelse er fuldt");
-            return false;
-        }
+        addPersonToRoom(personSelected, setRoom, false);
+        updateDisplayedRoom("pers-" + namePosition, setRoom);
+    } else {
+        closePopup();
+        showAlert("Valgt værelse er fuldt");
+        return false;
     }
 
     //Chnages the students choice
@@ -731,19 +682,15 @@ function grayOutButton(buttonNumber, house, _pers) {
     }
     if (!checkRoomAvailability(room)) {
         state = true;
-        console.log('Space');
     }
     if (!checkSex(_pers, room)) {
         state = true;
-        console.log('Sex');
     }
     if (personInRoom(_pers, room)) {
         state = true;
-        console.log('InRoom');
     }
     if (originalMember(_pers, room)) {
         state = true;
-        console.log('Own');
     }
 
     switch (state) {
@@ -892,7 +839,6 @@ function returnPeople() {
             
             studentList[i].choice = "eget vaerelse";
             updateDisplayedRoom(personId, room);
-            //addPersonToRoom(person, room, false);
             relocate(person, room, '', true);
             addTag(currentPerson, "Eget");
             removeTag(currentPerson, "Andet");
@@ -969,8 +915,6 @@ function countData() {
     updateCount();
 }
 
-var weekendList = [];
-
 //Closes the file select menu
 function hideInput() {
     var input = document.getElementById("file-input");
@@ -982,7 +926,6 @@ window.onbeforeunload = function(event) {
     event.preventDefault();
     return event.returnValue = "Are you sure you want to leave the page?";
 }
-
 
 //Load the weekend file
 function previewFile() {
