@@ -27,6 +27,7 @@ var personSelected = 0;
 var runLock = false;
 var checkList = [];
 var weekendList = [];
+var home;
 
 //Declaring all houses & rooms
 var rooms = [
@@ -247,20 +248,34 @@ function closePrintPopup() {
 
 //Make the top group selector work
 function selectGroup(group) {
-    if (group == "Alle"){
-        //If all is selected show all images/profiles
+    if (group == 'home') {
         [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
             el.style.display = 'flex';
         });
     } else {
-        //Otherwise hide all images/profiles, and un-hide all images in a certain letter group
-        [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
-            el.style.display = 'none';
-        });
-        [].forEach.call(document.querySelectorAll(`.${group}`), function (el) {
-            el.style.display = 'flex';
-        });
+        clearTimeout(home);
+        if (group == "Alle"){
+            //If all is selected show all images/profiles
+            [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
+                el.style.display = 'flex';
+            });
+        } else {
+            //Otherwise hide all images/profiles, and un-hide all images in a certain letter group
+            [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
+                el.style.display = 'none';
+            });
+            [].forEach.call(document.querySelectorAll(`.${group}`), function (el) {
+                el.style.display = 'flex';
+            });
+        }
+        home = setTimeout(returnNormal,300000);
     }
+}
+
+//Returns the page to deafault state
+function returnNormal() {
+    selectGroup('home');
+    closePopup();
 }
 
 //Opens the popup menu
@@ -349,6 +364,12 @@ function selectorButton(place) {
     if (place == "Eget") {
         //Check if the selected room is available
         if (checkRoomAvailability(roomNumber) == true) {
+
+            if (personInRoom(studentList[namePosition].number, studentList[namePosition].room)) {
+                closePopup();
+                return;
+            }
+
             //Update the persons choice 
             studentList[namePosition].choice = 'eget vaerelse';
 
@@ -482,7 +503,6 @@ function personInRoom(id, room) {
                 return roomContent;
             }
         }
-
         return false;
     } else {
 
@@ -494,7 +514,7 @@ function personInRoom(id, room) {
 
         var roomInQuestion = rooms.findIndex(x => x.room === room);
 
-        var currentRoom = Object.assign({}, roomInQuestion);
+        var currentRoom = Object.assign({}, rooms[roomInQuestion]);
 
         try {
             return Object.values(currentRoom).includes(id,2);
@@ -552,7 +572,7 @@ function removePersonFromRoom(person, room) {
     var currentRoom = Object.assign({}, room);
     //Create a empty object for the new room to be sorted into
     var newRoom = {};
-    //Assaign the discriptors to the new roo,
+    //Assaign the discriptors to the new room,
     newRoom["room"] = currentRoom.room;
     newRoom["sex"] = currentRoom.sex;
     newRoom["space"] = currentRoom.space;
@@ -582,7 +602,7 @@ function removePersonFromRoom(person, room) {
     }
 
     //Update the room in the rooms array
-    const itemIndex = rooms.findIndex(o => o.room === room);
+    const itemIndex = rooms.findIndex(o => o.room === newRoom.room);
     rooms[itemIndex] = newRoom;
 
 }
@@ -635,6 +655,10 @@ function selectRoom(setRoom) {
             showAlert("Du må ikke sove på dette værelse");
             return
         }
+        if (personInRoom(personSelected) !== false) {
+            removePersonFromRoom(personSelected, personInRoom(personSelected));
+        }
+
         addPersonToRoom(personSelected, setRoom, false);
         updateDisplayedRoom("pers-" + namePosition, setRoom);
     } else {
