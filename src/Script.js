@@ -499,7 +499,7 @@ function personInRoom(id, room) {
         for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
             var roomContent = rooms[roomPos];
-            if (Object.values(roomContent).includes(id, 2)) {
+            if (Object.values(roomContent).includes(id, 3)) {
                 return roomContent;
             }
         }
@@ -517,7 +517,7 @@ function personInRoom(id, room) {
         var currentRoom = Object.assign({}, rooms[roomInQuestion]);
 
         try {
-            return Object.values(currentRoom).includes(id,2);
+            return Object.values(currentRoom).includes(id,3);
         } catch(err) {
             return false;
         }
