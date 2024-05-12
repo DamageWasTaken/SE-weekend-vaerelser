@@ -1,5 +1,72 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
+//Dropbox declerations
+const clientId = 'jxdu6pl9vugjt2d';
+const redirectUri = 'http://localhost:8080/Index.html';
+var result = [];
+var data = [];
+var accessToken = '';
+var zipFileData;
+options = {
+    success: function(files) {
+        console.log(files[0].link);
+        loadFile(files[0].link);
+    },
+    cancel: function() {
+      console.warn('Aborting file select');
+    },
+    linkType: "direct", // or "preview"
+    multiselect: false, // or true
+    extensions: ['.csv'],
+    folderselect: false, // or true
+};
+    
+
+//Gets the user authenticate dropbox so that we can get a acess token
+function authenticateWithDropbox() {
+    const authUrl = `https://www.dropbox.com/oauth2/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = authUrl;
+}
+
+//When we're redirected back from the dropbox auth extract the access token 
+function handleDropboxRedirect() {
+    accessToken = window.location.hash.substr(1).split('&')[0].split('=')[1];
+    if (!accessToken) {
+        console.log('No access token found, calling fetch request');
+        authenticateWithDropbox();
+    }
+}
+
+//Check if we have a token
+if (window.location.href.includes(redirectUri)) {
+    handleDropboxRedirect();
+} else {
+    authenticateWithDropbox();
+}
+
+//Handles the data we get from the dropbox file.
+function handleData(data) {
+    var delta = 2;
+    //Split the result
+    var splitArray = data.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
+    //Remove the first 4 items of the array
+    splitArray.splice(0,4);
+    //Loop through the array where we delete every nth (delta) of the array
+    for (var i = delta; i < splitArray.length; i += delta) {
+        splitArray.splice(i,1);
+    }
+    for (var i = 0; i < splitArray.length; i += delta) {
+      var cacheArray = [splitArray[i],splitArray[i+1]];
+      result.push(cacheArray.join(' '));
+    }
+    console.log(result);
+    document.getElementById('result').innerText = result;
+}
+  
+function callDropboxChooser() {
+    Dropbox.choose(options);
+}
+
 //Declaring global time varibles
 const d = new Date();
 var checkTime = 23;
