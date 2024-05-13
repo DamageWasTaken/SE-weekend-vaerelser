@@ -2,9 +2,12 @@
 
 //Dropbox declerations
 const clientId = 'jxdu6pl9vugjt2d';
-const redirectUri = 'http://localhost:8080/Index.html';
+const redirectUri = 'http://localhost:8080/src/Index.html';
+var filePath = '/Weekend Program/config/Data.js';
+var folderPath = '/Weekend Program/config/viggo-billeder/'
 var result = [];
 var data = [];
+var dataReady = false;
 var accessToken = '';
 var zipFileData;
 options = {
@@ -60,8 +63,105 @@ function handleData(data) {
       result.push(cacheArray.join(' '));
     }
     console.log(result);
-    document.getElementById('result').innerText = result;
+    weekendList = result;
+    loadDOM();
 }
+
+async function loadFile(filelink) {
+    const fileUrl = filelink;
+    try {
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch file');
+        }
+        const text = await response.text();
+        handleData(text);
+    } catch (error) {
+        console.error('Error loading file:', error); 
+    }
+
+}
+
+function fetchData(filePath) {
+    // Request file content
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://content.dropboxapi.com/2/files/download', true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({ path: filePath }));
+    xhr.responseType = 'blob';
+  
+    xhr.onload = function () {
+        if (xhr.readyState == 4 && xhr.status === 200) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var fileContent = e.target.result;
+  
+            //Split the huge text chunk into smaller strings.
+            const temp = fileContent.toString().split('[')[1].toString().split(']')[0].toString().split(','); //
+  
+            //Combine the text together and parse them into objects.
+            for (var i = 0; i < temp.length; i += 6) {    
+              var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
+              if (i > 0) {
+                cacheArray[0] = cacheArray[0].slice(1);
+              }
+              data.push(JSON.parse(cacheArray.join(',')));
+            }
+  
+            console.log(data);
+          };
+          reader.readAsText(xhr.response);
+            
+        } else {
+            console.error('Error downloading file: ' + xhr.statusText);
+        }
+    };
+    xhr.send();  
+}
+
+fetchData(filePath);
+
+var xhr_folder = new XMLHttpRequest();
+xhr_folder.open('POST', 'https://content.dropboxapi.com/2/files/download_zip', true);
+xhr_folder.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+xhr_folder.setRequestHeader('Dropbox-API-Arg', JSON.stringify({ path: folderPath }));
+xhr_folder.responseType = 'blob';
+
+xhr_folder.onload = function () {
+    if (xhr_folder.readyState == 4 && xhr_folder.status === 200) {
+        zipFileData = xhr_folder.response;
+        dataReady = true;
+        console.log('Data is ready');
+    } else {
+        console.error('Error downloading file: ' + xhr_folder.statusText);
+    }
+};
+
+xhr_folder.send();
+
+async function dataDoneDownloading() {
+    for (let i = 0; i < data.length; i++) {
+        await getPicture(data[i].img).then(url => {
+            var img = document.createElement('img');
+            img.setAttribute('id',i);
+            img.src = url;
+            var container = document.getElementById('imageContainer');
+            container.insertAdjacentElement('beforeend',img);
+        });
+    }
+}
+
+function getPicture(filePath) {
+    return new Promise((resolve, reject) => {
+        JSZip.loadAsync(zipFileData)
+            .then(function(zip) {
+            zip.file(filePath).async('blob').then(function(blob) {
+                const url = URL.createObjectURL(blob);
+                resolve(url);
+            }).catch(reject);
+        }).catch(reject);
+    });
+  }
   
 function callDropboxChooser() {
     Dropbox.choose(options);
@@ -72,7 +172,7 @@ const d = new Date();
 var checkTime = 23;
 
 //Import the student data
-var studentList = data.map((x) => x);
+var studentList = data;
 
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 var allowedExtraValue = 2;
@@ -940,7 +1040,15 @@ function returnPeople() {
 }
 
 //Function loads all the profiles once the sourcefile is selected
-function loadDOM() {
+async function loadDOM() {
+    var alertText = document.getElementById('alertText');
+    alertText.innerHTML = 'Venter på data';
+    if (!dataReady) {
+        var check = setInterval(function () {if (dataReady) {
+            clearInterval(check);
+        }}, 100); 
+    }
+    alertText.innerHTML = 'Loader profiler...';
     hideInput();
     for (var i = 0; i < weekendList.length; i++) {
         var index = studentList.findIndex(e => e.name  === weekendList[i]);
@@ -948,20 +1056,18 @@ function loadDOM() {
         var testObejct = studentList[index];
         testObejct.choice = "ikke valgt";
     }
-    //Call the function
-    appendData(studentList)
-    //Load all profiles named in "studentList"
-    function appendData(studentList) {
-        //Grabs the outer shell for where the profiles are to be loaded to
-        var mainContainer = document.getElementById("container");
-        //Loads each profle one by one, giving assets as well
-        for (var i = 0; i < studentList.length; i++) {
+    //Grabs the outer shell for where the profiles are to be loaded to
+    var mainContainer = document.getElementById("container");
+    //Loads each profle one by one, giving assets as well
+        
+    for (var i = 0; i < data.length; i++) {
+        await getPicture(data[i].img).then(url => {
             if (checkList.includes(i)) {
-                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + studentList[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + studentList[i].img + '" class="image"> <p class="name-text">' + studentList[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + url + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
             } else {
-                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + studentList[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + studentList[i].img + '" class="image"> <p class="name-text">' + studentList[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + url + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
             }
-        }
+        });
     }
     //Count the data
     countData();
@@ -1018,6 +1124,7 @@ window.onbeforeunload = function(event) {
     return event.returnValue = "Are you sure you want to leave the page?";
 }
 
+/*
 //Load the weekend file
 function previewFile() {
     var [file] = document.querySelector("input[type=file]").files;
@@ -1051,3 +1158,4 @@ function previewFile() {
         reader.readAsText(file);
     }
 }
+*/

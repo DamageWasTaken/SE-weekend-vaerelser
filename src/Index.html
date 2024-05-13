@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
         <link rel="stylesheet" href="Style.css">
-        <script src="../Data.js"></script> 
+        <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="jxdu6pl9vugjt2d"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
         <script src="../Config.js"></script> 
         <script src="Script.js"></script> 
         <title>Weekend Vaerelser Skanderup</title>
@@ -40,7 +41,7 @@
             <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
         </nav>
         <div id="file-input">
-            <input type="file" onchange="previewFile()">
+            <button onclick="callDropboxChooser()">Vælg Weekend</button>
         </div>
         <div id="print-popup">
             <div class="rows6 table" id="generated-table-1"></div>
