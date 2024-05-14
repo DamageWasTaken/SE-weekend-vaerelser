@@ -9,45 +9,74 @@
         <script src="../Config.js"></script> 
         <script src="Script.js"></script> 
         <title>Weekend Vaerelser Skanderup</title>
-        <link rel="icon" href="Images/Website icon.png">
+        <!--<link rel="icon" href="Images/Website icon.png">-->
     </head>
     <body id="mainBody">
-        <nav>
-            <button class="nav-button" onclick="selectGroup('A')">A</button>
-            <button class="nav-button" onclick="selectGroup('B')">B</button>
-            <button class="nav-button" onclick="selectGroup('C')">C</button>
-            <button class="nav-button" onclick="selectGroup('D')">D</button>
-            <button class="nav-button" onclick="selectGroup('E')">E</button>
-            <button class="nav-button" onclick="selectGroup('F')">F</button>
-            <button class="nav-button" onclick="selectGroup('G')">G</button>
-            <button class="nav-button" onclick="selectGroup('H')">H</button>
-            <button class="nav-button" onclick="selectGroup('I')">I</button>
-            <button class="nav-button" onclick="selectGroup('J')">J</button>
-            <button class="nav-button" onclick="selectGroup('K')">K</button>
-            <button class="nav-button" onclick="selectGroup('L')">L</button>
-            <button class="nav-button" onclick="selectGroup('M')">M</button>
-            <button class="nav-button" onclick="selectGroup('N')">N</button>
-            <button class="nav-button" onclick="selectGroup('O')">O</button>
-            <button class="nav-button" onclick="selectGroup('P')">P</button>
-            <button class="nav-button" onclick="selectGroup('Q')">Q</button>
-            <button class="nav-button" onclick="selectGroup('R')">R</button>
-            <button class="nav-button" onclick="selectGroup('S')">S</button>
-            <button class="nav-button" onclick="selectGroup('T')">T</button>
-            <button class="nav-button" onclick="selectGroup('U')">U</button>
-            <button class="nav-button" onclick="selectGroup('V')">V</button>
-            <button class="nav-button" onclick="selectGroup('X')">X</button>
-            <button class="nav-button" onclick="selectGroup('Y')">Y</button>
-            <button class="nav-button" onclick="selectGroup('Z')">Z</button>
-            <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
-        </nav>
+        <div id="top-bar">
+            <div id="top-row">
+                <img id="image-icon" src="images/placeholder.png">
+                <div id="top-row-text-container">
+                    <p id="top-row-text-top" class="top-row-text">Skanderup Efterskole</p>
+                    <p id="top-row-text-bottom" class="top-row-text">Weekend</p>
+                </div>
+            </div>
+            <nav id="bottom-row">
+                <button class="nav-button" onclick="selectGroup('A')">A</button>
+                <button class="nav-button" onclick="selectGroup('B')">B</button>
+                <button class="nav-button" onclick="selectGroup('C')">C</button>
+                <button class="nav-button" onclick="selectGroup('D')">D</button>
+                <button class="nav-button" onclick="selectGroup('E')">E</button>
+                <button class="nav-button" onclick="selectGroup('F')">F</button>
+                <button class="nav-button" onclick="selectGroup('G')">G</button>
+                <button class="nav-button" onclick="selectGroup('H')">H</button>
+                <button class="nav-button" onclick="selectGroup('I')">I</button>
+                <button class="nav-button" onclick="selectGroup('J')">J</button>
+                <button class="nav-button" onclick="selectGroup('K')">K</button>
+                <button class="nav-button" onclick="selectGroup('L')">L</button>
+                <button class="nav-button" onclick="selectGroup('M')">M</button>
+                <button class="nav-button" onclick="selectGroup('N')">N</button>
+                <button class="nav-button" onclick="selectGroup('O')">O</button>
+                <button class="nav-button" onclick="selectGroup('P')">P</button>
+                <button class="nav-button" onclick="selectGroup('Q')">Q</button>
+                <button class="nav-button" onclick="selectGroup('R')">R</button>
+                <button class="nav-button" onclick="selectGroup('S')">S</button>
+                <button class="nav-button" onclick="selectGroup('T')">T</button>
+                <button class="nav-button" onclick="selectGroup('U')">U</button>
+                <button class="nav-button" onclick="selectGroup('V')">V</button>
+                <button class="nav-button" onclick="selectGroup('X')">X</button>
+                <button class="nav-button" onclick="selectGroup('Y')">Y</button>
+                <button class="nav-button" onclick="selectGroup('Z')">Z</button>
+                <button class="nav-button" onclick="selectGroup('Alle')">Alle</button>
+            </nav>
+        </div>
+        
+        <div id="bottom-navigation">
+            <div id="help-button" class="nav-button-icon" onclick="helpMenu()">
+                ?
+            </div>
+            <div id="print-button" class="nav-button-icon" onclick="readyToPrint()">
+                <svg id="printer-icon" width="16" height="16" fill="currentColor"  viewBox="0 0 16 16">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1"/>
+                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1"/>
+                </svg>
+            </div>
+            <div id="close-button" class="nav-button-icon DONT-SHOW" onclick="closeButton()">
+                x
+            </div>
+        </div>
         <div id="file-input">
-            <button onclick="callDropboxChooser()">Vælg Weekend</button>
+            <button id="file-select-button" onclick="callDropboxChooser()">Vælg Weekend</button>
         </div>
         <div id="print-popup">
             <div class="rows6 table" id="generated-table-1"></div>
             <div class="table" id="generated-table-2"></div>
             <div class="table" id="generated-table-3"></div>
             <div class="rows3 table" id="generated-table-4"></div>
+        </div>
+        <div id="help-menu">
+            <div id="help-menu-container">
+                Hello
+            </div>
         </div>
         <div id="alert-container" class="alert-container">
             <div id="top-alert" class="top-alert">

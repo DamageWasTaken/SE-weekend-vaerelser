@@ -16,7 +16,7 @@
     --orange: #e78514;
     --cyan: #157fa4;
     --faddedCyan: #185063;
-    --fadded: rgba(200, 200, 200, 0.7);
+    --fadded: rgba(50, 50, 50, 0.7);
     --faddedBlack: rgba(0, 0, 0, 0.7);
 }
 
@@ -47,7 +47,7 @@ body {
     justify-content: flex-start;
     height: 100vh;
     margin: 0 2%;
-    gap: 4em;
+    gap: 1em;
     width: auto !important;
     overflow: hidden;
     font-family: 'Arimo', sans-serif;
@@ -109,6 +109,10 @@ h2 {
     display: none !important;
 }
 
+.disabled {
+    pointer-events: none;
+}
+
 .not-available {
     background-color: var(--faddedCyan) !important;
     pointer-events: none;
@@ -131,6 +135,7 @@ h2 {
     background-color: var(--fadded);
     color: var(--text);
     padding-bottom: 4px;
+    font-family: 'Arimo';
 }
 
 #side-nav {
@@ -143,6 +148,72 @@ h2 {
     z-index: 2;
 }
 
+#top-bar {
+    padding-top: 6px;
+}
+
+#top-row {
+    display: flex;
+    flex-direction: row;
+    height: 7vw;
+    overflow: hidden;
+}
+
+#top-row-text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;    
+    padding-left: 12px;
+    height: 100%;
+}
+
+.top-row-text {
+    font-family: 'Arimo';
+    margin: 0;
+    line-height: 0.5;
+}
+
+#top-row-text-top {
+    font-size: 22px;
+}
+
+#top-row-text-bottom {
+    font-size: 12px;
+}
+
+#image-icon {
+    width: 7vw;
+    height: 7vw;
+    border-radius: 3.5vw;
+}
+
+.nav-button-icon {
+    background-color: var(--fadded);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: solid white 1px;
+    font-weight: 700;
+}
+
+#help-button {
+    font-family: 'Arimo';
+}
+
+#bottom-navigation {
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    z-index: 100;
+    width: 98vw;
+    bottom: 0;
+    padding-bottom: 1vw;
+    justify-content: space-between;
+}
+
 /*═══════════════════════*/
 /*  File input styling*/
 
@@ -151,6 +222,42 @@ h2 {
     position: fixed;
     top: 50%;
     z-index: 1000;
+    width: 25%;
+    height: 40px;
+    background-color: var(--fadded);
+    border-radius: 6px;
+    border: solid white 1px;
+}
+
+#file-select-button {
+    width: 100%;
+    height: 100%;
+    font-family: 'Arimo';
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+/*═══════════════════════*/
+/*  Help menu styling*/
+
+#help-menu {
+    z-index: 99;
+    position: fixed;
+    top: 0;
+    background-color: var(--faddedBlack);
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#help-menu-container {
+    width: 90%;
+    height: 90%;
+    background-color: white;
+    border-radius: 12px;
 }
 
 /*═══════════════════════*/

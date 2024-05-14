@@ -12,11 +12,13 @@ var accessToken = '';
 var zipFileData;
 options = {
     success: function(files) {
-        console.log(files[0].link);
         loadFile(files[0].link);
+        if (!dataReady) {
+            console.warn('Data not ready, waiting for data to load.'); 
+        }
     },
     cancel: function() {
-      console.warn('Aborting file select');
+      console.warn('Aborting file select.');
     },
     linkType: "direct", // or "preview"
     multiselect: false, // or true
@@ -35,7 +37,7 @@ function authenticateWithDropbox() {
 function handleDropboxRedirect() {
     accessToken = window.location.hash.substr(1).split('&')[0].split('=')[1];
     if (!accessToken) {
-        console.log('No access token found, calling fetch request');
+        console.warn('No access token found, calling fetch request');
         authenticateWithDropbox();
     }
 }
@@ -62,7 +64,6 @@ function handleData(data) {
       var cacheArray = [splitArray[i],splitArray[i+1]];
       result.push(cacheArray.join(' '));
     }
-    console.log(result);
     weekendList = result;
     loadDOM();
 }
@@ -107,13 +108,15 @@ function fetchData(filePath) {
               }
               data.push(JSON.parse(cacheArray.join(',')));
             }
-  
-            console.log(data);
           };
           reader.readAsText(xhr.response);
             
         } else {
             console.error('Error downloading file: ' + xhr.statusText);
+            if (xhr_folder.status === 401) {
+                console.warn('Dropbox access token expired, redirecting to authenticate');
+                authenticateWithDropbox();
+            }
         }
     };
     xhr.send();  
@@ -131,9 +134,13 @@ xhr_folder.onload = function () {
     if (xhr_folder.readyState == 4 && xhr_folder.status === 200) {
         zipFileData = xhr_folder.response;
         dataReady = true;
-        console.log('Data is ready');
     } else {
         console.error('Error downloading file: ' + xhr_folder.statusText);
+        
+        if (xhr_folder.status === 401) {
+            console.warn('Dropbox access token expired, redirecting to authenticate');
+            authenticateWithDropbox();
+        }
     }
 };
 
@@ -185,6 +192,7 @@ var buttonsHidden = false;
 var houseButtonsShown = false;
 var roomButtonsShown = false;
 var smallButtons = false;
+var helpMenuOpen = false;
 var namePosition = 0;
 var roomAmount = 0;
 var allowedAmount = 0;
@@ -304,13 +312,10 @@ window.addEventListener("keydown", checkKeyPressed, false);
 
 function checkKeyPressed(evt) {
     if (evt.keyCode === 69) {
-        showAlert("!!! Triggered Sort Event !!!");
         returnPeople();
     }
     if (evt.keyCode === 80) {
-        openPrintPopup();
-        generateList();
-        print();
+        readyToPrint();
     }
     if (evt.keyCode === 27) {
         closePrintPopup();
@@ -321,6 +326,15 @@ function checkKeyPressed(evt) {
     if (evt.keyCode === 76) {
         console.log(rooms);
     }
+}
+
+function readyToPrint() {
+    var bottomNav = document.getElementById('bottom-navigation');
+    addTag(bottomNav, 'DONT-SHOW');
+    openPrintPopup();
+    generateList();
+    print();
+    removeTag(bottomNav, 'DONT-SHOW');
 }
 
 //Shortens name to a string less than a provided length
@@ -397,18 +411,52 @@ function generateList() {
     }
 }
 
+function helpMenu() {
+    if (helpMenuOpen !== true) {
+        helpMenuOpen = true;
+        var closeIcon = document.getElementById('close-button');
+        var printIcon = document.getElementById('print-button');
+        var helpMenu = document.getElementById('help-menu');
+        addTag(printIcon, 'DONT-SHOW');
+        addTag(helpMenu, 'show');
+        removeTag(closeIcon, 'DONT-SHOW');
+    }
+}
+
+function closeButton() {
+    if (helpMenuOpen === true) {
+        helpMenuOpen = false;
+        var closeIcon = document.getElementById('print-button');
+        var printIcon = document.getElementById('close-button');
+        var helpMenu = document.getElementById('help-menu');
+        addTag(printIcon, 'DONT-SHOW');
+        removeTag(closeIcon, 'DONT-SHOW');
+        removeTag(helpMenu, 'show');
+    } else {
+        closePrintPopup();
+    }
+}
+
 //Opens the popup menu
 function openPrintPopup() {
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
+    var closeIcon = document.getElementById('close-button');
+    var printIcon = document.getElementById('print-button');
+    addTag(printIcon, 'DONT-SHOW');
     addTag(popup, "show");
     addTag(body, "print");
+    removeTag(closeIcon, 'DONT-SHOW');
 }
 
 //Closes the popup menu
 function closePrintPopup() {
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
+    var closeIcon = document.getElementById('print-button');
+    var printIcon = document.getElementById('close-button');
+    addTag(printIcon, 'DONT-SHOW');
+    removeTag(closeIcon, 'DONT-SHOW');
     removeTag(popup, "show");
     removeTag(body, "print");
 }
@@ -451,7 +499,7 @@ function openPopup(i) {
     popup.classList.toggle("show");
     popup.classList.toggle("blur-bg");
     document.getElementById("replaceableText").innerHTML = studentList[i].name;
-    document.getElementById("replaceableImage").src = studentList[i].img;
+    document.getElementById("replaceableImage").src = document.getElementById('pers-' + i).children[0].src;
     closeButtons();
 }
 
@@ -1042,13 +1090,19 @@ function returnPeople() {
 //Function loads all the profiles once the sourcefile is selected
 async function loadDOM() {
     var alertText = document.getElementById('alertText');
+    var body = document.getElementById('mainBody');
     alertText.innerHTML = 'Venter på data';
     if (!dataReady) {
-        var check = setInterval(function () {if (dataReady) {
-            clearInterval(check);
-        }}, 100); 
+        var check = setInterval(function () {
+            if (dataReady) {
+                clearInterval(check);
+                loadDOM();
+            }
+        }, 100); 
+        return;
     }
     alertText.innerHTML = 'Loader profiler...';
+    addTag(body,'disabled');
     hideInput();
     for (var i = 0; i < weekendList.length; i++) {
         var index = studentList.findIndex(e => e.name  === weekendList[i]);
@@ -1073,6 +1127,7 @@ async function loadDOM() {
     countData();
     //Close the alert once the window is loaded
     showAlert(" ", "Close");
+    removeTag(body,'disabled');
     //Set a interval that checks the time every minute
     var minute = 1000*60;
     setInterval(() => {
@@ -1123,39 +1178,3 @@ window.onbeforeunload = function(event) {
     event.preventDefault();
     return event.returnValue = "Are you sure you want to leave the page?";
 }
-
-/*
-//Load the weekend file
-function previewFile() {
-    var [file] = document.querySelector("input[type=file]").files;
-    const reader = new FileReader();
-
-    reader.addEventListener("load", () => {
-        //Set the result
-        var res = reader.result;
-        //Set the delta of how often we need to remove parts of the array.
-        var delta = 2;
-        //Split the result
-        const splitArray = res.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
-        //Remove the first 4 items of the array
-        splitArray.splice(0,4);
-        //Loop through the array where we delete every nth (delta) of the array
-        for (var i = delta; i < splitArray.length; i += delta) {
-            splitArray.splice(i,1);
-        }
-        //Loop though the array were we join every 2 parts of the array.
-        for (var i = 0; i < splitArray.length; i += delta) {
-            var cacheArray = [splitArray[i],splitArray[i+1]];
-            weekendList.push(cacheArray.join(' '));
-        }
-        //Run the function to load the rest of the DOM
-        loadDOM();
-        },
-        false,
-    );
-
-    if (file) {
-        reader.readAsText(file);
-    }
-}
-*/
