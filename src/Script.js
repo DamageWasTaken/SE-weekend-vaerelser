@@ -2,8 +2,8 @@
 
 //Dropbox declerations
 const clientId = 'jxdu6pl9vugjt2d';
-const redirectUri = 'http://localhost:8080/src/Index.html';
-var filePath = '/Weekend Program/config/Data.js';
+const redirectUri = 'http://localhost:8081/src/Index.html';
+var filePath = '/Weekend Program/config/Data.txt';
 var folderPath = '/Weekend Program/config/viggo-billeder/'
 var result = [];
 var data = [];
@@ -104,7 +104,7 @@ function fetchData(filePath) {
             for (var i = 0; i < temp.length; i += 6) {    
               var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
               if (i > 0) {
-                cacheArray[0] = cacheArray[0].slice(1);
+                cacheArray[0] = cacheArray[0].slice(2);
               }
               data.push(JSON.parse(cacheArray.join(',')));
             }
@@ -193,6 +193,8 @@ var houseButtonsShown = false;
 var roomButtonsShown = false;
 var smallButtons = false;
 var helpMenuOpen = false;
+var printMenuOpen = false;
+var expandableElements;
 var namePosition = 0;
 var roomAmount = 0;
 var allowedAmount = 0;
@@ -326,6 +328,9 @@ function checkKeyPressed(evt) {
     if (evt.keyCode === 76) {
         console.log(rooms);
     }
+    if (evt.keyCode === 72) {
+        helpMenu();
+    }
 }
 
 function readyToPrint() {
@@ -418,7 +423,8 @@ function helpMenu() {
         var printIcon = document.getElementById('print-button');
         var helpMenu = document.getElementById('help-menu');
         addTag(printIcon, 'DONT-SHOW');
-        addTag(helpMenu, 'show');
+        //addTag(helpMenu, 'show');
+        removeTag(helpMenu, 'hide');
         removeTag(closeIcon, 'DONT-SHOW');
     }
 }
@@ -426,19 +432,51 @@ function helpMenu() {
 function closeButton() {
     if (helpMenuOpen === true) {
         helpMenuOpen = false;
-        var closeIcon = document.getElementById('print-button');
-        var printIcon = document.getElementById('close-button');
         var helpMenu = document.getElementById('help-menu');
-        addTag(printIcon, 'DONT-SHOW');
-        removeTag(closeIcon, 'DONT-SHOW');
-        removeTag(helpMenu, 'show');
+        //removeTag(helpMenu, 'show');
+        addTag(helpMenu, 'hide');
+        if (!printMenuOpen) {
+            var closeIcon = document.getElementById('print-button');
+            var printIcon = document.getElementById('close-button');
+            addTag(printIcon, 'DONT-SHOW');
+            removeTag(closeIcon, 'DONT-SHOW');      
+        }
     } else {
         closePrintPopup();
     }
 }
 
+function expandContent(id) {
+    var expandableElement = document.getElementById(id);
+    expandableElement.classList.toggle('expanded');
+    setExpandButtonText(expandableElement, id);
+}
+
+function setExpandButtonText(element, id) {
+    var button = document.getElementById('expand-button-' + id.substr(id.length - 1));
+    var expanded = element.classList.contains('expanded');
+    button.innerHTML = expanded ? 'Mindre' : 'Mere';
+}
+
+window.onload = () => {
+    expandableElements = document.querySelectorAll('.expandable-content');
+    checkForOverflow();
+    var helpMenu = document.getElementById('help-menu');
+    addTag(helpMenu, 'hide');
+    addTag(helpMenu, 'visible');
+}
+
+function checkForOverflow() {
+    expandableElements.forEach(element => {
+        if (element.classList.contains("expanded")) return;
+        const overflowing = element.scrollHeight > element.clientHeight;
+        element.dataset.overflow = overflowing;
+    })
+}
+
 //Opens the popup menu
 function openPrintPopup() {
+    printMenuOpen = true;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
     var closeIcon = document.getElementById('close-button');
@@ -451,6 +489,7 @@ function openPrintPopup() {
 
 //Closes the popup menu
 function closePrintPopup() {
+    printMenuOpen = false;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
     var closeIcon = document.getElementById('print-button');

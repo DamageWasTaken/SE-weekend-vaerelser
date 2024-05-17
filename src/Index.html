@@ -3,18 +3,18 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+        <link rel="icon" type="image/x-icon" href="/images/logo.png">
         <link rel="stylesheet" href="Style.css">
         <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="jxdu6pl9vugjt2d"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
         <script src="../Config.js"></script> 
         <script src="Script.js"></script> 
         <title>Weekend Vaerelser Skanderup</title>
-        <!--<link rel="icon" href="Images/Website icon.png">-->
     </head>
     <body id="mainBody">
         <div id="top-bar">
             <div id="top-row">
-                <img id="image-icon" src="images/placeholder.png">
+                <img id="image-icon" src="images/logo.png">
                 <div id="top-row-text-container">
                     <p id="top-row-text-top" class="top-row-text">Skanderup Efterskole</p>
                     <p id="top-row-text-bottom" class="top-row-text">Weekend</p>
@@ -74,8 +74,225 @@
             <div class="rows3 table" id="generated-table-4"></div>
         </div>
         <div id="help-menu">
+            <div id="help-menu-title">
+                Hjælp og vejledninger
+            </div>
             <div id="help-menu-container">
-                Hello
+                <div id="help-menu-content">
+                    <div class="help-menu-element">
+                        <p class="help-menu-element-title help-menu-text">
+                            Sådan printer du
+                        </p>
+                        <div class="expandable-content" id="expandable-0">
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    Hvis du vil printe værelse-listen skal du enten trykke på print iconet
+                                </li>
+                                <li class="help-menu-text">
+                                    Når du trykker på print åbner der et print-vindue, herinde skal du huske at sætte orientering som "Landskab". Du kan også eventuelt slå "Print sidehover og sidefødder" fra og slå "Udskriv baggrunde" til, men det er ikke nødvendigt.
+                                </li>
+                                <li class="help-menu-text">
+                                    Efter du har printet vil du være inde på listen over hvor eleverne sover. Denne side kan lukkes ved at trykke (x) knappen nede i hjørnet. Dette retunere dig tilbage til siden hvor du kan vælge værelser.
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="content-expand-button" id="expand-button-0" onclick="expandContent('expandable-0')">
+                            Mere
+                        </div>
+                    </div>
+                    <div class="help-menu-element">
+                        <p class="help-menu-element-title help-menu-text">
+                            Der sker ikke noget når jeg vælger weekend filen
+                        </p>
+                        <div class="expandable-content" id="expandable-1">
+                            <p class="help-menu-element-content help-menu-text">
+                                Der kan være flere grunde til at der ikke sker noget:
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    Det kan være at filen bare tager lidt lang til at loade, det bør dog ikke tage mere en et par minutter.
+                                </li>
+                                <li class="help-menu-text">
+                                    Der kan være sket en uforudset fejl, prøv at genindlæs siden.
+                                </li>
+                                <li class="help-menu-text">
+                                    Weekend filen kan være expoteret forkert fra viggo, og kan derfor ikke læses.
+                                </li>   
+                                <li class="help-menu-text">
+                                    Prøv evt. en anden weekend fil for at se om den virker.
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text help-menu-text-footer">
+                                Hjemmeside konsolen kan også give indblik i hvad der er gået galt.
+                            </p>
+                        </div>
+                        <div class="content-expand-button" id="expand-button-1" onclick="expandContent('expandable-1')">
+                            Mere
+                        </div>
+                    </div>
+                    <div class="help-menu-element">
+                        <p class="help-menu-element-title help-menu-text">
+                            Weekend filen virker ikke
+                        </p>
+                        <div class="expandable-content" id="expandable-2">
+                            <p class="help-menu-element-content help-menu-text">
+                                Der kan være flere grunde til at weekend filen ikke virkker:
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    Hvis filen ikke kan vælges skyles det at det ikke er en .csv fil. Hvis det er tilfælet skal der enten laves en ny fil som skal ligges op på Dropbox.
+                                </li>
+                                <li class="help-menu-text">
+                                    Der kan være sket en uforudset fejl, prøv at genindlæs siden.
+                                </li>
+                                <li class="help-menu-text">
+                                    Weekend filen kan være expoteret forkert fra viggo, og kan derfor ikke læses.
+                                </li>   
+                                <li class="help-menu-text">
+                                    Din access-token fra Dropbox er udløbet, prøv at gå ind på hjemmesiden igen (ikke genindlæs).
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text help-menu-text-footer">
+                                Hjemmeside konsolen kan også give indblik i hvad der er gået galt.
+                            </p>
+                        </div>
+                        <div class="content-expand-button" id="expand-button-2" onclick="expandContent('expandable-2')">
+                            Mere
+                        </div>
+                    </div>
+                    <div class="help-menu-element">
+                        <p class="help-menu-element-title help-menu-text">
+                            Sådan laver du en weekend fil
+                        </p>
+                        <div class="expandable-content" id="expandable-3">
+                            <p class="help-menu-element-content help-menu-text">
+                                Først skal du gå ind på Viggo.
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    På Viggo startsiden skal du klikke på: <span class="bold">Funktioner</span> > <span class="bold">Udskriv og eksport</span>.
+                                </li>
+                                <li class="help-menu-text">
+                                    Derefter skal du huske at vælge <span class="bold">Ekspoter</span> og så <span class="bold">Gruppe</span>.
+                                </li>
+                                <li class="help-menu-text">
+                                    I søgefeltet skal du søge efter den pågældende weekend.
+                                </li>   
+                                <li class="help-menu-text">
+                                    Det eneste der skal være kryds ved er <span class="bold">Fornavn</span> og <span class="bold">Efternavn</span>, tryk derefter på <span class="bold">Ekspoter grupper</span>.
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Nu skal du åbne den fil du har downloadet i Excel.
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    I Excel skal du trykke på: <span class="bold">Fil</span> oppe i venstre hjørne.
+                                </li>
+                                <li class="help-menu-text">
+                                    Derefter skal du trykke på: <span class="bold">Gem Som</span> og vælge et sted at gemme filen.
+                                </li>
+                                <li class="help-menu-text">
+                                    Filen skal også have et navn så den er nem at finde, anbefalet format er: <span class="bold">"[weekend-nummer]. weekend d. [weekend-dato] [månede]"</span>.
+                                </li>   
+                                <li class="help-menu-text">
+                                    Filen skal gemmes som fil formatet: <span class="bold">CSV UTF-8 (Comma delimited) (*.csv)</span>.
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Det sidste der skal gøres er at ligge filen i Dropbox mappen: <span class="bold">weekend-filer</span>.
+                            </p>
+                            <p class="help-menu-element-content help-menu-text help-menu-text-footer">
+                                Mappens placering er: Apps > weekend api > Weekend Program > weekend-filer.
+                            </p>
+                        </div>
+                        <div class="content-expand-button" id="expand-button-3" onclick="expandContent('expandable-3')">
+                            Mere
+                        </div>
+                    </div>
+                    <div class="help-menu-element last-element">
+                        <p class="help-menu-element-title help-menu-text">
+                            Sådan opdaterer du profilerne
+                        </p>
+                        <div class="expandable-content" id="expandable-4">
+                            <p class="help-menu-element-content help-menu-text">
+                                Først skal du gå ind på Viggo. <span class="help-menu-text-footer">(Dette trin skal gøres af en lærer)</span>
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    På Viggo startsiden skal du klikke på: <span class="bold">Funktioner</span> > <span class="bold">Udskriv og eksport</span>.
+                                </li>
+                                <li class="help-menu-text">
+                                    Derefter skal du huske at vælge <span class="bold">Ekspoter</span> og så <span class="bold">Gruppe</span>.
+                                </li>
+                                <li class="help-menu-text">
+                                    I søgefeltet skal du søge efter <span class="bold">Alle elever</span>.
+                                </li>   
+                                <li class="help-menu-text">
+                                    Der skal være kryds ved: <span class="bold">Køn</span>, <span class="bold">Fornavn</span>, <span class="bold">Efternavn</span>, <span class="bold">Værelse</span> og <span class="bold">Elevnummer</span>
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Nu skal du åbne, både den fil du har downloadet og åbne den fil der hedder "Data-converter-v2", i Excel.
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    I den downloaded Excel fil skal du kopiere cellerne der har noget i sig.
+                                </li>
+                                <li class="help-menu-text">
+                                    Derefter skal du gå ind på "Data-converter-v2" filen og paste det du har kopieret inde i den fane der hedder "DATA".
+                                </li>
+                                <li class="help-menu-text">
+                                    Inde på "OUTPUT" fanen bør der nu være en masse navne, tekst og andet. Kopier alt fra <span class="bold">A1</span> til <span class="bold">F137</span> alt efter hvor mange elever der er. <span class="help-menu-text-footer">(Du skal ikke kopier navne der bare hedder "0", dette er bare ekstra pladser.)</span>
+                                </li>   
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Når du har kopieret alt inde fra Excel skal du gå ind på <a class="link-text" href="https://shancarter.github.io/mr-data-converter/" target="_blank">denne her</a> hjemmeside.
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    I det øverste felt skal du paste alt det du har kopieret fra Excel filen.
+                                </li>
+                                <li class="help-menu-text">
+                                    I feltet neden under skal du bare kopiere alt.
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Nu skal du åbne et nyt tekst dokument på din computer. <span class="help-menu-text-footer">(Det SKAL være et windows text dokument)</span>
+                            </p>
+                            <ul class="help-menu-element-content">
+                                <li class="help-menu-text">
+                                    Først skal du åbne dine filer.
+                                </li>
+                                <li class="help-menu-text">
+                                    Derefter skal du vægle et sted at lave filen, du skal bare kunne finde den. 
+                                </li>
+                                <li class="help-menu-text">
+                                    I venstre øverste hjørne skal du klikke på  <span class="bold">"Ny"</span> > <span class="bold">Tekst dokument</span>.
+                                </li>
+                                <li class="help-menu-text">
+                                    Tekst dokumentet skal hedde <span class="bold">"Data"</span>. <span class="help-menu-text-footer">(Vigtigt at navnet starter med et stort "D".)</span>
+                                </li>
+                                <li class="help-menu-text">
+                                    Inde i tekst dokument skal du paste det du kopierede inde fra hjemmesiden.
+                                </li>
+                            </ul>
+                            <p class="help-menu-element-content help-menu-text">
+                                Det sidste der skal gøres er at ligge filen i Dropbox mappen: <span class="bold">config</span>.
+                            </p>
+                            <p class="help-menu-element-content help-menu-text help-menu-text-footer">
+                                Mappens placering er: Apps > weekend api > Weekend Program > config.
+                            </p>
+                        </div>
+                        <div class="content-expand-button" id="expand-button-4" onclick="expandContent('expandable-4')">
+                            Mere
+                        </div>
+                    </div>
+                </div>
+                <div id="credits">
+                    <a class="credits-text" href="mailto:lucas.steele.sorensen@gmail.com">© Lucas Steele Sørensen 2024</a>
+                    <p class="credits-text">Skanderup Efterskole Årgang 23/24</p>
+                </div>
             </div>
         </div>
         <div id="alert-container" class="alert-container">
@@ -103,7 +320,7 @@
                         </svg>
                         <p id="replaceableTextHeader">texttext</p>
                     </div>
-                    <img id="replaceableImage" class="image" src="viggo-billeder/Dummy.svg" style="margin-top: 15px;">
+                    <img id="replaceableImage" class="image" src="images/Dummy.svg" style="margin-top: 15px;">
                     <p id="replaceableText" class="alt-name-text">Navn Navnsen</p>
                     <div id="buttons-stage-1" class="popup-buttons">
                         <div>
