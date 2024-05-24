@@ -331,13 +331,21 @@ function checkKeyPressed(evt) {
         closePrintPopup();
     }
     if (evt.keyCode === 82) {
-        generateList();
+        console.warn('Reloading profile images!')
+        reloadImages();
     }
     if (evt.keyCode === 76) {
         console.log(rooms);
     }
     if (evt.keyCode === 72) {
         helpMenu();
+    }
+}
+
+function reloadImages() {
+    var images = document.images;
+    for (var i=0; i<images.length; i++) {
+        images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
     }
 }
 
@@ -1183,6 +1191,13 @@ async function loadDOM() {
             clearInterval();
         }
     }, minute);
+
+    const img = document.querySelectorAll(".image");
+    console.log(img);
+    img.forEach((e) => e.addEventListener("error", function(event) {
+        event.target.src = "images/Dummy.svg";
+        event.onerror = null;
+    }));
 }
 
 function getPicture(name) {
