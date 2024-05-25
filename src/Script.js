@@ -71,6 +71,9 @@ function listImages() {
             return;
         }
         imageFiles = files;
+        for (var i = 0; i < data.length; i++) {
+            data[i].img = getPicture(data[i].img);
+        }
         console.info('Images are ready.');
         dataReady = true;
     });
@@ -183,8 +186,7 @@ function downloadFile(fileId) {
 
 
 //Declaring global time varibles
-const d = new Date();
-var checkTime = 23;
+var deadLine = [21,24];
 
 //Import the student data
 var studentList = data;
@@ -269,7 +271,7 @@ function handleConfig() {
         for (let i = 0; i < config.length; i++) {
             switch (Object.keys(config[i])[0]) {
                 case 'checkTime':
-                    checkTime = Object.values(config[i])[0];
+                    deadLine = Object.values(config[i])[0];
                     break;
             
                 case 'allowedRoomAmount':
@@ -555,7 +557,7 @@ function openPopup(i) {
     popup.classList.toggle("show");
     popup.classList.toggle("blur-bg");
     document.getElementById("replaceableText").innerHTML = studentList[i].name;
-    document.getElementById("replaceableImage").src = document.getElementById('pers-' + i).children[0].src;
+    document.getElementById("replaceableImage").src = data[i].img;
     closeButtons();
 }
 
@@ -1173,9 +1175,9 @@ async function loadDOM() {
         
     for (var i = 0; i < data.length; i++) {
         if (checkList.includes(i)) {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + getPicture(data[i].img) + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
         } else {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + getPicture(data[i].img) + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
         }
     }
     //Count the data
@@ -1186,9 +1188,10 @@ async function loadDOM() {
     //Set a interval that checks the time every minute
     var minute = 1000*60;
     setInterval(() => {
-        if (checkHour()) {
+        if (checkTime()) {
             returnPeople();
             clearInterval();
+            readyToPrint();
         }
     }, minute);
 
@@ -1196,7 +1199,7 @@ async function loadDOM() {
     console.log(img);
     img.forEach((e) => e.addEventListener("error", function(event) {
         event.target.src = "images/Dummy.svg";
-        event.onerror = null;
+        //event.onerror = null;
     }));
 }
 
@@ -1205,9 +1208,11 @@ function getPicture(name) {
     return file.webContentLink.replace("&export=download", "").replace('/uc?','/thumbnail?');
 }
 
-function checkHour() {
+function checkTime() {
+    const d = new Date();
     var hour = d.getHours();
-    if (hour === checkTime) {
+    var minute = d.getMinutes();
+    if (hour == deadLine[0] && minute == deadLine[1]) {
         return true;
     } else {
         return false;
