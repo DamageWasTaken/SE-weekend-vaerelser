@@ -81,6 +81,10 @@ function listImages() {
 
 //Create and render a Picker object for searching images.
 function createPicker() {
+    if (!accessToken) {
+        console.warn('No accessToken found, make sure to authenticate with Google OAuth. The popup window may be block.');
+        return;
+    }
     const view = new google.picker.View(google.picker.ViewId.DOCS);
     //Only allow .csv files
     view.setMimeTypes('text/csv');
@@ -180,6 +184,8 @@ function downloadFile(fileId) {
         console.info('Data is ready.')
 
         // After the data is ready ...
+        showAlert('Vælg venlist weekend filen', 'Stick')
+        distributeRooms();
         listImages();
     });
 }
@@ -299,25 +305,28 @@ function handleConfig() {
 handleConfig();
 
 //Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
-for (let i = 0; i < rooms.length; i++) {
-    var _i = i;
-    if (i > 12) {
-        _i = i+1;
-    }
-    //Allowing for manual adjustment of the room
-    if (rooms[i].sex === 'x'){
-        if (i === 0) {
-            var index = studentList.findIndex(e => e.room  === "1a");
-        } else if (i === 1) {
-            var index = studentList.findIndex(e => e.room  === '1b');
-        } else {
-            var index = studentList.findIndex(e => e.room  === _i);
+function distributeRooms() {
+    for (let i = 0; i < rooms.length; i++) {
+        var _i = i;
+        if (i > 12) {
+            _i = i+1;
         }
-        if (index !== -1) {
-            var _sex = studentList[index].sex;
-            rooms[i].sex = _sex;
+        //Allowing for manual adjustment of the room
+        if (rooms[i].sex === 'x'){
+            if (i === 0) {
+                var index = studentList.findIndex(e => e.room  === "1a");
+            } else if (i === 1) {
+                var index = studentList.findIndex(e => e.room  === '1b');
+            } else {
+                var index = studentList.findIndex(e => e.room  === _i);
+            }
+            if (index !== -1) {
+                var _sex = studentList[index].sex;
+                rooms[i].sex = _sex;
+            }
         }
     }
+    console.info('Room gender distributed.')
 }
 
 window.addEventListener("keydown", checkKeyPressed, false);
@@ -345,9 +354,12 @@ function checkKeyPressed(evt) {
 }
 
 function reloadImages() {
-    var images = document.images;
-    for (var i=0; i<images.length; i++) {
-        images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
+    var images = document.querySelectorAll('.image');
+    for (var i = 0; i < images.length; i++) {
+        if (i > 0) {
+            images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
+            images[i].src = data[i - 1].img;
+        }
     }
 }
 
@@ -587,29 +599,42 @@ function showAlert(alertMessage, param) {
     var alert = document.getElementById("alert-container");
     var alertContent = document.getElementById("alert-content");
     var alertEffect = document.getElementById("top-alert");
+    var alertText = document.getElementById("alertText");
     //Check if we just want to close the alert
-    if (param == "Close") {
-        alert.style.height = "0";
-        alertContent.style.height = "0";
-        alertEffect.style.height = "0";
-        return;
-    } else {
-        //Activate the effect
-        document.getElementById("top-alert").classList.toggle("active")
-        //Set the message in the alert to the specified text
-        document.getElementById("alertText").innerHTML = alertMessage;
-        //Open the alert
-        alert.style.height = "45px";
-        alertContent.style.height = "43px";
-        alertEffect.style.height = "45px";
-        //After 2s close the alert
-        setTimeout(function() {
+    switch (param) {
+        case 'Close':
             alert.style.height = "0";
             alertContent.style.height = "0";
             alertEffect.style.height = "0";
-            //Stop the effect
-            document.getElementById("top-alert").classList.toggle("active")
-        }, 2000)
+            break;
+
+        case 'Stick':
+            //Set the message in the alert to the specified text
+            alertText.innerHTML = alertMessage;
+            //Open the alert
+            alert.style.height = "45px";
+            alertContent.style.height = "43px";
+            alertEffect.style.height = "45px";
+            break;
+    
+        default:
+            //Activate the effect
+            addTag(alertEffect, "active");
+            //Set the message in the alert to the specified text
+            alertText.innerHTML = alertMessage;
+            //Open the alert
+            alert.style.height = "45px";
+            alertContent.style.height = "43px";
+            alertEffect.style.height = "45px";
+            //After 2s close the alert
+            setTimeout(function() {
+                alert.style.height = "0";
+                alertContent.style.height = "0";
+                alertEffect.style.height = "0";
+                //Stop the effect
+                removeTag(alertEffect, "active");
+            }, 2000);
+            break;
     }
     
 }
@@ -1196,7 +1221,6 @@ async function loadDOM() {
     }, minute);
 
     const img = document.querySelectorAll(".image");
-    console.log(img);
     img.forEach((e) => e.addEventListener("error", function(event) {
         event.target.src = "images/Dummy.svg";
         //event.onerror = null;
