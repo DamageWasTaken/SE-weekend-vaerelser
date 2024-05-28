@@ -577,7 +577,11 @@ function openPopup(i) {
     popup.classList.toggle("show");
     popup.classList.toggle("blur-bg");
     document.getElementById("replaceableText").innerHTML = studentList[i].name;
-    document.getElementById("replaceableImage").src = data[i].img;
+    if (document.getElementById("replaceableImage").src !== 'images/Dummy.svg') {
+        document.getElementById("replaceableImage").src = document.getElementById('pers-' + i).children[0].src;
+    } else {
+        document.getElementById("replaceableImage").src = data[i].img;
+    }
     closeButtons();
 }
 
