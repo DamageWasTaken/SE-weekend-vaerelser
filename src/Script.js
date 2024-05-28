@@ -221,6 +221,13 @@ var runLock = false;
 var checkList = [];
 var weekendList = [];
 var home;
+var backgroundImages = [
+    'images/BG-1.jpg',
+    'images/BG-2.jpg',
+    'images/BG-3.jpg',
+    'images/BG-4.jpg'
+];
+var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImages.length)] + ')';
 
 //Declaring all houses & rooms
 var rooms = [
@@ -426,23 +433,23 @@ function generateList() {
     }
     runLock = true;
     //-------
-    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Room 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
+    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Værelse 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
     for (var i = 0; i < 11 ; i++) {
-        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
+        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
     }
     //-------
     for (var i = 0; i < 13 ; i++) {
-        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
+        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
     }
     tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
     //-------
     for (var i = 0; i < 13 ; i++) {
-        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
+        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
     }
     tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
     //-------
     for (var i = 0; i < 6 ; i++) {
-        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
+        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
     }
 }
 
@@ -489,6 +496,7 @@ function setExpandButtonText(element, id) {
 }
 
 window.onload = () => {
+    document.getElementById('mainBody').style.backgroundImage = bgImg;
     authenticateGoogleOAuth();
     expandableElements = document.querySelectorAll('.expandable-content');
     checkForOverflow();
