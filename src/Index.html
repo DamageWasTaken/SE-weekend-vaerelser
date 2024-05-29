@@ -6,9 +6,9 @@
         <link rel="icon" type="image/x-icon" href="/images/logo.png">
         <link rel="stylesheet" href="Style.css">
         <script src="../Config.js"></script> 
+        <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="jxdu6pl9vugjt2d"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
         <script type="text/javascript" src="Script.js"></script> 
-        <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-        <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
         <title>Weekend Vaerelser Skanderup</title>
     </head>
     <body id="mainBody">
@@ -65,7 +65,7 @@
             </div>
         </div>
         <div id="file-input">
-            <button id="file-select-button" onclick="createPicker()">Vælg Weekend</button>
+            <button id="file-select-button" onclick="callDropboxChooser()">Vælg Weekend</button>
         </div>
         <div id="print-popup">
             <div class="rows6 table" id="generated-table-1"></div>
@@ -300,7 +300,7 @@
                   <span class="overlay"></span>
             </div>
             <div id="alert-content" class="alert-bg">
-                <p id="alertText">Log-ind med Google OAuth</p>
+                <p id="alertText">Vælg venlist weekend filen</p>
             </div>
         </div>
         <div id="popup">

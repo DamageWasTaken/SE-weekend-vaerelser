@@ -1,118 +1,55 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
-
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file';
-const CLIENT_ID = '294879549763-08fuvah7r95vd0sbbgrrcnqnsg7ju19u.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyBv_uj-7bG-NUu4APg7rr8-OqBl0-mhCh0';
-const APP_ID = 'weekend-vaerelser';
-const imageFolderID = '1Osx_4ZHsHIaOWHoLSzezfQrH0bJK_IZH';
-var tokenClient;
-var accessToken = null;
-var pickerInited = false;
-var gisInited = false;
+//Dropbox declerations
+const clientId = 'jxdu6pl9vugjt2d';
+const redirectUri = 'http://localhost:8080/src/Index.html';
+var filePath = '/Weekend Program/config/Data.txt';
+var folderPath = '/Weekend Program/config/viggo-billeder/'
+var result = [];
 var data = [];
 var dataReady = false;
-
-var imageFiles;
-
-// ** Functions for ensuring that all apis are loaded
-//Callback after api.js is loaded
-function gapiLoaded() {
-    gapi.load('client:picker', initializePicker);
-}
-
-//Callback after Google Identity Services are loaded
-function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: '', // defined later
-    });
-    gisInited = true;
-}
-
-//Callback after the API client is loaded. Loads the discovery doc to initialize the API.
-async function initializePicker() {
-    await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
-    pickerInited = true;
-}
-// **
-
-//Gets the user to allow Google OAuth2 so we can get an access token
-function authenticateGoogleOAuth() {
-    tokenClient.callback = async (response) => {
-        if (response.error !== undefined) {
-            throw (response);
+var accessToken = '';
+var zipFileData;
+options = {
+    success: function(files) {
+        loadFile(files[0].link);
+        if (!dataReady) {
+            console.warn('Data not ready, waiting for data to load.'); 
         }
-        accessToken = response.access_token;
-        console.info('Downloading data, this may take a minute');
-        findFile();
-    };
+    },
+    cancel: function() {
+      console.warn('Aborting file select.');
+    },
+    linkType: "direct", // or "preview"
+    multiselect: false, // or true
+    extensions: ['.csv'],
+    folderselect: false, // or true
+};
+    
 
-    if (accessToken === null) {
-        // Prompt the user to select a Google Account and ask for consent to share their data
-        tokenClient.requestAccessToken({prompt: 'consent'});
-    } else {
-        // Skip display of account chooser and consent dialog for an existing session.
-        tokenClient.requestAccessToken({prompt: ''});
-    }
+//Gets the user authenticate dropbox so that we can get a acess token
+function authenticateWithDropbox() {
+    const authUrl = `https://www.dropbox.com/oauth2/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    window.location.href = authUrl;
 }
 
-//lists all the images in the viggo-bileder folder on google drive
-function listImages() {
-    gapi.client.drive.files.list({
-        'q': `'${imageFolderID}' in parents and mimeType contains 'image/'`,
-        'fields': "nextPageToken, files(id, name, mimeType, webContentLink)",
-        'pageSize': 150,
-    }).then(function(response) {
-        var files = response.result.files;
-        if (!files || files.length <= 0) {
-            console.warn('No files found.');
-            return;
-        }
-        imageFiles = files;
-        for (var i = 0; i < data.length; i++) {
-            data[i].img = getPicture(data[i].img);
-        }
-        console.info('Images are ready.');
-        dataReady = true;
-    });
-}
-
-//Create and render a Picker object for searching images.
-function createPicker() {
+//When we're redirected back from the dropbox auth extract the access token 
+function handleDropboxRedirect() {
+    accessToken = window.location.hash.substr(1).split('&')[0].split('=')[1];
     if (!accessToken) {
-        console.warn('No accessToken found, make sure to authenticate with Google OAuth. The popup window may be block.');
-        return;
-    }
-    const view = new google.picker.View(google.picker.ViewId.DOCS);
-    //Only allow .csv files
-    view.setMimeTypes('text/csv');
-    const picker = new google.picker.PickerBuilder()
-        .setDeveloperKey(API_KEY)
-        .setAppId(APP_ID)
-        .setOAuthToken(accessToken)
-        .addView(view)
-        .addView(new google.picker.DocsUploadView())
-        .setCallback(pickerCallback)
-        .build();
-    picker.setVisible(true);
-}
-
-//Callback function for when a user selects a file in the picker
-async function pickerCallback(data) {
-    if (data.action === google.picker.Action.PICKED) {
-        const document = data[google.picker.Response.DOCUMENTS][0];
-        const fileId = document[google.picker.Document.ID];
-        const res = await gapi.client.drive.files.get({
-            'fileId': fileId,
-            'alt': 'media',
-        });
-        handleData(res.body);
+        console.warn('No access token found, calling fetch request');
+        authenticateWithDropbox();
     }
 }
 
-//Handles the weekend file data and splits it to an array with obejcts
+//Check if we have a token
+if (window.location.href.includes(redirectUri)) {
+    handleDropboxRedirect();
+} else {
+    authenticateWithDropbox();
+}
+
+//Handles the data we get from the dropbox file.
 function handleData(data) {
     var delta = 2;
     //Split the result
@@ -120,74 +57,121 @@ function handleData(data) {
     //Remove the first 4 items of the array
     splitArray.splice(0,4);
     //Loop through the array where we delete every nth (delta) of the array
-    
     for (var i = delta; i < splitArray.length; i += delta) {
         splitArray.splice(i,1);
     }
     for (var i = 0; i < splitArray.length; i += delta) {
       var cacheArray = [splitArray[i],splitArray[i+1]];
-      weekendList.push(cacheArray.join(' '));
+      result.push(cacheArray.join(' '));
     }
+    weekendList = result;
     loadDOM();
 }
 
-//Findes the Data.txt file in the config folder on Google drive
-function findFile() {
-    //List the files in the config folder
-    gapi.client.drive.files.list({
-        q: "name='config' and mimeType='application/vnd.google-apps.folder'",
-        fields: 'files(id, name)'
-    }).then((response) => {
-        //Check if the folder is found
-        const folders = response.result.files;
-        if (folders.length > 0) {
-            //Get the ID of the folder and then list the files in that folder that have the name Data.txt
-            const folderId = folders[0].id;
-            gapi.client.drive.files.list({
-                q: `'${folderId}' in parents and name='Data.txt'`,
-                fields: 'files(id, name)'
-            }).then((response) => {
-                //Get the files ID and send it over to be downloaded
-                const files = response.result.files;
-                if (files.length > 0) {
-                    const fileId = files[0].id;
-                    downloadFile(fileId);
-                } else {
-                    console.warn('File not found');
-                }
-            });
-        } else {
-            console.warn('Folder not found');
+async function loadFile(filelink) {
+    const fileUrl = filelink;
+    try {
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+            throw new Error('Failed to fetch file');
         }
-    });
+        const text = await response.text();
+        handleData(text);
+    } catch (error) {
+        console.error('Error loading file:', error); 
+    }
+
 }
 
-//Downloads the data file we need
-function downloadFile(fileId) {
-    gapi.client.drive.files.get({
-        'fileId': fileId,
-        'alt': 'media'
-    }).then((response) => {
-        const fileContent = response.body;
-        //Split the huge text chunk into smaller strings.
-        const temp = fileContent.toString().split('[')[1].toString().split(']')[0].toString().split(','); //
+function fetchData(filePath) {
+    // Request file content
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://content.dropboxapi.com/2/files/download', true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+    xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({ path: filePath }));
+    xhr.responseType = 'blob';
   
-        //Combine the text together and parse them into objects.
-        for (var i = 0; i < temp.length; i += 6) {    
-          var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
-          if (i > 0) {
-            cacheArray[0] = cacheArray[0].slice(2);
-          }
-          data.push(JSON.parse(cacheArray.join(',')));
+    xhr.onload = function () {
+        if (xhr.readyState == 4 && xhr.status === 200) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            var fileContent = e.target.result;
+  
+            //Split the huge text chunk into smaller strings.
+            const temp = fileContent.toString().split('[')[1].toString().split(']')[0].toString().split(','); //
+  
+            //Combine the text together and parse them into objects.
+            for (var i = 0; i < temp.length; i += 6) {    
+              var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
+              if (i > 0) {
+                cacheArray[0] = cacheArray[0].slice(2);
+              }
+              data.push(JSON.parse(cacheArray.join(',')));
+            }
+          };
+          reader.readAsText(xhr.response);
+            
+        } else {
+            console.error('Error downloading file: ' + xhr.statusText);
+            if (xhr_folder.status === 401) {
+                console.warn('Dropbox access token expired, redirecting to authenticate');
+                authenticateWithDropbox();
+            }
         }
+    };
+    xhr.send();  
+}
 
-        console.info('Data is ready.')
+fetchData(filePath);
 
-        // After the data is ready ...
-        showAlert('Vælg venlist weekend filen', 'Stick')
-        distributeRooms();
-        listImages();
+var xhr_folder = new XMLHttpRequest();
+xhr_folder.open('POST', 'https://content.dropboxapi.com/2/files/download_zip', true);
+xhr_folder.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+xhr_folder.setRequestHeader('Dropbox-API-Arg', JSON.stringify({ path: folderPath }));
+xhr_folder.responseType = 'blob';
+
+xhr_folder.onload = function () {
+    if (xhr_folder.readyState == 4 && xhr_folder.status === 200) {
+        zipFileData = xhr_folder.response;
+        dataReady = true;
+    } else {
+        console.error('Error downloading file: ' + xhr_folder.statusText);
+        
+        if (xhr_folder.status === 401) {
+            console.warn('Dropbox access token expired, redirecting to authenticate');
+            authenticateWithDropbox();
+        }
+    }
+};
+
+xhr_folder.send();
+
+async function dataDoneDownloading() {
+    for (let i = 0; i < data.length; i++) {
+        await getPicture(data[i].img).then(url => {
+            var img = document.createElement('img');
+            img.setAttribute('id',i);
+            img.src = url;
+            var container = document.getElementById('imageContainer');
+            container.insertAdjacentElement('beforeend',img);
+        });
+    }
+}
+
+function getPicture(filePath) {
+    return new Promise((resolve, reject) => {
+        JSZip.loadAsync(zipFileData)
+            .then(function(zip) {
+            zip.file(filePath).async('blob').then(function(blob) {
+                const url = URL.createObjectURL(blob);
+                resolve(url);
+            }).catch(reject);
+        }).catch(reject);
     });
+  }
+  
+function callDropboxChooser() {
+    Dropbox.choose(options);
 }
 
 
@@ -497,7 +481,7 @@ function setExpandButtonText(element, id) {
 
 window.onload = () => {
     document.getElementById('mainBody').style.backgroundImage = bgImg;
-    authenticateGoogleOAuth();
+    //authenticateGoogleOAuth();
     expandableElements = document.querySelectorAll('.expandable-content');
     checkForOverflow();
     var helpMenu = document.getElementById('help-menu');
@@ -1211,11 +1195,13 @@ async function loadDOM() {
     //Loads each profle one by one, giving assets as well
         
     for (var i = 0; i < data.length; i++) {
-        if (checkList.includes(i)) {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
-        } else {
-            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
-        }
+        await getPicture(data[i].img).then(url => {
+            if (checkList.includes(i)) {
+                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + url + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+            } else {
+                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + url + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+            }
+        });
     }
     //Count the data
     countData();
@@ -1237,11 +1223,6 @@ async function loadDOM() {
         event.target.src = "images/Dummy.svg";
         //event.onerror = null;
     }));
-}
-
-function getPicture(name) {
-    var file = imageFiles.find(file => file.name === name);
-    return file.webContentLink.replace("&export=download", "").replace('/uc?','/thumbnail?');
 }
 
 function checkTime() {
