@@ -2,7 +2,7 @@
 //To change the data follow these steps:
 //--link
 
-const data = [{"number":133,"name":"Adelina Høst Johnsen","img":"viggo-billeder/A/Adelina.jpg","room":44,"choice":"NAN","sex":"f"},
+const local_data = [{"number":133,"name":"Adelina Høst Johnsen","img":"viggo-billeder/A/Adelina.jpg","room":44,"choice":"NAN","sex":"f"},
 {"number":7,"name":"Albert Damsgaard Grønnerup","img":"viggo-billeder/A/Albert.jpg","room":19,"choice":"NAN","sex":"m"},
 {"number":81,"name":"Alberte Holmgaard Grønfeldt","img":"viggo-billeder/A/Alberte.jpg","room":38,"choice":"NAN","sex":"f"},
 {"number":14,"name":"Alexander Damgård","img":"viggo-billeder/A/Alexander.jpg","room":42,"choice":"NAN","sex":"m"},

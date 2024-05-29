@@ -1,11 +1,201 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
+
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file';
+const CLIENT_ID = '294879549763-08fuvah7r95vd0sbbgrrcnqnsg7ju19u.apps.googleusercontent.com';
+const API_KEY = 'AIzaSyBv_uj-7bG-NUu4APg7rr8-OqBl0-mhCh0';
+const APP_ID = 'weekend-vaerelser';
+const imageFolderID = '1Osx_4ZHsHIaOWHoLSzezfQrH0bJK_IZH';
+var tokenClient;
+var accessToken = null;
+var pickerInited = false;
+var gisInited = false;
+var data = [];
+var dataReady = false;
+
+var imageFiles;
+
+// ** Functions for ensuring that all apis are loaded
+//Callback after api.js is loaded
+function gapiLoaded() {
+    gapi.load('client:picker', initializePicker);
+}
+
+//Callback after Google Identity Services are loaded
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: '', // defined later
+    });
+    gisInited = true;
+}
+
+//Callback after the API client is loaded. Loads the discovery doc to initialize the API.
+async function initializePicker() {
+    await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+    pickerInited = true;
+}
+// **
+
+//Gets the user to allow Google OAuth2 so we can get an access token
+function authenticateGoogleOAuth() {
+    tokenClient.callback = async (response) => {
+        if (response.error !== undefined) {
+            throw (response);
+        }
+        accessToken = response.access_token;
+        console.info('Downloading data, this may take a minute');
+        findFile();
+    };
+
+    if (accessToken === null) {
+        // Prompt the user to select a Google Account and ask for consent to share their data
+        tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        // Skip display of account chooser and consent dialog for an existing session.
+        tokenClient.requestAccessToken({prompt: ''});
+    }
+}
+
+//lists all the images in the viggo-bileder folder on google drive
+function listImages() {
+    gapi.client.drive.files.list({
+        'q': `'${imageFolderID}' in parents and mimeType contains 'image/'`,
+        'fields': "nextPageToken, files(id, name, mimeType, webContentLink)",
+        'pageSize': 150,
+    }).then(function(response) {
+        var files = response.result.files;
+        if (!files || files.length <= 0) {
+            console.warn('No files found.');
+            return;
+        }
+        imageFiles = files;
+        for (var i = 0; i < data.length; i++) {
+            data[i].img = getPicture(data[i].img);
+        }
+        console.info('Images are ready.');
+        dataReady = true;
+    });
+}
+
+//Create and render a Picker object for searching images.
+function createPicker() {
+    if (!accessToken) {
+        console.warn('No accessToken found, make sure to authenticate with Google OAuth. The popup window may be block.');
+        return;
+    }
+    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    //Only allow .csv files
+    view.setMimeTypes('text/csv');
+    const picker = new google.picker.PickerBuilder()
+        .setDeveloperKey(API_KEY)
+        .setAppId(APP_ID)
+        .setOAuthToken(accessToken)
+        .addView(view)
+        .addView(new google.picker.DocsUploadView())
+        .setCallback(pickerCallback)
+        .build();
+    picker.setVisible(true);
+}
+
+//Callback function for when a user selects a file in the picker
+async function pickerCallback(data) {
+    if (data.action === google.picker.Action.PICKED) {
+        const document = data[google.picker.Response.DOCUMENTS][0];
+        const fileId = document[google.picker.Document.ID];
+        const res = await gapi.client.drive.files.get({
+            'fileId': fileId,
+            'alt': 'media',
+        });
+        handleData(res.body);
+    }
+}
+
+//Handles the weekend file data and splits it to an array with obejcts
+function handleData(data) {
+    var delta = 2;
+    //Split the result
+    var splitArray = data.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
+    //Remove the first 4 items of the array
+    splitArray.splice(0,4);
+    //Loop through the array where we delete every nth (delta) of the array
+    
+    for (var i = delta; i < splitArray.length; i += delta) {
+        splitArray.splice(i,1);
+    }
+    for (var i = 0; i < splitArray.length; i += delta) {
+      var cacheArray = [splitArray[i],splitArray[i+1]];
+      weekendList.push(cacheArray.join(' '));
+    }
+    loadDOM();
+}
+
+//Findes the Data.txt file in the config folder on Google drive
+function findFile() {
+    //List the files in the config folder
+    gapi.client.drive.files.list({
+        q: "name='config' and mimeType='application/vnd.google-apps.folder'",
+        fields: 'files(id, name)'
+    }).then((response) => {
+        //Check if the folder is found
+        const folders = response.result.files;
+        if (folders.length > 0) {
+            //Get the ID of the folder and then list the files in that folder that have the name Data.txt
+            const folderId = folders[0].id;
+            gapi.client.drive.files.list({
+                q: `'${folderId}' in parents and name='Data.txt'`,
+                fields: 'files(id, name)'
+            }).then((response) => {
+                //Get the files ID and send it over to be downloaded
+                const files = response.result.files;
+                if (files.length > 0) {
+                    const fileId = files[0].id;
+                    downloadFile(fileId);
+                } else {
+                    console.warn('File not found');
+                }
+            });
+        } else {
+            console.warn('Folder not found');
+        }
+    });
+}
+
+//Downloads the data file we need
+function downloadFile(fileId) {
+    gapi.client.drive.files.get({
+        'fileId': fileId,
+        'alt': 'media'
+    }).then((response) => {
+        const fileContent = response.body;
+        //Split the huge text chunk into smaller strings.
+        const temp = fileContent.toString().split('[')[1].toString().split(']')[0].toString().split(','); //
+  
+        //Combine the text together and parse them into objects.
+        for (var i = 0; i < temp.length; i += 6) {    
+          var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
+          if (i > 0) {
+            cacheArray[0] = cacheArray[0].slice(2);
+          }
+          data.push(JSON.parse(cacheArray.join(',')));
+        }
+
+        console.info('Data is ready.')
+
+        // After the data is ready ...
+        showAlert('Vælg venlist weekend filen', 'Stick')
+        distributeRooms();
+        listImages();
+    });
+}
+
+
 //Declaring global time varibles
-const d = new Date();
-var checkTime = 23;
+var deadLine = [21,24];
 
 //Import the student data
-var studentList = data.map((x) => x);
+var studentList = data;
 
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 var allowedExtraValue = 2;
@@ -18,6 +208,9 @@ var buttonsHidden = false;
 var houseButtonsShown = false;
 var roomButtonsShown = false;
 var smallButtons = false;
+var helpMenuOpen = false;
+var printMenuOpen = false;
+var expandableElements;
 var namePosition = 0;
 var roomAmount = 0;
 var allowedAmount = 0;
@@ -28,6 +221,13 @@ var runLock = false;
 var checkList = [];
 var weekendList = [];
 var home;
+var backgroundImages = [
+    'images/BG-1.jpg',
+    'images/BG-2.jpg',
+    'images/BG-3.jpg',
+    'images/BG-4.jpg'
+];
+var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImages.length)] + ')';
 
 //Declaring all houses & rooms
 var rooms = [
@@ -84,7 +284,7 @@ function handleConfig() {
         for (let i = 0; i < config.length; i++) {
             switch (Object.keys(config[i])[0]) {
                 case 'checkTime':
-                    checkTime = Object.values(config[i])[0];
+                    deadLine = Object.values(config[i])[0];
                     break;
             
                 case 'allowedRoomAmount':
@@ -112,48 +312,71 @@ function handleConfig() {
 handleConfig();
 
 //Converts the rooms to the correct sex, remains x if no-one is assaigned to the room
-for (let i = 0; i < rooms.length; i++) {
-    var _i = i;
-    if (i > 12) {
-        _i = i+1;
-    }
-    //Allowing for manual adjustment of the room
-    if (rooms[i].sex === 'x'){
-        if (i === 0) {
-            var index = studentList.findIndex(e => e.room  === "1a");
-        } else if (i === 1) {
-            var index = studentList.findIndex(e => e.room  === '1b');
-        } else {
-            var index = studentList.findIndex(e => e.room  === _i);
+function distributeRooms() {
+    for (let i = 0; i < rooms.length; i++) {
+        var _i = i;
+        if (i > 12) {
+            _i = i+1;
         }
-        if (index !== -1) {
-            var _sex = studentList[index].sex;
-            rooms[i].sex = _sex;
+        //Allowing for manual adjustment of the room
+        if (rooms[i].sex === 'x'){
+            if (i === 0) {
+                var index = studentList.findIndex(e => e.room  === "1a");
+            } else if (i === 1) {
+                var index = studentList.findIndex(e => e.room  === '1b');
+            } else {
+                var index = studentList.findIndex(e => e.room  === _i);
+            }
+            if (index !== -1) {
+                var _sex = studentList[index].sex;
+                rooms[i].sex = _sex;
+            }
         }
     }
+    console.info('Room gender distributed.')
 }
 
 window.addEventListener("keydown", checkKeyPressed, false);
 
 function checkKeyPressed(evt) {
     if (evt.keyCode === 69) {
-        showAlert("!!! Triggered Sort Event !!!");
         returnPeople();
     }
     if (evt.keyCode === 80) {
-        openPrintPopup();
-        generateList();
-        print();
+        readyToPrint();
     }
     if (evt.keyCode === 27) {
         closePrintPopup();
     }
     if (evt.keyCode === 82) {
-        generateList();
+        console.warn('Reloading profile images!')
+        reloadImages();
     }
     if (evt.keyCode === 76) {
         console.log(rooms);
     }
+    if (evt.keyCode === 72) {
+        helpMenu();
+    }
+}
+
+function reloadImages() {
+    var images = document.querySelectorAll('.image');
+    for (var i = 0; i < images.length; i++) {
+        if (i > 0) {
+            images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
+            images[i].src = data[i - 1].img;
+        }
+    }
+}
+
+function readyToPrint() {
+    var bottomNav = document.getElementById('bottom-navigation');
+    addTag(bottomNav, 'DONT-SHOW');
+    openPrintPopup();
+    generateList();
+    print();
+    removeTag(bottomNav, 'DONT-SHOW');
 }
 
 //Shortens name to a string less than a provided length
@@ -210,38 +433,108 @@ function generateList() {
     }
     runLock = true;
     //-------
-    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Room 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
+    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Værelse 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
     for (var i = 0; i < 11 ; i++) {
-        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
+        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
     }
     //-------
     for (var i = 0; i < 13 ; i++) {
-        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
+        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
     }
     tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
     //-------
     for (var i = 0; i < 13 ; i++) {
-        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
+        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
     }
     tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
     //-------
     for (var i = 0; i < 6 ; i++) {
-        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Room ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
+        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
     }
+}
+
+function helpMenu() {
+    if (helpMenuOpen !== true) {
+        helpMenuOpen = true;
+        var closeIcon = document.getElementById('close-button');
+        var printIcon = document.getElementById('print-button');
+        var helpMenu = document.getElementById('help-menu');
+        addTag(printIcon, 'DONT-SHOW');
+        //addTag(helpMenu, 'show');
+        removeTag(helpMenu, 'hide');
+        removeTag(closeIcon, 'DONT-SHOW');
+    }
+}
+
+function closeButton() {
+    if (helpMenuOpen === true) {
+        helpMenuOpen = false;
+        var helpMenu = document.getElementById('help-menu');
+        //removeTag(helpMenu, 'show');
+        addTag(helpMenu, 'hide');
+        if (!printMenuOpen) {
+            var closeIcon = document.getElementById('print-button');
+            var printIcon = document.getElementById('close-button');
+            addTag(printIcon, 'DONT-SHOW');
+            removeTag(closeIcon, 'DONT-SHOW');      
+        }
+    } else {
+        closePrintPopup();
+    }
+}
+
+function expandContent(id) {
+    var expandableElement = document.getElementById(id);
+    expandableElement.classList.toggle('expanded');
+    setExpandButtonText(expandableElement, id);
+}
+
+function setExpandButtonText(element, id) {
+    var button = document.getElementById('expand-button-' + id.substr(id.length - 1));
+    var expanded = element.classList.contains('expanded');
+    button.innerHTML = expanded ? 'Mindre' : 'Mere';
+}
+
+window.onload = () => {
+    document.getElementById('mainBody').style.backgroundImage = bgImg;
+    authenticateGoogleOAuth();
+    expandableElements = document.querySelectorAll('.expandable-content');
+    checkForOverflow();
+    var helpMenu = document.getElementById('help-menu');
+    addTag(helpMenu, 'hide');
+    addTag(helpMenu, 'visible');
+}
+
+function checkForOverflow() {
+    expandableElements.forEach(element => {
+        if (element.classList.contains("expanded")) return;
+        const overflowing = element.scrollHeight > element.clientHeight;
+        element.dataset.overflow = overflowing;
+    })
 }
 
 //Opens the popup menu
 function openPrintPopup() {
+    printMenuOpen = true;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
+    var closeIcon = document.getElementById('close-button');
+    var printIcon = document.getElementById('print-button');
+    addTag(printIcon, 'DONT-SHOW');
     addTag(popup, "show");
     addTag(body, "print");
+    removeTag(closeIcon, 'DONT-SHOW');
 }
 
 //Closes the popup menu
 function closePrintPopup() {
+    printMenuOpen = false;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
+    var closeIcon = document.getElementById('print-button');
+    var printIcon = document.getElementById('close-button');
+    addTag(printIcon, 'DONT-SHOW');
+    removeTag(closeIcon, 'DONT-SHOW');
     removeTag(popup, "show");
     removeTag(body, "print");
 }
@@ -284,7 +577,11 @@ function openPopup(i) {
     popup.classList.toggle("show");
     popup.classList.toggle("blur-bg");
     document.getElementById("replaceableText").innerHTML = studentList[i].name;
-    document.getElementById("replaceableImage").src = studentList[i].img;
+    if (document.getElementById("replaceableImage").src !== 'images/Dummy.svg') {
+        document.getElementById("replaceableImage").src = document.getElementById('pers-' + i).children[0].src;
+    } else {
+        document.getElementById("replaceableImage").src = data[i].img;
+    }
     closeButtons();
 }
 
@@ -314,29 +611,42 @@ function showAlert(alertMessage, param) {
     var alert = document.getElementById("alert-container");
     var alertContent = document.getElementById("alert-content");
     var alertEffect = document.getElementById("top-alert");
+    var alertText = document.getElementById("alertText");
     //Check if we just want to close the alert
-    if (param == "Close") {
-        alert.style.height = "0";
-        alertContent.style.height = "0";
-        alertEffect.style.height = "0";
-        return;
-    } else {
-        //Activate the effect
-        document.getElementById("top-alert").classList.toggle("active")
-        //Set the message in the alert to the specified text
-        document.getElementById("alertText").innerHTML = alertMessage;
-        //Open the alert
-        alert.style.height = "45px";
-        alertContent.style.height = "43px";
-        alertEffect.style.height = "45px";
-        //After 2s close the alert
-        setTimeout(function() {
+    switch (param) {
+        case 'Close':
             alert.style.height = "0";
             alertContent.style.height = "0";
             alertEffect.style.height = "0";
-            //Stop the effect
-            document.getElementById("top-alert").classList.toggle("active")
-        }, 2000)
+            break;
+
+        case 'Stick':
+            //Set the message in the alert to the specified text
+            alertText.innerHTML = alertMessage;
+            //Open the alert
+            alert.style.height = "45px";
+            alertContent.style.height = "43px";
+            alertEffect.style.height = "45px";
+            break;
+    
+        default:
+            //Activate the effect
+            addTag(alertEffect, "active");
+            //Set the message in the alert to the specified text
+            alertText.innerHTML = alertMessage;
+            //Open the alert
+            alert.style.height = "45px";
+            alertContent.style.height = "43px";
+            alertEffect.style.height = "45px";
+            //After 2s close the alert
+            setTimeout(function() {
+                alert.style.height = "0";
+                alertContent.style.height = "0";
+                alertEffect.style.height = "0";
+                //Stop the effect
+                removeTag(alertEffect, "active");
+            }, 2000);
+            break;
     }
     
 }
@@ -499,7 +809,7 @@ function personInRoom(id, room) {
         for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
             var roomContent = rooms[roomPos];
-            if (Object.values(roomContent).includes(id, 2)) {
+            if (Object.values(roomContent).includes(id, 3)) {
                 return roomContent;
             }
         }
@@ -517,7 +827,7 @@ function personInRoom(id, room) {
         var currentRoom = Object.assign({}, rooms[roomInQuestion]);
 
         try {
-            return Object.values(currentRoom).includes(id,2);
+            return Object.values(currentRoom).includes(id,3);
         } catch(err) {
             return false;
         }
@@ -873,7 +1183,22 @@ function returnPeople() {
 }
 
 //Function loads all the profiles once the sourcefile is selected
-function loadDOM() {
+async function loadDOM() {
+    var alertText = document.getElementById('alertText');
+    var body = document.getElementById('mainBody');
+    alertText.innerHTML = 'Venter på data';
+    if (!dataReady) {
+        console.warn('Waiting for data.')
+        var check = setInterval(function () {
+            if (dataReady) {
+                clearInterval(check);
+                loadDOM();
+            }
+        }, 100); 
+        return;
+    }
+    alertText.innerHTML = 'Loader profiler...';
+    addTag(body,'disabled');
     hideInput();
     for (var i = 0; i < weekendList.length; i++) {
         var index = studentList.findIndex(e => e.name  === weekendList[i]);
@@ -881,38 +1206,49 @@ function loadDOM() {
         var testObejct = studentList[index];
         testObejct.choice = "ikke valgt";
     }
-    //Call the function
-    appendData(studentList)
-    //Load all profiles named in "studentList"
-    function appendData(studentList) {
-        //Grabs the outer shell for where the profiles are to be loaded to
-        var mainContainer = document.getElementById("container");
-        //Loads each profle one by one, giving assets as well
-        for (var i = 0; i < studentList.length; i++) {
-            if (checkList.includes(i)) {
-                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + studentList[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + studentList[i].img + '" class="image"> <p class="name-text">' + studentList[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
-            } else {
-                mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + studentList[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + studentList[i].img + '" class="image"> <p class="name-text">' + studentList[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
-            }
+    //Grabs the outer shell for where the profiles are to be loaded to
+    var mainContainer = document.getElementById("container");
+    //Loads each profle one by one, giving assets as well
+        
+    for (var i = 0; i < data.length; i++) {
+        if (checkList.includes(i)) {
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+        } else {
+            mainContainer.insertAdjacentHTML("beforeend",'<div class="image-container DONT-SHOW Ikke-Valgt ' + data[i].name.charAt(0) + '" id="pers-' + i + '" onclick="openPopup('+ i +')">' + '<img src="' + data[i].img + '" class="image"> <p class="name-text">' + data[i].name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
         }
     }
     //Count the data
     countData();
     //Close the alert once the window is loaded
     showAlert(" ", "Close");
+    removeTag(body,'disabled');
     //Set a interval that checks the time every minute
     var minute = 1000*60;
     setInterval(() => {
-        if (checkHour()) {
+        if (checkTime()) {
             returnPeople();
             clearInterval();
+            readyToPrint();
         }
     }, minute);
+
+    const img = document.querySelectorAll(".image");
+    img.forEach((e) => e.addEventListener("error", function(event) {
+        event.target.src = "images/Dummy.svg";
+        //event.onerror = null;
+    }));
 }
 
-function checkHour() {
+function getPicture(name) {
+    var file = imageFiles.find(file => file.name === name);
+    return file.webContentLink.replace("&export=download", "").replace('/uc?','/thumbnail?');
+}
+
+function checkTime() {
+    const d = new Date();
     var hour = d.getHours();
-    if (hour === checkTime) {
+    var minute = d.getMinutes();
+    if (hour == deadLine[0] && minute == deadLine[1]) {
         return true;
     } else {
         return false;
@@ -949,38 +1285,4 @@ function hideInput() {
 window.onbeforeunload = function(event) {
     event.preventDefault();
     return event.returnValue = "Are you sure you want to leave the page?";
-}
-
-//Load the weekend file
-function previewFile() {
-    var [file] = document.querySelector("input[type=file]").files;
-    const reader = new FileReader();
-
-    reader.addEventListener("load", () => {
-        //Set the result
-        var res = reader.result;
-        //Set the delta of how often we need to remove parts of the array.
-        var delta = 2;
-        //Split the result
-        const splitArray = res.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
-        //Remove the first 4 items of the array
-        splitArray.splice(0,4);
-        //Loop through the array where we delete every nth (delta) of the array
-        for (var i = delta; i < splitArray.length; i += delta) {
-            splitArray.splice(i,1);
-        }
-        //Loop though the array were we join every 2 parts of the array.
-        for (var i = 0; i < splitArray.length; i += delta) {
-            var cacheArray = [splitArray[i],splitArray[i+1]];
-            weekendList.push(cacheArray.join(' '));
-        }
-        //Run the function to load the rest of the DOM
-        loadDOM();
-        },
-        false,
-    );
-
-    if (file) {
-        reader.readAsText(file);
-    }
 }
