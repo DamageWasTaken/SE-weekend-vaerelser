@@ -496,7 +496,9 @@ function setExpandButtonText(element, id) {
 }
 
 window.onload = () => {
-    document.getElementById('mainBody').style.backgroundImage = bgImg;
+    if (document.getElementById('mainBody').getAttribute('data-UIStyle') !== 'new') {
+        document.getElementById('mainBody').style.backgroundImage = bgImg;
+    }
     authenticateGoogleOAuth();
     expandableElements = document.querySelectorAll('.expandable-content');
     checkForOverflow();
