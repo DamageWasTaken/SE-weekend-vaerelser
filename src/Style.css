@@ -830,3 +830,28 @@ body {
 }
 
 }
+
+/*New UI styling*/
+
+body[data-UIStyle="new"] #top-row {
+    background-color: var(--fadded);
+    width: fit-content;
+    padding-right: 6px;
+    border-radius: 6px;
+}
+
+body[data-UIStyle="new"] #image-icon {
+    width: 50px;
+    height: 50px;
+    padding: 2.5px 0 2.5px 6px;
+}
+
+body[data-UIStyle="new"] #side-nav {
+    background-color: var(--fadded);
+    padding: 6px 6px 6px 6px;
+    border-radius: 6px;
+}
+
+body[data-UIStyle="new"] .full-container {
+    grid-template-rows: 125px;
+}
