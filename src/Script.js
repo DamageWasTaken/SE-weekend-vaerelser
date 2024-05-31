@@ -192,7 +192,7 @@ function downloadFile(fileId) {
 
 
 //Declaring global time varibles
-var deadLine = [21,24];
+var deadLine = [22,45];
 
 //Import the student data
 var studentList = data;
@@ -543,11 +543,14 @@ function closePrintPopup() {
 
 //Make the top group selector work
 function selectGroup(group) {
+    document.querySelectorAll('.highlighted').forEach((e) => {e.classList.remove('highlighted')});
     if (group == 'home') {
         [].forEach.call(document.querySelectorAll('.image-container'), function (el) {
             el.style.display = 'flex';
         });
     } else {
+        console.log(document.getElementById('eget'));
+        addTag(document.getElementById(group.toLowerCase()),'highlighted');
         clearTimeout(home);
         if (group == "Alle"){
             //If all is selected show all images/profiles

@@ -12,6 +12,8 @@
     --small: 14px;
     --green: #428d2a;
     --blue: #0000fe;
+    --fadedgreen: #657A62;
+    --fadedblue: #849BAA;
     --red: #d31919;
     --orange: #e78514;
     --cyan: #157fa4;
@@ -53,7 +55,7 @@ body {
     font-family: 'Arimo', sans-serif;
     color: var(--text);
     background-color: #8BC6EC;
-    background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+    background-image: url(images/BG-new.png);
 }
 
 nav {
@@ -95,6 +97,30 @@ h2 {
     font-weight: 700;
     margin: 0;
     font-family: 'Arimo', sans-serif;
+}
+
+
+body[data-UIStyle="new"] p {
+    font-size: 18px;
+    letter-spacing: normal;
+    line-height: 150%;
+    font-family: 'Poppins', sans-serif;
+}
+
+body[data-UIStyle="new"] h1 {
+    font-size: var(--h1);
+    letter-spacing: -2px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+body[data-UIStyle="new"] h2 {
+    font-size: var(--h2);
+    letter-spacing: -2px;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
 }
 
 .show {
@@ -468,11 +494,11 @@ ul.help-menu-element-content{
     background-color: var(--red);
 }
 
-#sover-andet-varelse {
+#andet {
     background-color: var(--blue);
 }
 
-#sover-eget-vaerelse {
+#eget {
     background-color: var(--green);
 }
 
@@ -833,6 +859,8 @@ body {
 
 /*New UI styling*/
 
+
+
 body[data-UIStyle="new"] {
     background-image: url('images/BG-new.png');
 }
@@ -851,7 +879,7 @@ body[data-UIStyle="new"] #top-row {
 body[data-UIStyle="new"] #bottom-row {
     left: 6px;
     bottom: 50px;
-    height: 85vh;
+    height: 84vh;
     flex-direction: column;
     position: absolute;
     width: initial;
@@ -879,6 +907,9 @@ body[data-UIStyle="new"] #side-nav {
 
 body[data-UIStyle="new"] .full-container {
     grid-template-rows: 125px;
+    margin-left: 7%;
+    row-gap: 75px;
+    width: 90%;
 }
 
 body[data-UIStyle="new"] #side-nav {
@@ -897,8 +928,63 @@ body[data-UIStyle="new"] .selector {
     background-color: transparent !important;
 }
 
-body[data-UIStyle="new"] .large-number {
-    font-size: 20px;
+body[data-UIStyle="new"] .selector-text {
+    line-height: 1;
     margin: 0;
+    padding: 4px 0 4px 0;
+}
+
+body[data-UIStyle="new"] .large-number {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 600;
+}
+
+body[data-UIStyle="new"] .name-text {
+    line-height: 1.2;
+    overflow: hidden;
+    margin: 0;
+    text-align: center;
+    padding-top: 10px;
+    white-space: initial;
+    height: 25px;
+    width: 92%;
+}
+
+body[data-UIStyle="new"] .image-container {
+    width: 125px;
+    height: 150px;
+    border-radius: 12.5px;
+    background-color: var(--fadded);
+}
+
+body[data-UIStyle="new"] .image-container>.image {
+    border-radius: 12.5px;
+    margin-top: 12.5px;
+}
+
+body[data-UIStyle="new"] .nav-button-icon {
+    border: none;
+}
+
+body[data-UIStyle="new"] .image-container.Andet > .room-overlay {
+    background-color: var(--fadedblue);
+}
+
+body[data-UIStyle="new"] .image-container.Eget > .room-overlay {
+    background-color: var(--fadedgreen);
+}
+
+body[data-UIStyle="new"] .overlay-text {
+    font-weight: 600;
+}
+
+.highlighted {
+    border: solid white 1px;
+    font-weight: 800 !important;
+}
+
+.selector.highlighted {
+    border: none;
     font-weight: 600;
 }
