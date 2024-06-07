@@ -3,7 +3,7 @@
 //Flags: checkTime, allowedRoomAmount, 
 
 const config = [
-    {checkTime: [21,45]},
+    {checkTime: [22,45]},
     {allowedRoomAmount: 2},
 ]
 
