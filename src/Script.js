@@ -11,6 +11,7 @@ var accessToken = null;
 var pickerInited = false;
 var gisInited = false;
 var data = [];
+var pickerRawData;
 var dataReady = false;
 
 var imageFiles;
@@ -114,6 +115,7 @@ async function pickerCallback(data) {
 
 //Handles the weekend file data and splits it to an array with obejcts
 function handleData(data) {
+    pickerRawData = data;
     var delta = 2;
     //Split the result
     var splitArray = data.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
@@ -121,6 +123,24 @@ function handleData(data) {
     splitArray.splice(0,4);
     //Loop through the array where we delete every nth (delta) of the array
     
+    for (var i = delta; i < splitArray.length; i += delta) {
+        splitArray.splice(i,1);
+    }
+    for (var i = 0; i < splitArray.length; i += delta) {
+      var cacheArray = [splitArray[i],splitArray[i+1]];
+      weekendList.push(cacheArray.join(' '));
+    }
+    loadDOM();
+}
+
+function handleDataAlternative() {
+    weekendList=[]
+    var delta = 2;
+    //Split the result
+    var splitArray = pickerRawData.split(/(?:\r?\n|(?:,))/gim); // |(?:;)
+    //Remove the first 4 items of the array
+    splitArray.splice(0,4);
+    //Loop through the array where we delete every nth (delta) of the array
     for (var i = delta; i < splitArray.length; i += delta) {
         splitArray.splice(i,1);
     }
@@ -218,6 +238,7 @@ var roomPosition = 0;
 var selectedHouse = "";
 var personSelected = 0;
 var runLock = false;
+var invalidData = false;
 var checkList = [];
 var weekendList = [];
 var home;
@@ -1205,11 +1226,23 @@ async function loadDOM() {
     alertText.innerHTML = 'Loader profiler...';
     addTag(body,'disabled');
     hideInput();
-    for (var i = 0; i < weekendList.length; i++) {
-        var index = studentList.findIndex(e => e.name  === weekendList[i]);
-        checkList.push(index);
-        var testObejct = studentList[index];
-        testObejct.choice = "ikke valgt";
+    //Tries to load the profiles by having the data split by ';' and if that doesn't work we go back and split the data with ','
+    try {
+        for (var i = 0; i < weekendList.length; i++) {
+            var index = studentList.findIndex(e => e.name  === weekendList[i]);
+            checkList.push(index);
+            var testObejct = studentList[index];
+            testObejct.choice = "ikke valgt";
+        }
+    } catch (error) {
+        if (!invalidData) {
+            console.info('Data could not be loaded, trying alternative split method.')
+            invalidData = true;
+            handleDataAlternative();
+        } else {
+            console.error('Data is invalid');
+            console.error(error);
+        }
     }
     //Grabs the outer shell for where the profiles are to be loaded to
     var mainContainer = document.getElementById("container");
