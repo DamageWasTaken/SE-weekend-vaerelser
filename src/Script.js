@@ -13,6 +13,7 @@ var gisInited = false;
 var data = [];
 var pickerRawData;
 var dataReady = false;
+var sameFile = false;
 
 var imageFiles;
 
@@ -46,6 +47,8 @@ function authenticateGoogleOAuth() {
             throw (response);
         }
         accessToken = response.access_token;
+        var tempObject = {value: accessToken, timestamp: new Date().getTime()};
+        localStorage.setItem('accesstoken', JSON.stringify(tempObject));
         console.info('Downloading data, this may take a minute');
         findFile();
     };
@@ -105,6 +108,13 @@ async function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
         const document = data[google.picker.Response.DOCUMENTS][0];
         const fileId = document[google.picker.Document.ID];
+        if (fileId == localStorage.getItem('previousFile')) {
+            sameFile = true;
+        } else {
+            localStorage.removeItem('rooms');
+            localStorage.removeItem('choices');
+            localStorage.setItem('previousFile',fileId);
+        }
         const res = await gapi.client.drive.files.get({
             'fileId': fileId,
             'alt': 'media',
@@ -359,6 +369,10 @@ function distributeRooms() {
 
 window.addEventListener("keydown", checkKeyPressed, false);
 
+document.addEventListener('touchmove', function (event) {
+    if (('scale' in event) && event.scale !== 1) { event.preventDefault(); }
+  }, false);
+
 function checkKeyPressed(evt) {
     if (evt.keyCode === 69) {
         returnPeople();
@@ -378,6 +392,9 @@ function checkKeyPressed(evt) {
     }
     if (evt.keyCode === 72) {
         helpMenu();
+    }
+    if (evt.keyCode === 74) {
+        updateStoredData();
     }
 }
 
@@ -517,8 +534,23 @@ function setExpandButtonText(element, id) {
 }
 
 window.onload = () => {
+    //localStorage.clear();
     if (document.getElementById('mainBody').getAttribute('data-UIStyle') !== 'new') {
         document.getElementById('mainBody').style.backgroundImage = bgImg;
+    }
+    try {
+        var storedToken = JSON.parse(localStorage.getItem('accesstoken')),
+            dateString = storedToken.timestamp,
+            token = storedToken.value,
+            now = new Date().getTime().toString;
+        if (dataExpired(dateString, now, 12)) {
+            console.info('Accesstoken expired!');
+            localStorage.removeItem('accesstoken');
+        } else {
+            accessToken = token;
+        }
+    } catch (error) {
+        console.info('No accesstoken found!');
     }
     authenticateGoogleOAuth();
     expandableElements = document.querySelectorAll('.expandable-content');
@@ -526,6 +558,42 @@ window.onload = () => {
     var helpMenu = document.getElementById('help-menu');
     addTag(helpMenu, 'hide');
     addTag(helpMenu, 'visible');
+}
+
+//Checks if the time has exceded the compareTime by the timeLimit (Measured in hours)
+function dataExpired(time, compareTime, timeLimit) {
+    //Get the time limit in seconds
+    timeLimit *= 3600;
+    //Compare the time
+    if ((compareTime - time)/1000 > timeLimit) {return true;}
+    return false;
+}
+
+//Stores importent data, so it's not lost even after a site reload
+function updateStoredData() {
+    localStorage.setItem('rooms',JSON.stringify(rooms));
+    var choices = [];
+    data.forEach((e,i) => {
+        choices.push(e.choice);
+    });
+    localStorage.setItem('choices', JSON.stringify(choices))
+}
+
+function loadStoredData() {
+    //Can add expiration check here
+    if (!sameFile) {
+        return;
+    }
+    rooms = JSON.parse(localStorage.getItem('rooms'));
+    var storedData = JSON.parse(localStorage.getItem('choices'));
+    data.map((e, i) => e.choice = storedData[i]);
+    updateCount();
+    for (let i = 0; i < data.length; i++) {
+        var room = personInRoom(data[i].number).room
+        if (room !== undefined) {
+            updateDisplayedRoom('pers-' + i, room);
+        }
+    }
 }
 
 function checkForOverflow() {
@@ -718,9 +786,11 @@ function selectorButton(place) {
             countData();
             closePopup();
             addPersonToRoom(studentList[namePosition].number, studentList[namePosition].room, false);
+            updateStoredData();
         } else {
             relocate(personNumber, roomNumber, "", true)
             closePopup();
+            updateStoredData();
         }
         
     } else {
@@ -831,7 +901,7 @@ function checkRoomAvailability(room) {
 function personInRoom(id, room) {
     //Check if the room param is specified
     if (room == null || (typeof room === "string" && room.trim().length === 0)) {
-        //If it is check all houses for the person
+        //If it is not, check all houses for the person
         for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
             var roomContent = rooms[roomPos];
@@ -1011,6 +1081,7 @@ function selectRoom(setRoom) {
     removeTag(currentPerson, "Ikke-Valgt");
     closePopup();
     countData();
+    updateStoredData();
 }
 
 //Check if the button should be grayed out, and does so if needed.
@@ -1206,6 +1277,7 @@ function returnPeople() {
         }
     }
     countData();
+    updateStoredData();
 }
 
 //Function loads all the profiles once the sourcefile is selected
@@ -1257,9 +1329,6 @@ async function loadDOM() {
     }
     //Count the data
     countData();
-    //Close the alert once the window is loaded
-    showAlert(" ", "Close");
-    removeTag(body,'disabled');
     //Set a interval that checks the time every minute
     var minute = 1000*60;
     setInterval(() => {
@@ -1275,6 +1344,10 @@ async function loadDOM() {
         event.target.src = "images/Dummy.svg";
         //event.onerror = null;
     }));
+    if (localStorage.getItem('choices') || localStorage.getItem('room')) {loadStoredData();}
+    //Close the alert once the window is loaded
+    showAlert(" ", "Close");
+    removeTag(body,'disabled');
 }
 
 function getPicture(name) {

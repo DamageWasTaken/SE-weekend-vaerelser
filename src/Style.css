@@ -829,6 +829,7 @@ body {
     background-attachment: fixed;
     background-position: center; 
     scroll-behavior: smooth;
+    background-size: cover;
 }
 
 #text {
