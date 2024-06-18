@@ -233,8 +233,8 @@ body[data-UIStyle="new"] h2 {
 .nav-button-icon {
     background-color: var(--fadded);
     border-radius: 6px;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -244,6 +244,12 @@ body[data-UIStyle="new"] h2 {
 
 #help-button {
     font-family: 'Arimo';
+    font-size: 18px;
+}
+
+#printer-icon {
+    height: 20px;
+    width: 20px;
 }
 
 #bottom-navigation {
@@ -840,7 +846,7 @@ body {
     display: grid;
     margin-left: 15%;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 100px;
+    grid-template-rows: repeat(auto-fill, 100px);
     position: relative;
     height: 80vh;
     column-gap: 4%;

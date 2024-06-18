@@ -166,7 +166,9 @@ function findFile() {
     //List the files in the config folder
     gapi.client.drive.files.list({
         q: "name='config' and mimeType='application/vnd.google-apps.folder'",
-        fields: 'files(id, name)'
+        fields: 'files(id, name)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true
     }).then((response) => {
         //Check if the folder is found
         const folders = response.result.files;
@@ -175,7 +177,9 @@ function findFile() {
             const folderId = folders[0].id;
             gapi.client.drive.files.list({
                 q: `'${folderId}' in parents and name='Data.txt'`,
-                fields: 'files(id, name)'
+                fields: 'files(id, name)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true
             }).then((response) => {
                 //Get the files ID and send it over to be downloaded
                 const files = response.result.files;
@@ -234,6 +238,7 @@ var allowedExtraValue = 2;
 var noChoise = 0;
 var ownRoom = 0;
 var otherRoom = 0;
+var timeoutTime = 2;
 var buttonsHidden = false;
 var houseButtonsShown = false;
 var roomButtonsShown = false;
@@ -320,6 +325,10 @@ function handleConfig() {
             
                 case 'allowedRoomAmount':
                     allowedExtraValue = Object.values(config[i])[0];
+                    break;
+
+                case 'returnToHomeTimeout':
+                    timeoutTime = Object.values(config[i])[0];
                     break;
             }
         }
@@ -409,6 +418,7 @@ function reloadImages() {
 }
 
 function readyToPrint() {
+    returnPeople();
     var bottomNav = document.getElementById('bottom-navigation');
     addTag(bottomNav, 'DONT-SHOW');
     openPrintPopup();
@@ -587,13 +597,13 @@ function loadStoredData() {
     rooms = JSON.parse(localStorage.getItem('rooms'));
     var storedData = JSON.parse(localStorage.getItem('choices'));
     data.map((e, i) => e.choice = storedData[i]);
-    updateCount();
     for (let i = 0; i < data.length; i++) {
         var room = personInRoom(data[i].number).room
         if (room !== undefined) {
             updateDisplayedRoom('pers-' + i, room);
         }
     }
+    countData();
 }
 
 function checkForOverflow() {
@@ -638,7 +648,6 @@ function selectGroup(group) {
             el.style.display = 'flex';
         });
     } else {
-        console.log(document.getElementById('eget'));
         addTag(document.getElementById(group.toLowerCase()),'highlighted');
         clearTimeout(home);
         if (group == "Alle"){
@@ -655,12 +664,13 @@ function selectGroup(group) {
                 el.style.display = 'flex';
             });
         }
-        home = setTimeout(returnNormal,300000);
+        home = setTimeout(returnNormal,(timeoutTime * 60000));
     }
 }
 
 //Returns the page to deafault state
 function returnNormal() {
+    console.log('Return');
     selectGroup('home');
     closePopup();
 }
@@ -682,8 +692,8 @@ function openPopup(i) {
 //Closes the popup menu
 function closePopup() {
     var popup = document.getElementById("popup");
-    popup.classList.toggle("show");
-    popup.classList.toggle("blur-bg");
+    removeTag(popup,'show');
+    removeTag(popup,'blur-bg');
     closeButtons();
 }
 
