@@ -439,6 +439,49 @@ ul.help-menu-element-content{
 }
 
 /*═══════════════════════*/
+/*  Config menu styling*/
+
+#config-menu {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+}
+
+#user-add-name {
+    resize: none;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid var(--text2);
+    color: var(--text2);
+    background-color: var(--text);
+}
+
+.popup-inner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--text);
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.config-popup-container {
+    display: flex;
+    flex-direction: column;
+    width: 35%;
+    height: 250px;
+}
+
+#config-text {
+    margin: 0;
+}
+
+/*═══════════════════════*/
 /*  Print popup styling*/
 
 .header {
