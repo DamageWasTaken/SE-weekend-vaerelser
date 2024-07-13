@@ -232,6 +232,9 @@ var deadLine = [22,45];
 //VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
 var allowedExtraValue = 2;
 
+//Temporary users:
+var temporaryUsers = [];
+
 //General variables
 var noChoise = 0;
 var ownRoom = 0;
@@ -766,23 +769,47 @@ function changePersonStatus(status) {
     var configButton2 = document.getElementById('config-button-2');
     var currentName = e => e.name === document.getElementById("config-text").textContent;
     namePosition = data.findIndex(currentName);
+    var profile = document.getElementById('pers-' + namePosition);
+    var childElement = profile.children[2];
+    var topText = childElement.children[0];
+    var bottomText = childElement.children[1];
     if (status === 'back') {
         removeTag(configButton1, 'not-available');
+        removeTag(profile, 'Ikke-Her');
+        addTag(profile, 'Ikke-Valgt')
         addTag(configButton2, 'not-available');
         data[namePosition].choice = 'ikke valgt';
-        countData();
+        topText.innerHTML = 'Værelse';
     } else {
         addTag(configButton1, 'not-available');
+        addTag(profile, 'Ikke-Her');
+        removeTag(profile, 'Ikke-Valgt');
+        removeTag(profile, 'Andet');
+        removeTag(profile, 'Eget');
         removeTag(configButton2, 'not-available');
         data[namePosition].choice = 'NOTHERE';
+        topText.innerHTML = 'Ikke på';
+        bottomText.innerHTML = 'Skolen';
         if (personInRoom(data[namePosition].number) !== false) {
             removePersonFromRoom(personInRoom(data[namePosition].number));
         }
     }
+    countData();
 }
 
 function addUser() {
-    
+    var name = document.getElementById('user-add-name').value;
+    if (name.match(/^[A-Za-z ]+$/)) {
+        var temporaryID = 999 - temporaryUsers.length;
+        temporaryUsers.push({
+            'name':name,
+            'id':temporaryID
+        })
+        console.log('ID: ' + temporaryID);
+        console.log('Name: ' + name);
+    } else {
+        showAlert('Navn må kun inholde bogstaver');
+    }
 }
 
 //Closes the popup menu

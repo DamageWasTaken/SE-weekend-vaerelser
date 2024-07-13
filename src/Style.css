@@ -715,9 +715,14 @@ ul.help-menu-element-content{
     background-color: var(--blue);
 }
 
-.image-container.Andet > .room-overlay {
+.image-container.Ikke-Her > .room-overlay {
     display: inline;
     background-color: var(--orange);
+}
+
+.Ikke-Her {
+    pointer-events: none;
+    opacity: 70%;
 }
 
 .name-text {
