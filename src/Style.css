@@ -715,6 +715,11 @@ ul.help-menu-element-content{
     background-color: var(--blue);
 }
 
+.image-container.Andet > .room-overlay {
+    display: inline;
+    background-color: var(--orange);
+}
+
 .name-text {
     font-size: 12px;
     line-height: 0;

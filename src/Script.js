@@ -203,10 +203,8 @@ function downloadFile(fileId) {
         'alt': 'media'
     }).then((response) => {
         const fileContent = response.body;
-        console.log(fileContent);
         //Split the huge text chunk into smaller strings.
         const temp = fileContent.toString().split('[')[1].toString().split(']')[0].toString().split(','); //
-        console.log(temp);
         //Combine the text together and parse them into objects.
         for (var i = 0; i < temp.length; i += 6) {    
           var cacheArray = [temp[i],temp[i+1],temp[i+2],temp[i+3],temp[i+4],temp[i+5]];
@@ -215,7 +213,6 @@ function downloadFile(fileId) {
           }
           data.push(JSON.parse(cacheArray.join(',')));
         }
-        console.log(data);
         console.info('Data is ready.')
 
         // After the data is ready ...
@@ -385,31 +382,34 @@ document.addEventListener('touchmove', function (event) {
   }, false);
 
 function checkKeyPressed(evt) {
-    if (evt.keyCode === 69) {
-        returnPeople();
+    if (evt.keyCode === 69 && evt.altKey) {
+        returnPeople(); // e
     }
-    if (evt.keyCode === 80) {
-        readyToPrint();
+    if (evt.keyCode === 80 && evt.altKey) {
+        readyToPrint(); // p
     }
     if (evt.keyCode === 27) {
-        closePrintPopup();
+        closePrintPopup(); // esc
     }
-    if (evt.keyCode === 82) {
-        console.warn('Reloading profile images!')
-        reloadImages();
+    if (evt.keyCode === 82 && evt.altKey) {
+        console.warn('Reloading profile images!');
+        reloadImages(); // r
     }
-    if (evt.keyCode === 76) {
-        console.log(rooms);
+    if (evt.keyCode === 76 && evt.altKey) {
+        console.log(rooms); // l
         console.log(data);
     }
-    if (evt.keyCode === 72) {
-        helpMenu();
+    if (evt.keyCode === 72 && evt.altKey) {
+        helpMenu(); // h
     }
-    if (evt.keyCode === 74) {
-        updateStoredData();
+    if (evt.keyCode === 74 && evt.altKey) {
+        updateStoredData(); // j
     }
-    if (evt.keyCode === 67) {
-        configMenu();
+    if (evt.keyCode === 67 && evt.altKey) {
+        configMenu(); // c
+    }
+    if (evt.keyCode === 88 && evt.altKey) {
+        localStorage.removeItem('previousFile'); // x
     }
 }
 
@@ -713,7 +713,6 @@ function selectGroup(group) {
 
 //Returns the page to deafault state
 function returnNormal() {
-    console.log('Return');
     selectGroup('home');
     closePopup();
 }
@@ -770,17 +769,20 @@ function changePersonStatus(status) {
     if (status === 'back') {
         removeTag(configButton1, 'not-available');
         addTag(configButton2, 'not-available');
-        data[namePosition].choice = 'NAN';
-        console.log('here, 1');
+        data[namePosition].choice = 'ikke valgt';
+        countData();
     } else {
         addTag(configButton1, 'not-available');
         removeTag(configButton2, 'not-available');
         data[namePosition].choice = 'NOTHERE';
-        console.log('here, 2');
         if (personInRoom(data[namePosition].number) !== false) {
-            //removePersonFromRoom(personInRoom(data[namePosition].number));
+            removePersonFromRoom(personInRoom(data[namePosition].number));
         }
     }
+}
+
+function addUser() {
+    
 }
 
 //Closes the popup menu
