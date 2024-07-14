@@ -166,6 +166,10 @@ body[data-UIStyle="new"] h2 {
     width: 170px;
 }
 
+.selected {
+    border: solid var(--text2) 1px;
+}
+
 /*═══════════════════════*/
 /*  nav styling*/
 .nav-button {
@@ -458,6 +462,15 @@ ul.help-menu-element-content{
     border: 1px solid var(--text2);
     color: var(--text2);
     background-color: var(--text);
+}
+
+.gender-selector-container {
+    display: flex;
+    gap: 10px;
+}
+
+.gender-selector-container > :not(.selected){
+    opacity: 70%;
 }
 
 .popup-inner-container {

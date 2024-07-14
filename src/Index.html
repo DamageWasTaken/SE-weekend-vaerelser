@@ -310,7 +310,10 @@
                     </svg>
                 </div>
                 <div class="popup-inner-container" style="justify-content: space-evenly;">
-                    <img class="image" src="images/Dummy.svg"> 
+                    <div class="gender-selector-container">
+                        <img id="male-img" class="image selected" src="images/Dummy_M.png" onclick="selectGender('male')"> 
+                        <img id="female-img" class="image" src="images/Dummy_F.png" onclick="selectGender('female')">
+                    </div>
                     <textarea name="Navn" id="user-add-name" rows="1" cols="25" minlength="2" maxlength="22" placeholder="Navn"></textarea>
                     <button onclick="addUser()" id="submit-button" class="popup-button">Tilføj Bruger</button>
                 </div>

@@ -236,6 +236,7 @@ var allowedExtraValue = 2;
 var temporaryUsers = [];
 
 //General variables
+var previousAlert = 'none';
 var noChoise = 0;
 var ownRoom = 0;
 var otherRoom = 0;
@@ -799,16 +800,54 @@ function changePersonStatus(status) {
 
 function addUser() {
     var name = document.getElementById('user-add-name').value;
-    if (name.match(/^[A-Za-z ]+$/)) {
-        var temporaryID = 999 - temporaryUsers.length;
-        temporaryUsers.push({
-            'name':name,
-            'id':temporaryID
-        })
-        console.log('ID: ' + temporaryID);
-        console.log('Name: ' + name);
-    } else {
-        showAlert('Navn må kun inholde bogstaver');
+    //Defining where we want to add the person, it's done like this so we can add the element after the config-pers.
+    var target = document.getElementById("config-pers");
+    //Check conditions for the name
+    switch (true) {
+        case !name.match(/^[ÆØÅæøåA-Za-z ]+$/):
+            console.warn('Name contains non letters');
+            showAlert('Navn må kun inholde bogstaver');
+            return;
+        case temporaryUsers.some((e) => e.name.toLowerCase() === name.toLowerCase()):
+            console.warn('Name already exists');
+            showAlert('Navn findes allerede');
+            return;
+        case temporaryUsers.length > 99:
+            console.warn('Too many temporary users');
+            showAlert('For mange midlertidig brugerer');
+            return;
+        case name.length < 3:
+            console.warn('Name too short');
+            showAlert('Navnet skal være mere end 3 tegn');
+            return;
+    }
+    //Giving the user a temporary ID number
+    var temporaryID = 999 - temporaryUsers.length;
+    //Grabbing their selected gender
+    var gender = document.getElementById('male-img').classList.contains('selected') ? 'm' : 'f';
+    //Pushing the user data to a array of temporary users
+    temporaryUsers.push({
+        'name':name,
+        'id':temporaryID,
+        'sex':gender
+    })
+    //Adding the user to the container with the other users
+    target.insertAdjacentHTML("afterend",'<div class="image-container Ikke-Valgt ' + name.charAt(0).toUpperCase() + '" id="pers-' + temporaryID + '" onclick="openPopup('+ temporaryID +')">' + '<img src="images/Dummy_Guest.png" class="image"> <p class="name-text">' + name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
+    console.log(temporaryUsers);
+}
+
+function selectGender(gender) {
+    var maleImg = document.getElementById('male-img');
+    var femaleImg = document.getElementById('female-img');
+    switch (gender) {
+        case 'male':
+            addTag(maleImg, 'selected');
+            removeTag(femaleImg, 'selected');
+            break;
+        case 'female':
+            addTag(femaleImg, 'selected');
+            removeTag(maleImg, 'selected');
+            break;
     }
 }
 
@@ -848,6 +887,7 @@ function showAlert(alertMessage, param) {
     //Check if we just want to close the alert
     switch (param) {
         case 'Close':
+            previousAlert = 'none';
             alert.style.height = "0";
             alertContent.style.height = "0";
             alertEffect.style.height = "0";
@@ -856,6 +896,8 @@ function showAlert(alertMessage, param) {
         case 'Stick':
             //Set the message in the alert to the specified text
             alertText.innerHTML = alertMessage;
+            //Set a variable so we can call it later if a new temporary alert is called.
+            previousAlert = alertMessage;
             //Open the alert
             alert.style.height = "45px";
             alertContent.style.height = "43px";
@@ -878,6 +920,9 @@ function showAlert(alertMessage, param) {
                 alertEffect.style.height = "0";
                 //Stop the effect
                 removeTag(alertEffect, "active");
+                if (previousAlert !== 'none') {
+                    showAlert(previousAlert, 'Stick');
+                }
             }, 2000);
             break;
     }
