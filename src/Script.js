@@ -765,9 +765,6 @@ function openPopup(i) {
                 document.getElementById("replaceableImage").src = data[i].img;
             }
             loadSelectorPage(0);
-            if (document.getElementById('pers-' + i).children[0].src.includes('images/Dummy_Guest.png')) {
-                addTag(document.getElementById('selector-button-1'), 'not-available');
-            }
         break;
     }
 }
@@ -1064,6 +1061,9 @@ function loadSelectorPage(page, ...args) {
             addTag(image, 'show');
             addTag(nameText, 'show');
             removeTag(button_1, 'not-available');
+            if (Number(popup.dataset.user.split('-')[1]) > 899) {
+                addTag(button_1, 'not-available');
+            }
             break;
     
         case 1:
