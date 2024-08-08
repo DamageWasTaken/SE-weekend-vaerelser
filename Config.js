@@ -1,6 +1,6 @@
 //Config file for the program
 //Syntax: {falg, value}
-//Flags: checkTime, allowedRoomAmount, returnToHomeTimeout
+//Flags: checkTime, allowedRoomAmount, returnToHomeTimeout, saveTemporaryUsers
 
 const config = [
     {checkTime: [22,45]},
@@ -12,8 +12,7 @@ const config = [
 //Falgs: roomSpace, roomGender
 
 const roomConfig = [
-    [7,'roomSpace',0],
-    [28,'roomSpace',0],
+
 ]
 
 // Base configuration

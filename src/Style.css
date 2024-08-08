@@ -624,7 +624,7 @@ ul.help-menu-element-content{
 }
 
 .popup-buttons {
-    display: flex;
+    display: none;
     flex-direction: row;
 }
 
@@ -644,7 +644,6 @@ ul.help-menu-element-content{
 }
 
 #buttons-stage-2 {
-    display: none;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
@@ -653,7 +652,6 @@ ul.help-menu-element-content{
 }
 
 #buttons-stage-3 {
-    display: none;
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -665,10 +663,19 @@ ul.help-menu-element-content{
     padding-right: 24px;
 }
 
+#replaceableText, #replaceableImage {
+    display: none;
+}
+
+.small > .room-button:has(.extra-btn) {
+    display: none !important;
+}
+
 #header {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    display: none;
     width: 100%;
     padding: 0 6px;
     margin: 16px 0 16px 0;

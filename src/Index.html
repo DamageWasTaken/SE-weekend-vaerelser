@@ -332,6 +332,7 @@
                     <div id="config-buttons">
                         <button class="config-select-button popup-button" id="config-button-1" onclick="changePersonStatus('away')">Ikke på skolen</button>
                         <button class="config-select-button not-available popup-button" id="config-button-2" onclick="changePersonStatus('back')">På skolen</button>
+                        <button class="config-select-button hide popup-button" id="config-button-3" onclick="removeUser()">Fjern bruger</button>
                     </div>
                 </div>
             </div>
@@ -344,7 +345,7 @@
                 <p id="alertText">Log-ind med Google OAuth</p>
             </div>
         </div>
-        <div id="popup">
+        <div id="popup" data-user="none">
             <div class="popup-container">
                 <div class="popup-top-container">
                     <p class="top-text">Vælg Soveplads</p>
@@ -354,7 +355,7 @@
                     </svg>
                 </div>
                 <div class="popup-inner-container">
-                    <div id="header" style="display: none;">
+                    <div id="header">
                         <svg id="return-arrow" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="var(--text2)" fill="none" stroke-linecap="round" stroke-linejoin="round" onclick="returnBack()">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M9 13l-4 -4l4 -4m-4 4h11a4 4 0 0 1 0 8h-1"/>
@@ -365,10 +366,10 @@
                     <p id="replaceableText" class="alt-name-text">Navn Navnsen</p>
                     <div id="buttons-stage-1" class="popup-buttons">
                         <div class="selector-buttons">
-                            <button class="popup-button" onclick="selectorButton('Eget')">På eget værelse</button>
+                            <button id="selector-button-1" class="popup-button" onclick="selectorButton('Eget')">På eget værelse</button>
                         </div>
                         <div class="selector-buttons">
-                            <button class="popup-button" onclick="selectorButton('Andet')">På andet værelse</button>
+                            <button id="selector-button-2" class="popup-button" onclick="selectorButton('Andet')">På andet værelse</button>
                         </div>
                     </div>
                     <div id="buttons-stage-2" class="popup-buttons">
@@ -376,13 +377,13 @@
                             <button class="popup-button" onclick="selectHouse('Valhal')">Valhal</button>
                         </div>
                         <div class="house-button">
-                            <button class="popup-button" onclick="selectHouse('Udgård')">Udgård</button>
+                            <button class="popup-button" onclick="selectHouse('Udgaard')">Udgård</button>
                         </div>
                         <div class="house-button">
-                            <button class="popup-button" onclick="selectHouse('Asgård')">Asgård</button>
+                            <button class="popup-button" onclick="selectHouse('Asgaard')">Asgård</button>
                         </div>
                         <div class="house-button">
-                            <button class="popup-button" onclick="selectHouse('Midgård')">Midgård</button>
+                            <button class="popup-button" onclick="selectHouse('Midgaard')">Midgård</button>
                         </div>
                     </div>
                     <div id="buttons-stage-3" class="popup-buttons">

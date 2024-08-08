@@ -235,31 +235,20 @@ var allowedExtraValue = 2;
 //Temporary users:
 var temporaryUsers = [];
 
-//General variables
+//General variables NEEDS REWORK
+
+//Have to be there:
 var previousAlert = 'none';
 var noChoise = 0;
 var ownRoom = 0;
 var otherRoom = 0;
 var timeoutTime = 2;
-var buttonsHidden = false;
-var houseButtonsShown = false;
-var roomButtonsShown = false;
-var smallButtons = false;
-var helpMenuOpen = false;
-var configMode = false;
-var printMenuOpen = false;
 var expandableElements;
-var namePosition = 0;
-var roomAmount = 0;
-var allowedAmount = 0;
-var roomPosition = 0;
-var selectedHouse = "";
-var personSelected = 0;
 var runLock = false;
 var invalidData = false;
+var home;
 var checkList = [];
 var weekendList = [];
-var home;
 var backgroundImages = [
     'images/BG-1.jpg',
     'images/BG-2.jpg',
@@ -267,6 +256,23 @@ var backgroundImages = [
     'images/BG-4.jpg'
 ];
 var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImages.length)] + ')';
+
+//Global variables that should be removed:
+/*
+var buttonsHidden = false;
+var houseButtonsShown = false;
+var roomButtonsShown = false;
+var smallButtons = false;
+var helpMenuOpen = false;
+var configMode = false;
+var printMenuOpen = false;
+var namePosition = 0;
+var roomAmount = 0;
+var allowedAmount = 0;
+var roomPosition = 0;
+var selectedHouse = "";
+var personSelected = 0;
+*/
 
 //Declaring all houses & rooms
 var rooms = [
@@ -428,8 +434,8 @@ function reloadImages() {
 }
 
 function readyToPrint() {
-    returnPeople();
     var bottomNav = document.getElementById('bottom-navigation');
+    returnPeople();
     addTag(bottomNav, 'DONT-SHOW');
     openPrintPopup();
     generateList();
@@ -512,37 +518,33 @@ function generateList() {
 }
 
 function helpMenu() {
-    if (helpMenuOpen !== true) {
-        helpMenuOpen = true;
-        configMode = false;
-        var closeIcon = document.getElementById('close-button');
-        var printIcon = document.getElementById('print-button');
-        var configIcon = document.getElementById('config-button');
-        var helpIcon = document.getElementById('help-button');
-        var helpMenu = document.getElementById('help-menu');
-        var configPers = document.getElementById('config-pers');
-        addTag(printIcon, 'DONT-SHOW');
-        addTag(helpIcon, 'DONT-SHOW');
-        addTag(configPers, 'DONT-SHOW');
-        removeTag(helpMenu, 'hide');
-        removeTag(closeIcon, 'DONT-SHOW');
-        removeTag(configIcon, 'DONT-SHOW');
-    }
+    closeButton();
+    var helpMenu = document.getElementById('help-menu');
+    var closeIcon = document.getElementById('close-button');
+    var printIcon = document.getElementById('print-button');
+    var configIcon = document.getElementById('config-button');
+    var helpIcon = document.getElementById('help-button');
+    addTag(printIcon, 'DONT-SHOW');
+    addTag(helpIcon, 'DONT-SHOW');
+    removeTag(helpMenu, 'hide');
+    removeTag(closeIcon, 'DONT-SHOW');
+    removeTag(configIcon, 'DONT-SHOW');
 }
 
 function configMenu() {
-    configMode = true;
-    helpMenuOpen = false;
+    closeButton();
     var configIcon = document.getElementById('config-button');
     var helpIcon = document.getElementById('help-button');
-    var helpMenu = document.getElementById('help-menu');
+    var closeIcon = document.getElementById('close-button');
+    var printIcon = document.getElementById('print-button');
     var configPers = document.getElementById('config-pers');
     var topBar = document.getElementById('top-bar');
     var sideBar = document.getElementById('side-nav');
     showAlert('Konfigurations mode', 'Stick');
     removeTag(helpIcon, 'DONT-SHOW');
     removeTag(configPers, 'DONT-SHOW');
-    addTag(helpMenu, 'hide');
+    removeTag(closeIcon, 'DONT-SHOW');
+    addTag(printIcon, 'DONT-SHOW');
     addTag(configIcon, 'DONT-SHOW');
     addTag(topBar, 'disabled');
     addTag(sideBar, 'disabled');
@@ -551,28 +553,24 @@ function configMenu() {
 }
 
 function closeButton() {
-    if (helpMenuOpen === true || configMode === true) {
-        helpMenuOpen = false;
-        configMode = false;
-        var helpMenu = document.getElementById('help-menu');
+    var helpMenu = document.getElementById('help-menu');
+    var configPers = document.getElementById('config-pers');
+    var closeIcon = document.getElementById('print-button');
+    var printIcon = document.getElementById('close-button');
+    var configIcon = document.getElementById('config-button');
+    var helpIcon = document.getElementById('help-button');
+    var topBar = document.getElementById('top-bar');
+    var sideBar = document.getElementById('side-nav');
+    if (!hasTag(helpMenu, 'hide') || !hasTag(configPers, 'DONT-SHOW')) {
         showAlert('', 'Close');
         addTag(helpMenu, 'hide');
-        if (!printMenuOpen) {
-            var closeIcon = document.getElementById('print-button');
-            var printIcon = document.getElementById('close-button');
-            var configIcon = document.getElementById('config-button');
-            var helpIcon = document.getElementById('help-button');
-            var configPers = document.getElementById('config-pers');
-            var topBar = document.getElementById('top-bar');
-            var sideBar = document.getElementById('side-nav');
-            addTag(printIcon, 'DONT-SHOW');
-            addTag(configIcon, 'DONT-SHOW');
-            addTag(configPers, 'DONT-SHOW');
-            removeTag(topBar, 'disabled');
-            removeTag(sideBar, 'disabled');
-            removeTag(closeIcon, 'DONT-SHOW');    
-            removeTag(helpIcon, 'DONT-SHOW');
-        }
+        addTag(printIcon, 'DONT-SHOW');
+        addTag(configIcon, 'DONT-SHOW');
+        addTag(configPers, 'DONT-SHOW');
+        removeTag(topBar, 'disabled');
+        removeTag(sideBar, 'disabled');
+        removeTag(closeIcon, 'DONT-SHOW');    
+        removeTag(helpIcon, 'DONT-SHOW');
     } else {
         closePrintPopup();
     }
@@ -630,7 +628,7 @@ function dataExpired(time, compareTime, timeLimit) {
 function updateStoredData() {
     localStorage.setItem('rooms',JSON.stringify(rooms));
     var choices = [];
-    data.forEach((e,i) => {
+    data.forEach((e) => {
         choices.push(e.choice);
     });
     localStorage.setItem('choices', JSON.stringify(choices))
@@ -663,7 +661,6 @@ function checkForOverflow() {
 
 //Opens the popup menu
 function openPrintPopup() {
-    printMenuOpen = true;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
     var closeIcon = document.getElementById('close-button');
@@ -676,7 +673,6 @@ function openPrintPopup() {
 
 //Closes the popup menu
 function closePrintPopup() {
-    printMenuOpen = false;
     var popup = document.getElementById("print-popup");
     var body = document.getElementById("container");
     var closeIcon = document.getElementById('print-button');
@@ -724,19 +720,24 @@ function returnNormal() {
 //Opens the popup menu
 function openPopup(i) {
     var configPopup = document.getElementById("config-menu");
+    var configPers = document.getElementById("config-pers");
     var config1 = document.getElementById('config-1');
     var config2 = document.getElementById('config-2');
     var configButton1 = document.getElementById('config-button-1');
     var configButton2 = document.getElementById('config-button-2');
-    if (i == 'config') {
-        removeTag(config1, 'DONT-SHOW');
-        removeTag(configPopup, "hide");
-        addTag(configPopup, "show");
-        addTag(config2, 'DONT-SHOW');
-        addTag(configPopup,"blur-bg");
-    } else {
-        if (configMode === true) {
-            document.getElementById("config-text").innerHTML = data[i].name;
+    switch (true) {
+        case i === 'config':
+            removeTag(config1, 'DONT-SHOW');
+            removeTag(configPopup, "hide");
+            addTag(configPopup, "show");
+            addTag(config2, 'DONT-SHOW');
+            addTag(configPopup,"blur-bg");
+            return;
+
+        case !hasTag(configPers, 'DONT-SHOW') && i > 899:
+
+        case !hasTag(configPers, 'DONT-SHOW'):
+            document.getElementById("config-text").innerHTML = document.getElementById('pers-' + i).children[1].innerText;
             document.getElementById("config-image").src = document.getElementById('pers-' + i).children[0].src;
             removeTag(config2, 'DONT-SHOW');
             removeTag(configPopup, "hide");
@@ -750,18 +751,24 @@ function openPopup(i) {
                 addTag(configButton1, 'not-available');
                 removeTag(configButton2, 'not-available');
             }
-        } else {
+            return;
+
+        default:
             var popup = document.getElementById("popup");
-            popup.classList.toggle("show");
-            popup.classList.toggle("blur-bg");
-            document.getElementById("replaceableText").innerHTML = data[i].name;
-            if (document.getElementById("replaceableImage").src !== 'images/Dummy.svg') {
+            popup.dataset.user = 'pers-' + i;
+            addTag(popup, 'show');
+            addTag(popup, 'blur-bg');
+            document.getElementById("replaceableText").innerHTML = document.getElementById('pers-' + i).children[1].innerHTML;
+            if (!document.getElementById("replaceableImage").src.includes('images/Dummy.svg')) {
                 document.getElementById("replaceableImage").src = document.getElementById('pers-' + i).children[0].src;
-            } else {
+            } else if (i < 899) {
                 document.getElementById("replaceableImage").src = data[i].img;
             }
-            closeButtons();
-        }
+            loadSelectorPage(0);
+            if (document.getElementById('pers-' + i).children[0].src.includes('images/Dummy_Guest.png')) {
+                addTag(document.getElementById('selector-button-1'), 'not-available');
+            }
+        break;
     }
 }
 
@@ -825,15 +832,26 @@ function addUser() {
     var temporaryID = 999 - temporaryUsers.length;
     //Grabbing their selected gender
     var gender = document.getElementById('male-img').classList.contains('selected') ? 'm' : 'f';
-    //Pushing the user data to a array of temporary users
+    //Pushing the user data to a array of temporary users so we can tell them apart
     temporaryUsers.push({
         'name':name,
         'id':temporaryID,
         'sex':gender
     })
+    //Pushing the user data to the main data array
+    data.push({
+        'number':temporaryID,
+        'name':name,
+        'img':'none',
+        'room':-1,
+        'choice':'ikke valgt',
+        'sex':gender
+    })
     //Adding the user to the container with the other users
     target.insertAdjacentHTML("afterend",'<div class="image-container Ikke-Valgt ' + name.charAt(0).toUpperCase() + '" id="pers-' + temporaryID + '" onclick="openPopup('+ temporaryID +')">' + '<img src="images/Dummy_Guest.png" class="image"> <p class="name-text">' + name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
-    console.log(temporaryUsers);
+    showAlert('Bruger Tilføjet');
+    countData();
+    closePopup();
 }
 
 function selectGender(gender) {
@@ -853,27 +871,30 @@ function selectGender(gender) {
 
 //Closes the popup menu
 function closePopup() {
-    if (configMode === true) {
-        var configPopup = document.getElementById("config-menu");
-        removeTag(configPopup,'show');
-        removeTag(configPopup,'blur-bg');
-    } else {
-        var popup = document.getElementById("popup");
-        removeTag(popup,'show');
-        removeTag(popup,'blur-bg');
-        closeButtons();
+    var configPopup = document.getElementById("config-menu");
+    var popup = document.getElementById("popup");
+    switch (true) {
+        case hasTag(configPopup, 'show'):
+            removeTag(configPopup,'show');
+            removeTag(configPopup,'blur-bg');
+            break;
+    
+        default:
+            removeTag(popup,'show');
+            removeTag(popup,'blur-bg');
+            popup.dataset.user = 'none';
+            closeButtons();
+            break;
     }
 }
 
 //Returns to the previous menu
 function returnBack() {
-    var switchT = houseButtonsShown;
-    //Close the menu and open it again to "return" to the first part
-    closePopup();
-    openPopup(namePosition);
-    //Check if the menu was in part 3, if so return to part 2
-    if (!switchT) {
-        selectorButton('Andet');
+    var stage_3 = document.getElementById("buttons-stage-3");
+    if (hasTag(stage_3, 'show')) {
+        loadSelectorPage(1);
+    } else {
+        loadSelectorPage(0);
     }
 }
 
@@ -929,70 +950,194 @@ function showAlert(alertMessage, param) {
     
 }
 
-//Checks if person selected own room or other room, if they selected own room - do prep, otherwise send to next menu
+//
 function selectorButton(place) {
-    //Grabs the name and image from the person selected
-    var nameText = document.getElementById("replaceableText");
-    var image = document.getElementById("replaceableImage");
-    var header = document.getElementById("header");
-    //Grabs the name text itself from the person selected
-    var currentName = e => e.name === document.getElementById("replaceableText").textContent;
-    //Finds out what number in the array the person is
-    namePosition = data.findIndex(currentName);
-    //Finds out what ID to target
-    var currentPerson = document.getElementById("pers-" + namePosition);
-    //Finds the persons current room number
-    var roomNumber = data[namePosition].room;
-    //Finds the persons id number
-    var personNumber = data[namePosition].number;
-    //Defines webpage elements
-    var mainButtons = document.getElementById("buttons-stage-1");
-    var houseButtons = document.getElementById("buttons-stage-2");
-    //If OwnRoom is selected prep the person to be added to the room array
-    if (place == "Eget") {
-        //Check if the selected room is available
-        if (checkRoomAvailability(roomNumber) == true) {
+    //Declerations
+    var popup = document.getElementById('popup');
+    var name = document.getElementById("replaceableText").textContent;
+    var namePos = data.findIndex(e => e.name === name);
+    var currentPerson = document.getElementById("pers-" + namePos);
+    var guest = popup.dataset.user.split('-')[1] > 899 ? true : false;
 
-            if (personInRoom(data[namePosition].number, data[namePosition].room)) {
+    if (place === 'Eget' && !guest) {
+        switch (true) {        
+            case personInRoom(data[namePos].number, data[namePos].room):
                 closePopup();
                 return;
-            }
-
-            //Update the persons choice 
-            data[namePosition].choice = 'eget vaerelse';
-
-            //Removes and adds a class to be able to select person by group
-            addTag(currentPerson, "Eget");
-            removeTag(currentPerson, "Andet");
-            removeTag(currentPerson, "Ikke-Valgt");
-            
-            //Call the data to be counted and close the popup.
-            countData();
-            closePopup();
-            addPersonToRoom(data[namePosition].number, data[namePosition].room, false);
-            updateStoredData();
-        } else {
-            relocate(personNumber, roomNumber, "", true)
-            closePopup();
-            updateStoredData();
+                
+            case checkRoomAvailability(data[namePos].room):
+                addPersonToRoom(data[namePos].number, data[namePos].room, false);
+                data[namePos].choice = 'eget vaerelse';
+                addTag(currentPerson, "Eget");
+                removeTag(currentPerson, "Andet");
+                removeTag(currentPerson, "Ikke-Valgt");
+                countData();
+                closePopup();
+                updateStoredData();
+                return;
         }
-        
+        relocate(data[namePos].number, data[namePos].room, "", true);
+        closePopup();
+        updateStoredData();
+        return;
     } else {
-        //Hide all the previous elements
-        mainButtons.classList.toggle("hide");
-        nameText.classList.toggle("hide");
-        image.classList.toggle("hide");
-        //Unhide all the new buttons
-        header.classList.toggle("show");
-        houseButtons.classList.toggle("show");
-        //Switchstate True
-        buttonsHidden = true;
-        houseButtonsShown = true;
-        //Sets the person selected
-        personSelected = data[namePosition].number;
-        //Updates the header text for the popup
-        document.getElementById("replaceableTextHeader").innerHTML = "Vælg fløj";
+        loadSelectorPage(1);
     }
+}
+
+//Sends the user to the room select menu.
+function selectHouse(house) {
+    var popup = document.getElementById('popup');
+    if (popup.dataset.user.split('-')[1] > 899) {
+        loadSelectorPage(2, house, 'guest');
+    } else {
+        loadSelectorPage(2, house);
+    }
+}
+
+//Func for adding pers to the selected room based on the button
+function selectRoom(setRoom) {
+    var popup = document.getElementById('popup');
+    var popupText = document.getElementById('replaceableTextHeader').innerText.split(' ')[0];
+    var currentPerson = document.getElementById(popup.dataset.user);
+    if (popup.dataset.user.split('-')[1] > 899) {
+        var personSelected = data[data.findIndex(e => e.number === Number(popup.dataset.user.split('-')[1]))].number;
+    } else {
+        var personSelected = data[popup.dataset.user.split('-')[1]].number;
+    }
+
+    switch (popupText) {
+        case 'Midgård':
+            if (setRoom < 2) {
+                setRoom === 1 ? setRoom = '1b' : setRoom = '1a';
+            }
+            break;
+    
+        case 'Asgård':
+            setRoom += 14;
+            break;
+
+        case 'Udgård':
+            setRoom += 27;
+            break;
+        
+        case 'Valhal':
+            setRoom += 40;
+            break;
+    }
+
+    switch (true) {
+        case !checkRoomAvailability(setRoom):
+        case !checkSex(personSelected, setRoom):
+            closePopup();
+            showAlert("Du kan ikke sove på dette værelse");
+            return;
+
+        default:
+            addPersonToRoom(personSelected, setRoom, false);
+            data[data.findIndex(e => e.number === personSelected)].choice = 'andet vaerelse';
+            addTag(currentPerson, "Andet");
+            removeTag(currentPerson, "Eget");
+            removeTag(currentPerson, "Ikke-Valgt");
+            closePopup();
+            countData();
+            updateStoredData();
+    }
+}
+
+//Make function to change pages!
+function loadSelectorPage(page, ...args) {
+    var popup = document.getElementById('popup');
+    var nameText = document.getElementById("replaceableText");
+    var image = document.getElementById("replaceableImage");
+    var stage_1 = document.getElementById("buttons-stage-1");
+    var stage_2 = document.getElementById("buttons-stage-2");
+    var stage_3 = document.getElementById("buttons-stage-3");
+    var header = document.getElementById("header");
+    var headerText = document.getElementById("replaceableTextHeader");
+    var button_1 = document.getElementById('selector-button-1');
+    switch (page) {
+
+        case 0:
+            closeButtons();
+            addTag(stage_1, 'show');
+            addTag(image, 'show');
+            addTag(nameText, 'show');
+            removeTag(button_1, 'not-available');
+            break;
+    
+        case 1:
+            closeButtons();
+            addTag(stage_2, 'show');
+            addTag(header, 'show');
+            headerText.innerHTML = "Vælg fløj";
+            break;
+
+        case 2:
+            if (args.includes('guest')) {
+                var personSelected = data[data.findIndex(e => e.number === Number(popup.dataset.user.split('-')[1]))].number;
+            } else {
+                var personSelected = data[popup.dataset.user.split('-')[1]].number;
+            }
+            closeButtons();
+            addTag(stage_3, 'show');
+            addTag(header, 'show');
+            switch (true) {
+                case args.includes('Midgaard'):
+                    headerText.innerHTML = "Midgård - Værelse";
+                    for (var i = 0; i < 13; i++) {
+                        document.getElementById("btn-" + i ).innerHTML = rooms[i].room;
+                        grayOutButton(i, 'Midgaard', personSelected);
+                    }
+                    break;
+            
+                case args.includes('Asgaard'):
+                    headerText.innerHTML = "Asgård - Værelse";
+                    for (var i = 0; i < 13; i++) {
+                        document.getElementById("btn-" + i).innerHTML = rooms[i + 13].room;
+                        grayOutButton(i, 'Asgaard', personSelected);
+                    }
+                    break;
+
+                case args.includes('Udgaard'):
+                    headerText.innerHTML = "Udgård - Værelse";
+                    for (var i = 0; i < 13; i++) {
+                        document.getElementById("btn-" + i).innerHTML = rooms[i + 26].room;
+                        grayOutButton(i, 'Asgaard', personSelected);
+                    }
+                    break;
+
+                case args.includes('Valhal'):
+                    addTag(stage_3, 'small');
+                    headerText.innerHTML = "Valhal - Værelse";
+                    for (var i = 0; i < 6; i++) {
+                        document.getElementById("btn-" + i).innerHTML = rooms[i + 39].room;
+                        grayOutButton(i, 'Asgaard', personSelected);
+                    }
+                    break;
+            }
+            break;
+    }
+}
+
+//Make sure all the buttons are closed and returned to default
+function closeButtons() {
+    //Define the elements that are to be used
+    var nameText = document.getElementById("replaceableText");
+    var image = document.getElementById("replaceableImage");
+    var stage_1 = document.getElementById("buttons-stage-1");
+    var stage_2 = document.getElementById("buttons-stage-2");
+    var stage_3 = document.getElementById("buttons-stage-3");
+    var header = document.getElementById("header");
+
+    //Return everything to it's default
+    removeTag(image, 'show');
+    removeTag(header, 'show');
+    removeTag(nameText, 'show');
+    removeTag(stage_1, 'show');
+    removeTag(stage_2, 'show');
+    removeTag(stage_3, 'show');
+    removeTag(stage_3, 'small');
 }
 
 //Relocates someone based on some parameters
@@ -1022,22 +1167,27 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         memberList = Object.values(memberList);
         if (roomLength - 3 > 0 && roomLength - 3 > currentRoom.space + allowedExtraValue - 1) {
             for (var i = 0; i < (roomLength - 3); i++) {
-                //Check if their an original member of the room. If they are store the name and break the loop
-                if (!originalMember(memberList[i], targetLocation)) {
+                //Check if their an original member of the room. If they are, store the name and break the loop
+                //Also checks if the person is a guest, guests can't be kicked unless they're the last person in the room.
+                if (!originalMember(memberList[i], targetLocation) && (memberList[i] < 899 || i > 1)) {
                     //Grab the person and place them into an object
                     Object.assign(personToBeReplaced, {id: memberList[i]});
-                    //Stop the loop
                     break;
                 }
             }
 
-            if (Object.keys(personToBeReplaced).length > 0) {
+            //Checks if there is a person that needs to be removed from the room, special case for if they're a guest
+            if (Object.keys(personToBeReplaced).length > 0 && personToBeReplaced.id < 900) {
                 //Find the persons own room and add it to the object
                 Object.assign(personToBeReplaced, {ownRoom: data[data.findIndex(e => e.number === personToBeReplaced.id)].room})
                 //Remove a person
                 removePersonFromRoom(personToBeReplaced.id, currentRoom);
                 //Add people to their respective rooms.
                 addPersonToRoom(personToBeReplaced.id, personToBeReplaced.ownRoom, false);
+            } else {
+                //If they're a guest only remove them from the room.
+                removePersonFromRoom(personToBeReplaced.id, currentRoom);
+                updateDisplayedRoom('pers-' + personToBeReplaced.id, -1);
             }
         }
         addPersonToRoom(person, targetLocation, false);
@@ -1067,7 +1217,7 @@ function originalMember(person, room) {
 //Check if a room is available, if it is, return true
 function checkRoomAvailability(room) {
     //Find the room position in the array
-    roomPosition = rooms.findIndex(e => e.room === room);
+    var roomPosition = rooms.findIndex(e => e.room === room);
     //Find the amount of people in the room
     roomAmount = Object.keys(rooms[roomPosition]).length-3;
     //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
@@ -1156,6 +1306,7 @@ function addPersonToRoom(person, room, bypass) {
 //Removes a person from a room !!! Requires the room object as the param "room"
 function removePersonFromRoom(person, room) {
 
+    data[data.findIndex(e => e.number === person)].choice = 'ikke valgt';
     //Set a variable that is used later
     var minusVal = 0;
     //Create a temp object thats set to the current room
@@ -1194,7 +1345,7 @@ function removePersonFromRoom(person, room) {
     //Update the room in the rooms array
     const itemIndex = rooms.findIndex(o => o.room === newRoom.room);
     rooms[itemIndex] = newRoom;
-
+    countData();
 }
 
 //Function to check if the person specified is the same sex as the room
@@ -1208,70 +1359,11 @@ function checkSex(personId, room) {
     }
 }
 
-//Func for adding pers to the selected room based on the button
-function selectRoom(setRoom) {
-    //Grabs the name text itself from the person selected
-    var currentName = e => e.name === document.getElementById("replaceableText").textContent;
-    //Finds out what number in the array the person is
-    namePosition = data.findIndex(currentName);
-    //Finds the persons id
-    var id = data[namePosition].number
-    //Finds out what ID to target
-    var currentPerson = document.getElementById("pers-" + namePosition);
-    switch (selectedHouse) {
-        case 'Midgaard':
-            if (setRoom === 0) {
-                setRoom = "1a";
-            } else if (setRoom === 1) {
-                setRoom = "1b";
-            }
-            break;
-    
-        case 'Asgaard':
-            setRoom += 14;
-            break;
-        
-        case 'Udgaard':
-            setRoom += 27;
-            break;
-        case 'Valhal':
-            setRoom += 40;
-            break;
-    }
 
-    if (checkRoomAvailability(setRoom) === true) {
-        if (!checkSex(id, setRoom)) {
-            closePopup();
-            showAlert("Du må ikke sove på dette værelse");
-            return
-        }
-        if (personInRoom(personSelected) !== false) {
-            removePersonFromRoom(personSelected, personInRoom(personSelected));
-        }
-
-        addPersonToRoom(personSelected, setRoom, false);
-        updateDisplayedRoom("pers-" + namePosition, setRoom);
-    } else {
-        closePopup();
-        showAlert("Valgt værelse er fuldt");
-        return false;
-    }
-
-    //Chnages the students choice
-    data[namePosition].choice = 'andet vaerelse';
-
-    addTag(currentPerson, "Andet");
-    removeTag(currentPerson, "Eget");
-    removeTag(currentPerson, "Ikke-Valgt");
-    closePopup();
-    countData();
-    updateStoredData();
-}
 
 //Check if the button should be grayed out, and does so if needed.
 function grayOutButton(buttonNumber, house, _pers) {
     var button = document.getElementById("btn-" + buttonNumber );
-    var state = false;
     var room = 0;
     switch (house) {
         case 'Midgaard':
@@ -1295,120 +1387,36 @@ function grayOutButton(buttonNumber, house, _pers) {
             room = buttonNumber + 40;
             break;
     }
-    if (!checkRoomAvailability(room)) {
-        state = true;
-    }
-    if (!checkSex(_pers, room)) {
-        state = true;
-    }
-    if (personInRoom(_pers, room)) {
-        state = true;
-    }
-    if (originalMember(_pers, room)) {
-        state = true;
-    }
 
-    switch (state) {
-        case true:
+    //DEBUG
+    /*
+    console.log('Avail ' + !checkRoomAvailability(room));
+    console.log('Sex ' + !checkSex(_pers, room));
+    console.log('InRoom ' + personInRoom(_pers, room));
+    console.log('Orig ' + originalMember(_pers, room));
+    */
+
+    switch (true) {
+        case !checkRoomAvailability(room):
+        case !checkSex(_pers, room):
+        case personInRoom(_pers, room):
+        case originalMember(_pers, room):
             addTag(button,'not-available');
             break;
-
-        case false:
-            removeTag(button,'not-available');
+    
+        default:
+            removeTag(button,'not-available')
             break;
     }
+
 }
 
-//Opens up the house select menu
-function selectHouse(house) {
-    var houseButtons = document.getElementById("buttons-stage-2");
-    var roomButtons = document.getElementById("buttons-stage-3");
-    //Removes the house selects buttons & adds the room select buttons.
-    //Change the popup header text
-    document.getElementById("replaceableTextHeader").innerHTML = house + " - Værelse";
-    houseButtons.classList.toggle("show");
-    houseButtonsShown = false;
-    roomButtons.classList.toggle("show");
-    roomButtonsShown = true;
-    //Makes sure that the extra buttons are added as well
-    [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
-        el.style.display = 'inline';
-    });
-    //Chekcs what house is selected and adds the room numbers to the buttons
-    if (house == "Asgård") {
-        selectedHouse = "Asgaard";
-        for (var i = 13; i < 26; i++) {
-            var minusI = i - 13;
-            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            grayOutButton(minusI, 'Asgaard', personSelected);
-        }
-    } else if (house == "Midgård") {
-        selectedHouse = "Midgaard";
-        for (var i = 0; i < 13; i++) {
-            document.getElementById("btn-" + i ).innerHTML = rooms[i].room;
-            grayOutButton(i, 'Midgaard', personSelected);
-        }
-    } else if (house == "Udgård") {
-        selectedHouse = "Udgaard";
-        for (var i = 26; i < 39; i++) {
-            var minusI = i - 26;
-            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            grayOutButton(minusI, 'Udgaard', personSelected);
-        }
-    } else if (house == "Valhal") {
-        selectedHouse = "Valhal";
-        //Removes the extra buttons because there are less rooms
-        roomButtons.classList.toggle("small");
-        smallButtons = true;
-        for (var i = 39; i < 45; i++) {
-            var minusI = i - 39;
-            document.getElementById("btn-" + minusI).innerHTML = rooms[i].room;
-            grayOutButton(minusI, 'Valhal', personSelected);
-        }
-        [].forEach.call(document.querySelectorAll(`.extra-btn`), function (el) {
-            el.style.display = 'none';
-        });
-    }
-}
 
 //Send the values to the HTMl page
 function updateCount() {
     document.getElementById("eget-vaerelse-number").innerHTML = ownRoom;
     document.getElementById("andet-vaerelse-number").innerHTML = otherRoom;
     document.getElementById("ikke-valgt-number").innerHTML = noChoise;
-}
-
-//Make sure all the buttons are closed and returned to default
-function closeButtons() {
-    //Define the elements that are to be used
-    var nameText = document.getElementById("replaceableText");
-    var image = document.getElementById("replaceableImage");
-    var mainButtons = document.getElementById("buttons-stage-1");
-    var houseButtons = document.getElementById("buttons-stage-2");
-    var roomButtons = document.getElementById("buttons-stage-3");
-    var header = document.getElementById("header");
-
-    //Go down the list and check if something is in the default state, if not, return to default
-    if (houseButtonsShown == true) {
-        houseButtons.classList.toggle("show");
-        header.classList.toggle("show")
-        houseButtonsShown = false;
-    }
-    if (roomButtonsShown == true) {
-        roomButtons.classList.toggle("show");
-        header.classList.toggle("show")
-        roomButtonsShown = false;
-    }
-    if (buttonsHidden == true) {
-        mainButtons.classList.toggle("hide");
-        nameText.classList.toggle("hide");
-        image.classList.toggle("hide");
-        buttonsHidden = false;
-    }
-    if (smallButtons == true) {
-        roomButtons.classList.toggle("small");
-        smallButtons = false;
-    }
 }
 
 //Function to remove a present tag
@@ -1425,17 +1433,47 @@ function addTag(element, tag) {
     }
 }
 
+//Function to return if an element has a tag
+function hasTag(element, tag) {
+    return element.classList.contains(tag);
+}
+
 //Updates the displayed room is a person changes room
 function updateDisplayedRoom(personId, room) {
-    var parentElement = document.getElementById(personId);
-    var childElement = parentElement.children[2];
-    var replaceText = childElement.children[1];
-    replaceText.innerHTML = room;
-    if (room === data[personId.split('-')[1]].room) {
-        removeTag(parentElement, "Ikke-Valgt");
+    if (room === -1) {
+        try {
+            var parentElement = document.getElementById(personId);
+            var childElement = parentElement.children[2];    
+        } catch (error) {
+            var parentElement = document.getElementById('pers-' + data[personId.split('-')[1]].number);
+            var childElement = parentElement.children[2]; 
+        }
+        var replaceText = childElement.children[1];
+        replaceText.innerHTML = 'xx';
+        addTag(parentElement, "Ikke-Valgt");
         removeTag(parentElement, "Andet");
-        addTag(parentElement, "Eget");
-    } else {
+        removeTag(parentElement, "Eget");
+        return;
+    }
+    try {
+        var parentElement = document.getElementById(personId);
+        var childElement = parentElement.children[2];    
+        var replaceText = childElement.children[1];
+        replaceText.innerHTML = room;
+        if (room === data[personId.split('-')[1]].room) {
+            removeTag(parentElement, "Ikke-Valgt");
+            removeTag(parentElement, "Andet");
+            addTag(parentElement, "Eget");
+        } else {
+            removeTag(parentElement, "Ikke-Valgt");
+            removeTag(parentElement, "Eget");
+            addTag(parentElement, "Andet");
+        }
+    } catch (error) {
+        var parentElement = document.getElementById('pers-' + data[personId.split('-')[1]].number);
+        var childElement = parentElement.children[2]; 
+        var replaceText = childElement.children[1];
+        replaceText.innerHTML = room;
         removeTag(parentElement, "Ikke-Valgt");
         removeTag(parentElement, "Eget");
         addTag(parentElement, "Andet");
@@ -1445,7 +1483,7 @@ function updateDisplayedRoom(personId, room) {
 //Send everyone back to their original room if they're not allready in a room
 function returnPeople() {
     for (var i = 0; i < data.length; i++) {
-        if (data[i].choice === "ikke valgt") {
+        if (data[i].choice === "ikke valgt" && data[i].number < 900) {
             //Define the variables needed
             var person = data[i].number;
             var personId = "pers-" + i;
