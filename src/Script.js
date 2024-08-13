@@ -625,13 +625,21 @@ function dataExpired(time, compareTime, timeLimit) {
 }
 
 //Stores importent data, so it's not lost even after a site reload
+
+/* 
+Temporay users should be saved in their own item (WITH TIMESTAMP!) and of course store their choices.
+When we load the stored data (if there is any) we need to check if the users timestap exceeds the allowed timelimit.
+(Timelimit is 2 days standard, but can be changed in the config file.)
+If they do exceed the timelimit they should be removed.
+*/
 function updateStoredData() {
     localStorage.setItem('rooms',JSON.stringify(rooms));
     var choices = [];
     data.forEach((e) => {
         choices.push(e.choice);
     });
-    localStorage.setItem('choices', JSON.stringify(choices))
+    localStorage.setItem('choices', JSON.stringify(choices));
+    localStorage.setItem('tempUsers', JSON.stringify(temporaryUsers));
 }
 
 function loadStoredData() {
@@ -640,6 +648,7 @@ function loadStoredData() {
         return;
     }
     rooms = JSON.parse(localStorage.getItem('rooms'));
+    temporaryUsers = JSON.parse(localStorage.getItem('tempUsers'));
     var storedData = JSON.parse(localStorage.getItem('choices'));
     data.map((e, i) => e.choice = storedData[i]);
     for (let i = 0; i < data.length; i++) {
@@ -725,6 +734,7 @@ function openPopup(i) {
     var config2 = document.getElementById('config-2');
     var configButton1 = document.getElementById('config-button-1');
     var configButton2 = document.getElementById('config-button-2');
+    var configButton3 = document.getElementById('config-button-3');
     switch (true) {
         case i === 'config':
             removeTag(config1, 'DONT-SHOW');
@@ -735,7 +745,17 @@ function openPopup(i) {
             return;
 
         case !hasTag(configPers, 'DONT-SHOW') && i > 899:
-
+            document.getElementById("config-text").innerHTML = document.getElementById('pers-' + i).children[1].innerText;
+            document.getElementById("config-image").src = document.getElementById('pers-' + i).children[0].src;
+            addTag(configButton1, 'hide');
+            addTag(configButton2, 'hide');
+            removeTag(configButton3, 'hide');
+            removeTag(config2, 'DONT-SHOW');
+            removeTag(configPopup, "hide");
+            addTag(config1, 'DONT-SHOW')
+            addTag(configPopup, "show");
+            addTag(configPopup,"blur-bg");
+            return;
         case !hasTag(configPers, 'DONT-SHOW'):
             document.getElementById("config-text").innerHTML = document.getElementById('pers-' + i).children[1].innerText;
             document.getElementById("config-image").src = document.getElementById('pers-' + i).children[0].src;
@@ -829,12 +849,6 @@ function addUser() {
     var temporaryID = 999 - temporaryUsers.length;
     //Grabbing their selected gender
     var gender = document.getElementById('male-img').classList.contains('selected') ? 'm' : 'f';
-    //Pushing the user data to a array of temporary users so we can tell them apart
-    temporaryUsers.push({
-        'name':name,
-        'id':temporaryID,
-        'sex':gender
-    })
     //Pushing the user data to the main data array
     data.push({
         'number':temporaryID,
@@ -844,11 +858,41 @@ function addUser() {
         'choice':'ikke valgt',
         'sex':gender
     })
+    var dataIndex = data.findIndex(e => e.number === temporaryID);
+    //Pushing the user data to a array of temporary users so we can tell them apart
+    temporaryUsers.push({
+        'name':name,
+        'id':temporaryID,
+        'sex':gender,
+        'index':dataIndex
+    })
     //Adding the user to the container with the other users
     target.insertAdjacentHTML("afterend",'<div class="image-container Ikke-Valgt ' + name.charAt(0).toUpperCase() + '" id="pers-' + temporaryID + '" onclick="openPopup('+ temporaryID +')">' + '<img src="images/Dummy_Guest.png" class="image"> <p class="name-text">' + name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
     showAlert('Bruger Tilføjet');
     countData();
     closePopup();
+}
+
+//The 'user' arg can be used to remotely delete a user, otherwise not used if removing is done manually through the config menu.
+//The arg user should be the ID number of the user.
+function removeUser(user) {
+    if (user == null || (typeof user === "string" && user.trim().length === 0)) {
+        var name = document.getElementById('config-text').innerText;
+        var userDataIndex = data.findIndex(e => e.name === name);
+        var userId = data[userDataIndex].number
+    } else {
+        var userDataIndex = data.findIndex(e => e.number === user);
+        var userId = user
+    }
+    if (personInRoom(userId) !== false) {
+        removePersonFromRoom(userId,personInRoom(userId));
+    }
+    document.getElementById('pers-'+userId).remove();
+    temporaryUsers.splice(999-userId,1);
+    data.splice(userDataIndex, 1);
+    countData();
+    closePopup();
+    showAlert('Bruger Fjernet');
 }
 
 function selectGender(gender) {
