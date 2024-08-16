@@ -649,6 +649,15 @@ function loadStoredData() {
     }
     rooms = JSON.parse(localStorage.getItem('rooms'));
     temporaryUsers = JSON.parse(localStorage.getItem('tempUsers'));
+    //Run through the temporary users and check if their timestamp is expired.
+    temporaryUsers.forEach((e, i) => {
+        if (dataExpired( e.timestamp, new Date().getTime(), 0)) {
+            data.splice(temporaryUsers[i].index, 1);
+            temporaryUsers.splice(i, 1);
+        } else {
+            //add HTML for the user here:
+        }
+    });
     var storedData = JSON.parse(localStorage.getItem('choices'));
     data.map((e, i) => e.choice = storedData[i]);
     for (let i = 0; i < data.length; i++) {
@@ -857,20 +866,22 @@ function addUser() {
         'room':-1,
         'choice':'ikke valgt',
         'sex':gender
-    })
+    });
     var dataIndex = data.findIndex(e => e.number === temporaryID);
     //Pushing the user data to a array of temporary users so we can tell them apart
     temporaryUsers.push({
         'name':name,
         'id':temporaryID,
         'sex':gender,
-        'index':dataIndex
-    })
+        'index':dataIndex,
+        'timestamp': new Date().getTime()
+    });
     //Adding the user to the container with the other users
     target.insertAdjacentHTML("afterend",'<div class="image-container Ikke-Valgt ' + name.charAt(0).toUpperCase() + '" id="pers-' + temporaryID + '" onclick="openPopup('+ temporaryID +')">' + '<img src="images/Dummy_Guest.png" class="image"> <p class="name-text">' + name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
     showAlert('Bruger Tilføjet');
     countData();
     closePopup();
+    updateStoredData();
 }
 
 //The 'user' arg can be used to remotely delete a user, otherwise not used if removing is done manually through the config menu.
