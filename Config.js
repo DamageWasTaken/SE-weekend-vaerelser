@@ -1,11 +1,13 @@
 //Config file for the program
 //Syntax: {falg, value}
-//Flags: checkTime, allowedRoomAmount, returnToHomeTimeout, saveTemporaryUsers
+//Flags: checkTime<[Hour,Minute]>, allowedRoomAmount<Count>, returnToHomeTimeout<Minute>, saveTemporaryUsers<Bool>, temporaryUserTimeout<Hour>
 
 const config = [
     {checkTime: [22,45]},
     {allowedRoomAmount: 2},
     {returnToHomeTimeout: 1},
+    {saveTemporaryUsers: true},
+    {temporaryUserTimeout: 48},
 ]
 
 //Syntax: [room, flag, value]

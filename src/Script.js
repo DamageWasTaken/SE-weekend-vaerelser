@@ -111,8 +111,10 @@ async function pickerCallback(data) {
         if (fileId == localStorage.getItem('previousFile')) {
             sameFile = true;
         } else {
+            //If a different file is selected compared to last time, clear prevoius data.
             localStorage.removeItem('rooms');
             localStorage.removeItem('choices');
+            localStorage.removeItem('tempUsers')
             localStorage.setItem('previousFile',fileId);
         }
         const res = await gapi.client.drive.files.get({
@@ -223,26 +225,22 @@ function downloadFile(fileId) {
 }
 
 
-//Declaring global time varibles
+//Config Variables (Default values):
+//checkTime
 var deadLine = [22,45];
-
-//Import the student data
-//var data = data;
-
-//VALUE TO CHANGE ALLOWED EXTRA AMOUNT IN EACH ROOM
+//allowedRoomAmount
 var allowedExtraValue = 2;
-
-//Temporary users:
-var temporaryUsers = [];
-
-//General variables NEEDS REWORK
-
-//Have to be there:
-var previousAlert = 'none';
-var noChoise = 0;
-var ownRoom = 0;
-var otherRoom = 0;
+//returnToHomeTimeout
 var timeoutTime = 2;
+//saveTemporaryUsers
+var saveTempUsers = true;
+//temporaryUserTimeout
+var tempUserTimout = 48;
+
+//Global variables:
+
+var temporaryUsers = [];
+var previousAlert = 'none';
 var expandableElements;
 var runLock = false;
 var invalidData = false;
@@ -257,22 +255,6 @@ var backgroundImages = [
 ];
 var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImages.length)] + ')';
 
-//Global variables that should be removed:
-/*
-var buttonsHidden = false;
-var houseButtonsShown = false;
-var roomButtonsShown = false;
-var smallButtons = false;
-var helpMenuOpen = false;
-var configMode = false;
-var printMenuOpen = false;
-var namePosition = 0;
-var roomAmount = 0;
-var allowedAmount = 0;
-var roomPosition = 0;
-var selectedHouse = "";
-var personSelected = 0;
-*/
 
 //Declaring all houses & rooms
 var rooms = [
@@ -338,6 +320,14 @@ function handleConfig() {
 
                 case 'returnToHomeTimeout':
                     timeoutTime = Object.values(config[i])[0];
+                    break;
+
+                case 'saveTemporaryUsers':
+                    saveTempUsers = Object.values(config[i])[0];
+                    break;
+
+                case 'temporaryUserTimeout':
+                    tempUserTimout = Object.values(config[i])[0];
                     break;
             }
         }
@@ -408,6 +398,7 @@ function checkKeyPressed(evt) {
     if (evt.keyCode === 76 && evt.altKey) {
         console.log(rooms); // l
         console.log(data);
+        console.log(temporaryUsers);
     }
     if (evt.keyCode === 72 && evt.altKey) {
         helpMenu(); // h
@@ -639,7 +630,12 @@ function updateStoredData() {
         choices.push(e.choice);
     });
     localStorage.setItem('choices', JSON.stringify(choices));
-    localStorage.setItem('tempUsers', JSON.stringify(temporaryUsers));
+    if (saveTempUsers) {
+        temporaryUsers.forEach((e) => {
+            e.html = document.getElementById('pers-' + e.id).outerHTML;
+        });
+        localStorage.setItem('tempUsers', JSON.stringify(temporaryUsers));
+    }
 }
 
 function loadStoredData() {
@@ -647,17 +643,35 @@ function loadStoredData() {
     if (!sameFile) {
         return;
     }
+    //Defining where we want to add the person, it's done like this so we can add the element after the config-pers.
+    var target = document.getElementById("config-pers");
     rooms = JSON.parse(localStorage.getItem('rooms'));
     temporaryUsers = JSON.parse(localStorage.getItem('tempUsers'));
     //Run through the temporary users and check if their timestamp is expired.
-    temporaryUsers.forEach((e, i) => {
-        if (dataExpired( e.timestamp, new Date().getTime(), 0)) {
-            data.splice(temporaryUsers[i].index, 1);
-            temporaryUsers.splice(i, 1);
+    //This has to be done otherwise we don't loop through the array the correct number of times...
+    let numberOfTempUsers = temporaryUsers.length;
+    //Is gonna need to be redone, problems will occur when one user is removed but others still remain...
+    for (var i = 0; i < numberOfTempUsers; i++) {
+        if (dataExpired( temporaryUsers[0].timestamp, new Date().getTime(), tempUserTimout)) {
+            console.info('Temporary user expired, removing user');
+            data.splice(temporaryUsers[0].index, 1);
+            temporaryUsers.splice(0, 1);
+
         } else {
-            //add HTML for the user here:
+            target.insertAdjacentHTML("afterend",temporaryUsers[0].html,);
+            data.push({
+                'number':temporaryUsers[i].id,
+                'name':temporaryUsers[i].name,
+                'img':'none',
+                'room':-1,
+                'choice':'ikke valgt',
+                'sex':temporaryUsers[i].sex
+            });
+            console.log('Adding temporary user');
         }
-    });
+    }
+    localStorage.removeItem('tempUsers');
+    localStorage.setItem('tempUsers', JSON.stringify(temporaryUsers));
     var storedData = JSON.parse(localStorage.getItem('choices'));
     data.map((e, i) => e.choice = storedData[i]);
     for (let i = 0; i < data.length; i++) {
@@ -874,7 +888,8 @@ function addUser() {
         'id':temporaryID,
         'sex':gender,
         'index':dataIndex,
-        'timestamp': new Date().getTime()
+        'timestamp': new Date().getTime(),
+        'html':''
     });
     //Adding the user to the container with the other users
     target.insertAdjacentHTML("afterend",'<div class="image-container Ikke-Valgt ' + name.charAt(0).toUpperCase() + '" id="pers-' + temporaryID + '" onclick="openPopup('+ temporaryID +')">' + '<img src="images/Dummy_Guest.png" class="image"> <p class="name-text">' + name + '</p> <div class="room-overlay"><p class="overlay-text overlay-static-text">Værelse</p> <p class="overlay-text overlay-replace-text">xx</p></div> </div>',);
@@ -1468,7 +1483,7 @@ function grayOutButton(buttonNumber, house, _pers) {
 
 
 //Send the values to the HTMl page
-function updateCount() {
+function updateCount(ownRoom, otherRoom, noChoise) {
     document.getElementById("eget-vaerelse-number").innerHTML = ownRoom;
     document.getElementById("andet-vaerelse-number").innerHTML = otherRoom;
     document.getElementById("ikke-valgt-number").innerHTML = noChoise;
@@ -1646,9 +1661,9 @@ function checkTime() {
 //Count the number of each value
 function countData() {
     //Set count to 0
-    noChoise = 0;
-    ownRoom = 0;
-    otherRoom = 0;
+    var noChoise = 0;
+    var ownRoom = 0;
+    var otherRoom = 0;
     //Count each type & add to value
     for (var i = 0; i < data.length; i++) {
         if (data[i].choice == "eget vaerelse") {
@@ -1660,7 +1675,7 @@ function countData() {
         }
     }
     //Call the values to be rendered to the website
-    updateCount();
+    updateCount(ownRoom, otherRoom, noChoise);
 }
 
 //Closes the file select menu
