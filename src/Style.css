@@ -166,6 +166,10 @@ body[data-UIStyle="new"] h2 {
     width: 170px;
 }
 
+.selected {
+    border: solid var(--text2) 1px;
+}
+
 /*═══════════════════════*/
 /*  nav styling*/
 .nav-button {
@@ -233,8 +237,8 @@ body[data-UIStyle="new"] h2 {
 .nav-button-icon {
     background-color: var(--fadded);
     border-radius: 6px;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -244,6 +248,12 @@ body[data-UIStyle="new"] h2 {
 
 #help-button {
     font-family: 'Arimo';
+    font-size: 18px;
+}
+
+#printer-icon {
+    height: 20px;
+    width: 20px;
 }
 
 #bottom-navigation {
@@ -433,6 +443,58 @@ ul.help-menu-element-content{
 }
 
 /*═══════════════════════*/
+/*  Config menu styling*/
+
+#config-menu {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+}
+
+#user-add-name {
+    resize: none;
+    text-align: center;
+    border-radius: 5px;
+    border: 1px solid var(--text2);
+    color: var(--text2);
+    background-color: var(--text);
+}
+
+.gender-selector-container {
+    display: flex;
+    gap: 10px;
+}
+
+.gender-selector-container > :not(.selected){
+    opacity: 70%;
+}
+
+.popup-inner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--text);
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+}
+
+.config-popup-container {
+    display: flex;
+    flex-direction: column;
+    width: 35%;
+    height: 250px;
+}
+
+#config-text {
+    margin: 0;
+}
+
+/*═══════════════════════*/
 /*  Print popup styling*/
 
 .header {
@@ -562,7 +624,7 @@ ul.help-menu-element-content{
 }
 
 .popup-buttons {
-    display: flex;
+    display: none;
     flex-direction: row;
 }
 
@@ -582,7 +644,6 @@ ul.help-menu-element-content{
 }
 
 #buttons-stage-2 {
-    display: none;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
@@ -591,7 +652,6 @@ ul.help-menu-element-content{
 }
 
 #buttons-stage-3 {
-    display: none;
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -603,10 +663,19 @@ ul.help-menu-element-content{
     padding-right: 24px;
 }
 
+#replaceableText, #replaceableImage {
+    display: none;
+}
+
+.small > .room-button:has(.extra-btn) {
+    display: none !important;
+}
+
 #header {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    display: none;
     width: 100%;
     padding: 0 6px;
     margin: 16px 0 16px 0;
@@ -664,6 +733,16 @@ ul.help-menu-element-content{
 .image-container.Andet > .room-overlay {
     display: inline;
     background-color: var(--blue);
+}
+
+.image-container.Ikke-Her > .room-overlay {
+    display: inline;
+    background-color: var(--orange);
+}
+
+.Ikke-Her {
+    pointer-events: none;
+    opacity: 70%;
 }
 
 .name-text {
@@ -829,6 +908,7 @@ body {
     background-attachment: fixed;
     background-position: center; 
     scroll-behavior: smooth;
+    background-size: cover;
 }
 
 #text {
@@ -839,7 +919,7 @@ body {
     display: grid;
     margin-left: 15%;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 100px;
+    grid-template-rows: repeat(auto-fill, 100px);
     position: relative;
     height: 80vh;
     column-gap: 4%;
