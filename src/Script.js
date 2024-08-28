@@ -650,24 +650,24 @@ function loadStoredData() {
     //Run through the temporary users and check if their timestamp is expired.
     //This has to be done otherwise we don't loop through the array the correct number of times...
     let numberOfTempUsers = temporaryUsers.length;
+    var amoutDeleted = 0;
     //Is gonna need to be redone, problems will occur when one user is removed but others still remain...
     for (var i = 0; i < numberOfTempUsers; i++) {
-        if (dataExpired( temporaryUsers[0].timestamp, new Date().getTime(), tempUserTimout)) {
+        if (dataExpired( temporaryUsers[i-amoutDeleted].timestamp, new Date().getTime(), tempUserTimout)) {
             console.info('Temporary user expired, removing user');
-            data.splice(temporaryUsers[0].index, 1);
-            temporaryUsers.splice(0, 1);
-
+            data.splice(temporaryUsers[i-amoutDeleted].index, 1);
+            temporaryUsers.splice(i-amoutDeleted, 1);
+            amoutDeleted++;
         } else {
-            target.insertAdjacentHTML("afterend",temporaryUsers[0].html,);
+            target.insertAdjacentHTML("afterend",temporaryUsers[i-amoutDeleted].html,);
             data.push({
-                'number':temporaryUsers[i].id,
-                'name':temporaryUsers[i].name,
+                'number':temporaryUsers[i-amoutDeleted].id,
+                'name':temporaryUsers[i-amoutDeleted].name,
                 'img':'none',
                 'room':-1,
                 'choice':'ikke valgt',
-                'sex':temporaryUsers[i].sex
+                'sex':temporaryUsers[i-amoutDeleted].sex
             });
-            console.log('Adding temporary user');
         }
     }
     localStorage.removeItem('tempUsers');
@@ -914,8 +914,9 @@ function removeUser(user) {
         removePersonFromRoom(userId,personInRoom(userId));
     }
     document.getElementById('pers-'+userId).remove();
-    temporaryUsers.splice(999-userId,1);
+    temporaryUsers.splice(temporaryUsers.findIndex(e => e.id === userId),1);
     data.splice(userDataIndex, 1);
+    updateStoredData();
     countData();
     closePopup();
     showAlert('Bruger Fjernet');
@@ -1238,14 +1239,13 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         if (roomLength - 3 > 0 && roomLength - 3 > currentRoom.space + allowedExtraValue - 1) {
             for (var i = 0; i < (roomLength - 3); i++) {
                 //Check if their an original member of the room. If they are, store the name and break the loop
-                //Also checks if the person is a guest, guests can't be kicked unless they're the last person in the room.
-                if (!originalMember(memberList[i], targetLocation) && (memberList[i] < 899 || i > 1)) {
+                //Also checks if the person is a guest, guests can't be kicked unless they're the last person in the room that's not an original memeber.
+                if (!originalMember(memberList[i], targetLocation) && (memberList[i] < 899 || i > 1 || (i+1 == (roomLength - 3) && originalMember(i+1)))) {
                     //Grab the person and place them into an object
                     Object.assign(personToBeReplaced, {id: memberList[i]});
                     break;
                 }
             }
-
             //Checks if there is a person that needs to be removed from the room, special case for if they're a guest
             if (Object.keys(personToBeReplaced).length > 0 && personToBeReplaced.id < 900) {
                 //Find the persons own room and add it to the object
