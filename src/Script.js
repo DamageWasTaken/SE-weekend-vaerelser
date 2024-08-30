@@ -5,7 +5,7 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://
 const CLIENT_ID = '294879549763-08fuvah7r95vd0sbbgrrcnqnsg7ju19u.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyBv_uj-7bG-NUu4APg7rr8-OqBl0-mhCh0';
 const APP_ID = 'weekend-vaerelser';
-const imageFolderID = '1Osx_4ZHsHIaOWHoLSzezfQrH0bJK_IZH';
+//const imageFolderID = '1Whad-PIWB3BS6jLh09pBycS3ocQxVGcM';
 var tokenClient;
 var accessToken = null;
 var pickerInited = false;
@@ -65,21 +65,43 @@ function authenticateGoogleOAuth() {
 //lists all the images in the viggo-bileder folder on google drive
 function listImages() {
     gapi.client.drive.files.list({
-        'q': `'${imageFolderID}' in parents and mimeType contains 'image/'`,
-        'fields': "nextPageToken, files(id, name, mimeType, webContentLink)",
-        'pageSize': 150,
+        q: "name='viggo-billeder' and mimeType='application/vnd.google-apps.folder'",
+        fields: 'files(id, name)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true
     }).then(function(response) {
-        var files = response.result.files;
-        if (!files || files.length <= 0) {
-            console.warn('No files found.');
-            return;
+        const folders = response.result.files
+        if (folders.length > 0) {
+            //Get the ID of the folder and then list the files in that folder
+            const folderId = folders[0].id;
+            gapi.client.drive.files.list({
+                q: `'${folderId}' in parents and mimeType contains 'image/'`,
+                fields: "nextPageToken, files(id, name, mimeType, webContentLink)",
+                pageSize: 150,
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true
+            }).then((response) => {
+                //Get the files ID and send it over to be downloaded
+                const filesResponse = response.result.files;
+                if (filesResponse.length > 0) {
+                    var files = response.result.files;
+                    if (!files || files.length <= 0) {
+                        console.warn('No files found.');
+                        return;
+                    }
+                    imageFiles = files;
+                    for (var i = 0; i < data.length; i++) {
+                        data[i].img = getPicture(data[i].img);
+                    }
+                    console.info('Images are ready.');
+                    dataReady = true;
+                } else {
+                    console.warn('File not found');
+                }
+            });
+        } else {
+            console.warn('Folder not found');
         }
-        imageFiles = files;
-        for (var i = 0; i < data.length; i++) {
-            data[i].img = getPicture(data[i].img);
-        }
-        console.info('Images are ready.');
-        dataReady = true;
     });
 }
 
@@ -419,7 +441,7 @@ function reloadImages() {
     for (var i = 0; i < images.length; i++) {
         if (i > 0) {
             images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
-            images[i].src = data[i - 1].img;
+            //images[i].src = data[i - 1].img;
         }
     }
 }
