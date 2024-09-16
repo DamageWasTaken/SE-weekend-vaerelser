@@ -694,9 +694,10 @@ ul.help-menu-element-content{
 /*  Profile styling*/
 .image {
     position: relative;
-    width: 100px;
     height: 100px;
-    border-radius: 50px;
+    /*border-radius: 50px;
+    width: 100px;*/
+    clip-path: circle(50px at 50% 50%);
 }
 
 .image-container {

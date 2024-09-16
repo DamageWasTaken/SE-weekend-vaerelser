@@ -1,7 +1,7 @@
 // Data Converter: https://shancarter.github.io/mr-data-converter/
 
 
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file';
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.photos.readonly';
 const CLIENT_ID = '294879549763-08fuvah7r95vd0sbbgrrcnqnsg7ju19u.apps.googleusercontent.com';
 const API_KEY = 'AIzaSyBv_uj-7bG-NUu4APg7rr8-OqBl0-mhCh0';
 const APP_ID = 'weekend-vaerelser';
@@ -71,12 +71,13 @@ function listImages() {
         includeItemsFromAllDrives: true
     }).then(function(response) {
         const folders = response.result.files
+        console.log(folders);
         if (folders.length > 0) {
             //Get the ID of the folder and then list the files in that folder
             const folderId = folders[0].id;
             gapi.client.drive.files.list({
                 q: `'${folderId}' in parents and mimeType contains 'image/'`,
-                fields: "nextPageToken, files(id, name, mimeType, webContentLink)",
+                fields: "nextPageToken, files(id, name, mimeType, thumbnailLink)",
                 pageSize: 150,
                 supportsAllDrives: true,
                 includeItemsFromAllDrives: true
@@ -85,16 +86,19 @@ function listImages() {
                 const filesResponse = response.result.files;
                 if (filesResponse.length > 0) {
                     var files = response.result.files;
+                    console.log(files);
                     if (!files || files.length <= 0) {
                         console.warn('No files found.');
                         return;
                     }
                     imageFiles = files;
-                    for (var i = 0; i < data.length; i++) {
+                    rateLimitProcessImages(data, 10);
+                    /*for (var i = 0; i < data.length; i++) {
                         data[i].img = getPicture(data[i].img);
                     }
                     console.info('Images are ready.');
                     dataReady = true;
+                    */
                 } else {
                     console.warn('File not found');
                 }
@@ -103,6 +107,25 @@ function listImages() {
             console.warn('Folder not found');
         }
     });
+}
+
+function rateLimitProcessImages(files, delay) {
+    let i = 0;
+
+    function processImage() {
+        if (i >= files.length) {
+            console.info('Images are ready.');
+            dataReady = true;
+            return;
+        }
+
+        files[i].img = getPicture(files[i].img);
+        i++;
+
+        setTimeout(processImage, delay);  // Add a delay between each image processing
+    }
+
+    processImage();
 }
 
 //Create and render a Picker object for searching images.
@@ -1665,8 +1688,8 @@ async function loadDOM() {
 }
 
 function getPicture(name) {
-    var file = imageFiles.find(file => file.name === name);
-    return file.webContentLink.replace("&export=download", "").replace('/uc?','/thumbnail?');
+    return imageFiles.find(file => file.name === name).thumbnailLink;
+/*    return file.webContentLink.replace("&export=download", "").replace('/uc?','/thumbnail?');*/
 }
 
 function checkTime() {
