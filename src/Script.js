@@ -71,7 +71,6 @@ function listImages() {
         includeItemsFromAllDrives: true
     }).then(function(response) {
         const folders = response.result.files
-        console.log(folders);
         if (folders.length > 0) {
             //Get the ID of the folder and then list the files in that folder
             const folderId = folders[0].id;
@@ -86,13 +85,12 @@ function listImages() {
                 const filesResponse = response.result.files;
                 if (filesResponse.length > 0) {
                     var files = response.result.files;
-                    console.log(files);
                     if (!files || files.length <= 0) {
                         console.warn('No files found.');
                         return;
                     }
                     imageFiles = files;
-                    rateLimitProcessImages(data, 10);
+                    rateLimitProcessImages(data, 10 );
                     /*for (var i = 0; i < data.length; i++) {
                         data[i].img = getPicture(data[i].img);
                     }
@@ -302,8 +300,13 @@ var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImage
 
 
 //Declaring all houses & rooms
+var houses = [
+
+];
+
+//
 var rooms = [
-    {room:"1a",sex:"x",space:2},
+/*    {room:"1a",sex:"x",space:2},
     {room:"1b",sex:"x",space:2},
     {room:2,sex:"x",space:4},
     {room:3,sex:"x",space:3},
@@ -347,7 +350,7 @@ var rooms = [
     {room:42,sex:"x",space:3},
     {room:43,sex:"x",space:3},
     {room:44,sex:"x",space:3},
-    {room:45,sex:"x",space:3}
+    {room:45,sex:"x",space:3}*/
 ]
 
 //Handling the config file
@@ -377,6 +380,32 @@ function handleConfig() {
             }
         }
     }
+    if (houseLayout.length > 0 && roomLayout.length > 0) {
+        for (let i = 0; i < houseLayout.length; i++) {
+            houses.push({house:Object.values(houseLayout[i])[1], amountOfRooms:Object.values(houseLayout[i])[0], houseNumber:Object.values(houseLayout[i])[1], members:[]});
+        }
+        for (var i = 0; i < roomLayout.length; i++) {
+            var roomNumber = roomLayout[i].roomNumber;
+            var roomCapacity = roomLayout[i].capacity;
+            var roomHouseGroup = roomLayout[i].houseGroup;
+
+            if (String(roomNumber).includes('-')) {
+                var startNumber = Number(roomNumber.split('-')[0]);
+                var endNumber = Number(roomNumber.split('-')[1]);
+                for (let x = 0; x < (endNumber-startNumber + 1); x++) {
+                    rooms.push({room:startNumber + x,sex:"x",space:roomCapacity,houseGroup:roomHouseGroup});
+                }
+            } else {
+                rooms.push({room:roomNumber,sex:"x",space:roomCapacity,houseGroup:roomHouseGroup});
+            }
+        }
+        console.info('Config file loaded.');
+    } else {
+        console.error('No room or house layout, please check if the Config file is correct.');
+        showAlert("CONFIG ERROR", 'Stick');
+        return;
+    }
+    /*
     if (roomConfig.length > 0) {
         for (let i = 0; i < roomConfig.length; i++) {
             var slot = rooms.findIndex(x => x.room === roomConfig[i][0]);
@@ -391,6 +420,7 @@ function handleConfig() {
             }    
         }
     }
+    */
 }
 
 handleConfig();
@@ -436,10 +466,6 @@ function checkKeyPressed(evt) {
     if (evt.keyCode === 27) {
         closePrintPopup(); // esc
     }
-    if (evt.keyCode === 82 && evt.altKey) {
-        console.warn('Reloading profile images!');
-        reloadImages(); // r
-    }
     if (evt.keyCode === 76 && evt.altKey) {
         console.log(rooms); // l
         console.log(data);
@@ -456,16 +482,6 @@ function checkKeyPressed(evt) {
     }
     if (evt.keyCode === 88 && evt.altKey) {
         localStorage.removeItem('previousFile'); // x
-    }
-}
-
-function reloadImages() {
-    var images = document.querySelectorAll('.image');
-    for (var i = 0; i < images.length; i++) {
-        if (i > 0) {
-            images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
-            //images[i].src = data[i - 1].img;
-        }
     }
 }
 
@@ -501,7 +517,7 @@ function shortenName(name, length) {
 //Return a string that is used to generate the printable list
 function printRoom(room) {
     var index = rooms.findIndex(e => e.room  === room);
-    var length = Object.keys(rooms[index]).length - 3;
+    var length = Object.keys(rooms[index]).length - 4;
     var string = "";
     if (length <= 0) {
         return "";
@@ -1279,13 +1295,15 @@ function relocate(person, targetLocation, previousLocation, forceRelocate) {
         delete memberList.room;
         delete memberList.sex;
         delete memberList.space;
+        delete memberList.houseGroup;
+
         //Set the memberlist to the values of the room so that the slots are removed.
         memberList = Object.values(memberList);
-        if (roomLength - 3 > 0 && roomLength - 3 > currentRoom.space + allowedExtraValue - 1) {
-            for (var i = 0; i < (roomLength - 3); i++) {
+        if (roomLength - 4 > 0 && roomLength - 4 > currentRoom.space + allowedExtraValue - 1) {
+            for (var i = 0; i < (roomLength - 4); i++) {
                 //Check if their an original member of the room. If they are, store the name and break the loop
                 //Also checks if the person is a guest, guests can't be kicked unless they're the last person in the room that's not an original memeber.
-                if (!originalMember(memberList[i], targetLocation) && (memberList[i] < 899 || i > 1 || (i+1 == (roomLength - 3) && originalMember(i+1)))) {
+                if (!originalMember(memberList[i], targetLocation) && (memberList[i] < 899 || i > 1 || (i+1 == (roomLength - 4) && originalMember(i+1)))) {
                     //Grab the person and place them into an object
                     Object.assign(personToBeReplaced, {id: memberList[i]});
                     break;
@@ -1334,7 +1352,7 @@ function checkRoomAvailability(room) {
     //Find the room position in the array
     var roomPosition = rooms.findIndex(e => e.room === room);
     //Find the amount of people in the room
-    roomAmount = Object.keys(rooms[roomPosition]).length-3;
+    var roomAmount = Object.keys(rooms[roomPosition]).length - 4;
     //Find out how many people can be assaigned to the room, by taking the space value and adding the amount of extra people allowed
     allowedAmount = rooms[roomPosition].space+allowedExtraValue;
 
@@ -1354,7 +1372,7 @@ function personInRoom(id, room) {
         for (var i = 0; i < rooms.length; i++) {
             var roomPos = i;
             var roomContent = rooms[roomPos];
-            if (Object.values(roomContent).includes(id, 3)) {
+            if (Object.values(roomContent).includes(id, 4)) {
                 return roomContent;
             }
         }
@@ -1389,33 +1407,33 @@ function addPersonToRoom(person, room, bypass) {
     }
 
     //Set the room position to the index of the room
-        roomPosition = rooms.findIndex(e => e.room === room);
-        //Grab the current profile of the room
-        var currentProfile = Object.assign({}, rooms[roomPosition]);
-        //Find out what slot the person should be added to
-        var slotPos = "Slot" + (Object.keys(rooms[roomPosition]).length - 2);
-        //Define the object that should be added
-        var addedContent = {
-            [slotPos]:person
-        }
-        //Add the new object to the profile
-        Object.assign(currentProfile, addedContent);
-        
-        //Replace the room in the rooms array
-        const itemIndex = rooms.findIndex(o => o.room === room);
-        rooms[itemIndex] = currentProfile;
+    roomPosition = rooms.findIndex(e => e.room === room);
+    //Grab the current profile of the room
+    var currentProfile = Object.assign({}, rooms[roomPosition]);
+    //Find out what slot the person should be added to
+    var slotPos = "Slot" + (Object.keys(rooms[roomPosition]).length - 3);
+    //Define the object that should be added
+    var addedContent = {
+        [slotPos]:person
+    }
+    //Add the new object to the profile
+    Object.assign(currentProfile, addedContent);
+    
+    //Replace the room in the rooms array
+    const itemIndex = rooms.findIndex(o => o.room === room);
+    rooms[itemIndex] = currentProfile;
 
-        var namePos = data.findIndex(e => e.number === person);
+    var namePos = data.findIndex(e => e.number === person);
 
-        //Update the persons profile
-        if (data[namePos].room === room) {
-            data[namePos].choice = "eget vaerelse";
-        } else {
-            data[namePos].choice = "andet vaerelse";
-        }
+    //Update the persons profile
+    if (data[namePos].room === room) {
+        data[namePos].choice = "eget vaerelse";
+    } else {
+        data[namePos].choice = "andet vaerelse";
+    }
 
-        updateDisplayedRoom("pers-" + namePos, room);        
-        countData();
+    updateDisplayedRoom("pers-" + namePos, room);        
+    countData();
 }
 
 //Removes a person from a room !!! Requires the room object as the param "room"
