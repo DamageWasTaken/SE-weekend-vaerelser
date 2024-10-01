@@ -384,6 +384,7 @@ function handleConfig() {
         for (let i = 0; i < houseLayout.length; i++) {
             houses.push({house:Object.values(houseLayout[i])[1], amountOfRooms:Object.values(houseLayout[i])[0], houseNumber:Object.values(houseLayout[i])[1], members:[]});
         }
+        //
         for (var i = 0; i < roomLayout.length; i++) {
             var roomNumber = roomLayout[i].roomNumber;
             var roomCapacity = roomLayout[i].capacity;
@@ -421,6 +422,15 @@ function handleConfig() {
         }
     }
     */
+}
+
+function handleRoomLayout() {
+    for (let i = 0; i < houseLayout.length; i++) {
+        var houseIndex = houseLayout.findIndex(e => e.houseNumber === i+1);
+        document.getElementById('house-button-' + i).innerText = houseLayout[houseIndex].houseName;
+        removeTag(document.getElementById('house-button-' + i), 'DONT-SHOW');
+    }
+    console.info('Room config loaded');
 }
 
 handleConfig();
@@ -665,6 +675,7 @@ window.onload = () => {
     var helpMenu = document.getElementById('help-menu');
     addTag(helpMenu, 'hide');
     addTag(helpMenu, 'visible');
+    handleRoomLayout();
 }
 
 //Checks if the time has exceded the compareTime by the timeLimit (Measured in hours)
@@ -1117,6 +1128,7 @@ function selectorButton(place) {
 //Sends the user to the room select menu.
 function selectHouse(house) {
     var popup = document.getElementById('popup');
+    house += 'h';
     if (popup.dataset.user.split('-')[1] > 899) {
         loadSelectorPage(2, house, 'guest');
     } else {
@@ -1127,7 +1139,7 @@ function selectHouse(house) {
 //Func for adding pers to the selected room based on the button
 function selectRoom(setRoom) {
     var popup = document.getElementById('popup');
-    var popupText = document.getElementById('replaceableTextHeader').innerText.split(' ')[0];
+    //var popupText = document.getElementById('replaceableTextHeader').innerText.split(' ')[0];
     var currentPerson = document.getElementById(popup.dataset.user);
     if (popup.dataset.user.split('-')[1] > 899) {
         var personSelected = data[data.findIndex(e => e.number === Number(popup.dataset.user.split('-')[1]))].number;
@@ -1135,24 +1147,10 @@ function selectRoom(setRoom) {
         var personSelected = data[popup.dataset.user.split('-')[1]].number;
     }
 
-    switch (popupText) {
-        case 'Midgård':
-            if (setRoom < 2) {
-                setRoom === 1 ? setRoom = '1b' : setRoom = '1a';
-            }
-            break;
+    setRoom = document.getElementById('btn-' + setRoom).innerText;
     
-        case 'Asgård':
-            setRoom += 14;
-            break;
-
-        case 'Udgård':
-            setRoom += 27;
-            break;
-        
-        case 'Valhal':
-            setRoom += 40;
-            break;
+    if (setRoom.match(/\b(\d+)\b/gim) !== null) {
+        setRoom = Number(setRoom);
     }
 
     switch (true) {
@@ -1214,39 +1212,15 @@ function loadSelectorPage(page, ...args) {
             closeButtons();
             addTag(stage_3, 'show');
             addTag(header, 'show');
-            switch (true) {
-                case args.includes('Midgaard'):
-                    headerText.innerHTML = "Midgård - Værelse";
-                    for (var i = 0; i < 13; i++) {
-                        document.getElementById("btn-" + i ).innerHTML = rooms[i].room;
-                        grayOutButton(i, 'Midgaard', personSelected);
-                    }
-                    break;
+
+            var selectedHouseIndex = houseLayout.findIndex(e => e.houseNumber === Number(args[args.findIndex(e => e.match(/(\d{1,2}h)+/g))].split('h')[0]) + 1);
+            var firstRoomAtHouseGroup = rooms.findIndex(e => e.houseGroup === houseLayout[selectedHouseIndex].houseNumber);
             
-                case args.includes('Asgaard'):
-                    headerText.innerHTML = "Asgård - Værelse";
-                    for (var i = 0; i < 13; i++) {
-                        document.getElementById("btn-" + i).innerHTML = rooms[i + 13].room;
-                        grayOutButton(i, 'Asgaard', personSelected);
-                    }
-                    break;
-
-                case args.includes('Udgaard'):
-                    headerText.innerHTML = "Udgård - Værelse";
-                    for (var i = 0; i < 13; i++) {
-                        document.getElementById("btn-" + i).innerHTML = rooms[i + 26].room;
-                        grayOutButton(i, 'Asgaard', personSelected);
-                    }
-                    break;
-
-                case args.includes('Valhal'):
-                    addTag(stage_3, 'small');
-                    headerText.innerHTML = "Valhal - Værelse";
-                    for (var i = 0; i < 6; i++) {
-                        document.getElementById("btn-" + i).innerHTML = rooms[i + 39].room;
-                        grayOutButton(i, 'Asgaard', personSelected);
-                    }
-                    break;
+            headerText.innerHTML = `${houseLayout[selectedHouseIndex].houseName} - Værelse`;
+            for (var i = 0; i < houseLayout[selectedHouseIndex].capacity; i++) {
+                removeTag(document.getElementById("btn-" + i ), 'DONT-SHOW');
+                document.getElementById("btn-" + i ).innerHTML = rooms[firstRoomAtHouseGroup + i].room;
+                grayOutButton(i, rooms[firstRoomAtHouseGroup + i].room, personSelected);
             }
             break;
     }
@@ -1270,6 +1244,9 @@ function closeButtons() {
     removeTag(stage_2, 'show');
     removeTag(stage_3, 'show');
     removeTag(stage_3, 'small');
+
+    //Closes the room selector buttons
+    document.querySelectorAll('.alt').forEach((e) => {addTag(e, 'DONT-SHOW')});
 }
 
 //Relocates someone based on some parameters
@@ -1495,32 +1472,8 @@ function checkSex(personId, room) {
 
 
 //Check if the button should be grayed out, and does so if needed.
-function grayOutButton(buttonNumber, house, _pers) {
+function grayOutButton(buttonNumber, room, _pers) {
     var button = document.getElementById("btn-" + buttonNumber );
-    var room = 0;
-    switch (house) {
-        case 'Midgaard':
-            room = buttonNumber;
-            if (buttonNumber == 0) {
-                room = '1a';
-            } else if (buttonNumber == 1) {
-                room = '1b';
-            }
-            break;
-
-        case 'Asgaard':
-            room = buttonNumber + 14;
-            break;
-
-        case 'Udgaard':
-            room = buttonNumber + 27;
-            break;
-
-        case 'Valhal':
-            room = buttonNumber + 40;
-            break;
-    }
-
     //DEBUG
     /*
     console.log('Avail ' + !checkRoomAvailability(room));
@@ -1528,7 +1481,6 @@ function grayOutButton(buttonNumber, house, _pers) {
     console.log('InRoom ' + personInRoom(_pers, room));
     console.log('Orig ' + originalMember(_pers, room));
     */
-
     switch (true) {
         case !checkRoomAvailability(room):
         case !checkSex(_pers, room):
