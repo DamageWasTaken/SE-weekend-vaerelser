@@ -511,27 +511,40 @@ ul.help-menu-element-content{
 }
 
 .table {
-	display: inline-grid;
-    grid-template-columns: 1fr 1fr;
+    margin-top: 2em;
+	display: flex;
+    flex-wrap: wrap;
 	width: 450px;
 	border: 1px solid black;
-	height: 700px;
     color: black;
+    grid-auto-rows: min-content;
+    height: min-content;
+    background: gray;
+}
+
+.flipped {
+    justify-content: flex-end;
+    flex-direction: row-reverse;
 }
 
 .table-part {
-	width: 100%;
+	width: 50%;
 	height: 100px;
 	border: 1px solid black;
     overflow: hidden;
+    background: white;
 }
 
-.rows6 {
-	height: 600px;
-}
-
-.rows3 {
-	height: 300px;
+.table-title {
+    width: 100%;
+    position: relative;
+    top: -2em;
+    display: flex;
+    justify-content: center;
+    height: 0;
+    align-items: flex-start;
+    font-weight: 900;
+    font-family: 'Arimo', sans-serif;
 }
 
 .print {

@@ -132,9 +132,12 @@ function createPicker() {
         console.warn('No accessToken found, make sure to authenticate with Google OAuth. The popup window may be block.');
         return;
     }
-    const view = new google.picker.View(google.picker.ViewId.DOCS);
+    const view = new google.picker.DocsView(google.picker.ViewId.DOCS);
     //Only allow .csv files
-    view.setMimeTypes('text/csv');
+    //view.setMimeTypes('text/csv');
+    view.setMimeTypes("text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    view.setMode(google.picker.DocsViewMode.LIST);
+    view.setParent('1fKT0WxXiN2hh3UexlJvgNROmbVtSigwe'); //The folder ID of 'weekend-filer'
     const picker = new google.picker.PickerBuilder()
         .setDeveloperKey(API_KEY)
         .setAppId(APP_ID)
@@ -151,6 +154,7 @@ async function pickerCallback(data) {
     if (data.action === google.picker.Action.PICKED) {
         const document = data[google.picker.Response.DOCUMENTS][0];
         const fileId = document[google.picker.Document.ID];
+        localStorage.setItem('pickedFile',JSON.stringify(document[google.picker.Document.NAME]));
         if (fileId == localStorage.getItem('previousFile')) {
             sameFile = true;
         } else {
@@ -160,51 +164,69 @@ async function pickerCallback(data) {
             localStorage.removeItem('tempUsers')
             localStorage.setItem('previousFile',fileId);
         }
-        const res = await gapi.client.drive.files.get({
-            'fileId': fileId,
-            'alt': 'media',
-        });
-        handleData(res.body);
+        if (document.mimeType !== 'text/csv') {
+            const fileData = await downloadFileAsBinary(fileId);
+            if (fileData) {
+                handleData(fileData, document.mimeType);
+            } else {
+                console.error("Failed to fetch file data.");
+            }
+        } else {
+            const res = await gapi.client.drive.files.get({
+                'fileId': fileId,
+                'alt': 'media',
+            });
+            handleData(res.body, 'text/csv');
+        }
     }
 }
 
-//Handles the weekend file data and splits it to an array with obejcts
-function handleData(data) {
+async function downloadFileAsBinary(fileId) {
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+        // Return the response as an ArrayBuffer for binary data compatibility
+        return await response.arrayBuffer().then(buffer => {return buffer});
+    } else {
+        console.error("Error fetching file:", response.statusText);
+        return null;
+    }
+}
+
+//Handles the weekend file data and splits it to an array with objects
+//Default handle method / mimeType is text/csv
+function handleData(data, mimeType) {
     pickerRawData = data;
-    var delta = 2;
-    //Split the result
-    var splitArray = data.split(/(?:\r?\n|(?:;))/gim); // |(?:;)
-    //Remove the first 4 items of the array
-    splitArray.splice(0,4);
-    //Loop through the array where we delete every nth (delta) of the array
-    
-    for (var i = delta; i < splitArray.length; i += delta) {
-        splitArray.splice(i,1);
-    }
-    for (var i = 0; i < splitArray.length; i += delta) {
-      var cacheArray = [splitArray[i],splitArray[i+1]];
-      weekendList.push(cacheArray.join(' '));
+    switch (mimeType) {
+        case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+            const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const csvData = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
+
+            handleData(csvData, 'text/csv');
+            break;
+            
+        default:
+            var delta = 2;
+            //Split the result
+            var splitArray = data.split(/(?:\r?\n|(?:,)|(?:;))/gim); // |(?:;)
+            //Remove the first 4 items of the array
+            splitArray.splice(0,4);
+            //Loop through the array where we delete every nth (delta) of the array
+            
+            for (var i = delta; i < splitArray.length; i += delta) {
+                splitArray.splice(i,1);
+            }
+            for (var i = 0; i < splitArray.length; i += delta) {
+                var cacheArray = [splitArray[i],splitArray[i+1]];
+                weekendList.push(cacheArray.join(' '));
+            }
+            break;
     }
     loadDOM();
 }
 
-function handleDataAlternative() {
-    weekendList=[]
-    var delta = 2;
-    //Split the result
-    var splitArray = pickerRawData.split(/(?:\r?\n|(?:,))/gim); // |(?:;)
-    //Remove the first 4 items of the array
-    splitArray.splice(0,4);
-    //Loop through the array where we delete every nth (delta) of the array
-    for (var i = delta; i < splitArray.length; i += delta) {
-        splitArray.splice(i,1);
-    }
-    for (var i = 0; i < splitArray.length; i += delta) {
-      var cacheArray = [splitArray[i],splitArray[i+1]];
-      weekendList.push(cacheArray.join(' '));
-    }
-    loadDOM();
-}
 
 //Findes the Data.txt file in the config folder on Google drive
 function findFile() {
@@ -267,6 +289,54 @@ function downloadFile(fileId) {
     });
 }
 
+async function printAndUpload() {
+    // Convert content to PDF
+    const content = document.getElementById('print-popup');
+    const options = {
+        margin:       0.5,
+        filename:     `${localStorage.getItem('pickedFile').split('.csv')[0]} - ${new Date().toLocaleDateString()}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98},
+        html2canvas:  {scale:10, width:1100, height:800},
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+    
+    // Generate PDF and wait until it's fully ready
+    const pdf = await html2pdf().set(options).from(content).toPdf().get('pdf');
+       
+    // Get the PDF data as a Blob
+    const pdfBlob = pdf.output('blob');
+    
+    // Upload PDF to Google Drive
+    uploadToDrive(pdfBlob);
+}
+
+function uploadToDrive(file) {
+    const driveId = '0AAM7277rxTw5Uk9PVA';
+    const folderId = '1IXtvCMYd4GFkNSu3rm2tWqDvq2_1XnEG';
+
+    const metadata = {
+        'name': `${localStorage.getItem('pickedFile').split('.csv')[0]} - ${new Date().toLocaleDateString()}.pdf`,
+        'mimeType': 'application/pdf',
+        'parents': folderId ? [folderId] : [],
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true', {
+        method: 'POST',
+        headers: new Headers({ 'Authorization': 'Bearer ' + gapi.auth.getToken().access_token }),
+        body: form
+    })
+    .then((res) => res.json())
+    .then((data) => {
+        console.info('File:'+ data.name +' uploaded successfully:');
+        showAlert('Weekendliste Uploaded');
+        finishPrinting();
+    })
+    .catch((error) => console.error('Error uploading file:', error));
+  }
 
 //Config Variables (Default values):
 //checkTime
@@ -285,8 +355,6 @@ var tempUserTimout = 48;
 var temporaryUsers = [];
 var previousAlert = 'none';
 var expandableElements;
-var runLock = false;
-var invalidData = false;
 var home;
 var checkList = [];
 var weekendList = [];
@@ -301,56 +369,10 @@ var bgImg = 'url(' + backgroundImages[Math.floor(Math.random() * backgroundImage
 
 //Declaring all houses & rooms
 var houses = [
-
 ];
 
 //
 var rooms = [
-/*    {room:"1a",sex:"x",space:2},
-    {room:"1b",sex:"x",space:2},
-    {room:2,sex:"x",space:4},
-    {room:3,sex:"x",space:3},
-    {room:4,sex:"x",space:3},
-    {room:5,sex:"x",space:3},
-    {room:6,sex:"x",space:3},
-    {room:7,sex:"x",space:3},
-    {room:8,sex:"x",space:3},
-    {room:9,sex:"x",space:3},
-    {room:10,sex:"x",space:3},
-    {room:11,sex:"x",space:3},
-    {room:12,sex:"x",space:3},
-    {room:14,sex:"x",space:3},
-    {room:15,sex:"x",space:4},
-    {room:16,sex:"x",space:3},
-    {room:17,sex:"x",space:3},
-    {room:18,sex:"x",space:3},
-    {room:19,sex:"x",space:3},
-    {room:20,sex:"x",space:3},
-    {room:21,sex:"x",space:3},
-    {room:22,sex:"x",space:3},
-    {room:23,sex:"x",space:3},
-    {room:24,sex:"x",space:3},
-    {room:25,sex:"x",space:3},
-    {room:26,sex:"x",space:3},
-    {room:27,sex:"x",space:3},
-    {room:28,sex:"x",space:4},
-    {room:29,sex:"x",space:3},
-    {room:30,sex:"x",space:3},
-    {room:31,sex:"x",space:3},
-    {room:32,sex:"x",space:3},
-    {room:33,sex:"x",space:3},
-    {room:34,sex:"x",space:3},
-    {room:35,sex:"x",space:3},
-    {room:36,sex:"x",space:3},
-    {room:37,sex:"x",space:3},
-    {room:38,sex:"x",space:3},
-    {room:39,sex:"x",space:3},
-    {room:40,sex:"x",space:3},
-    {room:41,sex:"x",space:3},
-    {room:42,sex:"x",space:3},
-    {room:43,sex:"x",space:3},
-    {room:44,sex:"x",space:3},
-    {room:45,sex:"x",space:3}*/
 ]
 
 //Handling the config file
@@ -382,7 +404,7 @@ function handleConfig() {
     }
     if (houseLayout.length > 0 && roomLayout.length > 0) {
         for (let i = 0; i < houseLayout.length; i++) {
-            houses.push({house:Object.values(houseLayout[i])[1], amountOfRooms:Object.values(houseLayout[i])[0], houseNumber:Object.values(houseLayout[i])[1], members:[]});
+            houses.push({house:Object.values(houseLayout[i])[1], amountOfRooms:Object.values(houseLayout[i])[0], houseNumber:Object.values(houseLayout[i])[2], layout:Object.values(houseLayout[i])[3], members:[]});
         }
         //
         for (var i = 0; i < roomLayout.length; i++) {
@@ -425,9 +447,9 @@ function handleConfig() {
 }
 
 function handleRoomLayout() {
-    for (let i = 0; i < houseLayout.length; i++) {
-        var houseIndex = houseLayout.findIndex(e => e.houseNumber === i+1);
-        document.getElementById('house-button-' + i).innerText = houseLayout[houseIndex].houseName;
+    for (let i = 0; i < houses.length; i++) {
+        var houseIndex = houses.findIndex(e => e.houseNumber === i+1);
+        document.getElementById('house-button-' + i).innerText = houses[houseIndex].house;
         removeTag(document.getElementById('house-button-' + i), 'DONT-SHOW');
     }
     console.info('Room config loaded');
@@ -501,6 +523,11 @@ function readyToPrint() {
     addTag(bottomNav, 'DONT-SHOW');
     openPrintPopup();
     generateList();
+    printAndUpload();
+}
+
+function finishPrinting() {
+    var bottomNav = document.getElementById('bottom-navigation');
     print();
     removeTag(bottomNav, 'DONT-SHOW');
 }
@@ -519,7 +546,6 @@ function shortenName(name, length) {
         } else {
             return name;
         }
-        
     }
     return name;
 }
@@ -547,35 +573,37 @@ function printRoom(room) {
 
 //Generate the room array showcase
 function generateList() {
-    var tableMidgaard = document.getElementById("generated-table-1");
-	var tableAsgaard = document.getElementById("generated-table-2");
-	var tableUdgaard = document.getElementById("generated-table-3");
-	var tableValhal = document.getElementById("generated-table-4");
-    if (runLock) {
-        tableMidgaard.innerHTML = '';
-        tableAsgaard.innerHTML = '';
-        tableUdgaard.innerHTML = '';
-        tableValhal.innerHTML = '';
-    }
-    runLock = true;
-    //-------
-    tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse 1A</b> </div> <div class="generated-text">' + printRoom("1a") + '</div> <div class="header"> <b>Værelse 1B</b> </div> <div class="generated-text">' + printRoom("1b") + '</div> </div>',);
-    for (var i = 0; i < 11 ; i++) {
-        tableMidgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+2) + '</b> </div> <div class="generated-text">' + printRoom(i+2) + '</div> </div>',);
-    }
-    //-------
-    for (var i = 0; i < 13 ; i++) {
-        tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+14) + '</b> </div> <div class="generated-text">' + printRoom(i+14) + '</div> </div>',);
-    }
-    tableAsgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
-    //-------
-    for (var i = 0; i < 13 ; i++) {
-        tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i + 27) + '</b> </div> <div class="generated-text">' + printRoom(i+27) + '</div> </div>',);
-    }
-    tableUdgaard.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="blank"></div> </div>',);
-    //-------
-    for (var i = 0; i < 6 ; i++) {
-        tableValhal.insertAdjacentHTML("beforeend",'<div class="table-part"> <div class="header"> <b>Værelse ' + (i+40) + '</b> </div> <div class="generated-text">' + printRoom(i+40) + '</div> </div>',);
+    var table1 = document.getElementById("generated-table-1");
+    var table2 = document.getElementById("generated-table-2");
+    var table3 = document.getElementById("generated-table-3");
+    var table4 = document.getElementById("generated-table-4");
+    var table5 = document.getElementById("generated-table-5");
+    var table6 = document.getElementById("generated-table-6");
+
+    table1.innerHTML = '';
+    table2.innerHTML = '';
+    table3.innerHTML = '';
+    table4.innerHTML = '';
+    table5.innerHTML = '';
+    table6.innerHTML = '';
+    removeTag(table1, 'flipped');
+    removeTag(table2, 'flipped');
+    removeTag(table3, 'flipped');
+    removeTag(table4, 'flipped');
+    removeTag(table5, 'flipped');
+    removeTag(table6, 'flipped');
+    
+    for (let i = 0; i < houses.length; i++) {
+        //var layoutOrder = houses[i].layout.match(/l_\w+/gim)[0];
+        var flags = houses[i].layout.match(/(?<=F_)\w+/gim);
+        var insert = flags.includes('startBottom') ? 'afterbegin' : 'beforeend';
+        flags.includes('flipped') ? addTag(document.getElementById(`generated-table-${i + 1}`), 'flipped') : '';
+        var firstRoomAtHouseGroup = rooms.findIndex(e => e.houseGroup === houseLayout[i].houseNumber);
+        for (let x = 0; x < houses[i].amountOfRooms; x++) {
+            removeTag(document.getElementById(`generated-table-${i+1}`), 'DONT-SHOW');
+            document.getElementById(`generated-table-${i + 1}`).insertAdjacentHTML(insert, '<div class="table-part" id="table-'+ (i+1) +'-part-'+ x +'"> <div class="header"> <b>Værelse ' + rooms[firstRoomAtHouseGroup + x].room + '</b> </div> <div class="generated-text">' + printRoom(rooms[firstRoomAtHouseGroup + x].room) + '</div> </div>',);
+        }
+        document.getElementById(`generated-table-${i + 1}`).insertAdjacentHTML('afterbegin','<div class="table-title">'+ houses[i].house +'</div>',);
     }
 }
 
@@ -773,6 +801,10 @@ function openPrintPopup() {
     addTag(popup, "show");
     addTag(body, "print");
     removeTag(closeIcon, 'DONT-SHOW');
+
+    for (let i = 0; i < houses.length; i++) {
+        addTag(document.getElementById(`generated-table-${i+1}`), 'DONT-SHOW');
+    }
 }
 
 //Closes the popup menu
@@ -1213,11 +1245,11 @@ function loadSelectorPage(page, ...args) {
             addTag(stage_3, 'show');
             addTag(header, 'show');
 
-            var selectedHouseIndex = houseLayout.findIndex(e => e.houseNumber === Number(args[args.findIndex(e => e.match(/(\d{1,2}h)+/g))].split('h')[0]) + 1);
-            var firstRoomAtHouseGroup = rooms.findIndex(e => e.houseGroup === houseLayout[selectedHouseIndex].houseNumber);
+            var selectedHouseIndex = houses.findIndex(e => e.houseNumber === Number(args[args.findIndex(e => e.match(/(\d{1,2}h)+/g))].split('h')[0]) + 1);
+            var firstRoomAtHouseGroup = rooms.findIndex(e => e.houseGroup === houses[selectedHouseIndex].houseNumber);
             
-            headerText.innerHTML = `${houseLayout[selectedHouseIndex].houseName} - Værelse`;
-            for (var i = 0; i < houseLayout[selectedHouseIndex].capacity; i++) {
+            headerText.innerHTML = `${houses[selectedHouseIndex].house} - Værelse`;
+            for (var i = 0; i < houses[selectedHouseIndex].amountOfRooms; i++) {
                 removeTag(document.getElementById("btn-" + i ), 'DONT-SHOW');
                 document.getElementById("btn-" + i ).innerHTML = rooms[firstRoomAtHouseGroup + i].room;
                 grayOutButton(i, rooms[firstRoomAtHouseGroup + i].room, personSelected);
@@ -1367,7 +1399,7 @@ function personInRoom(id, room) {
         var currentRoom = Object.assign({}, rooms[roomInQuestion]);
 
         try {
-            return Object.values(currentRoom).includes(id,3);
+            return Object.values(currentRoom).includes(id,4);
         } catch(err) {
             return false;
         }
@@ -1614,14 +1646,8 @@ async function loadDOM() {
             testObejct.choice = "ikke valgt";
         }
     } catch (error) {
-        if (!invalidData) {
-            console.info('Data could not be loaded, trying alternative split method.')
-            invalidData = true;
-            handleDataAlternative();
-        } else {
-            console.error('Data is invalid');
-            console.error(error);
-        }
+        console.error('Data is invalid');
+        console.error(error);
     }
     //Grabs the outer shell for where the profiles are to be loaded to
     var mainContainer = document.getElementById("container");

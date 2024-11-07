@@ -6,6 +6,8 @@
         <link rel="icon" type="image/x-icon" href="/images/logo.ico">
         <link rel="stylesheet" href="Style.css">
         <script src="../Config.js"></script> 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
         <script type="text/javascript" src="Script.js"></script> 
         <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
         <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
@@ -73,10 +75,12 @@
             <button id="file-select-button" onclick="createPicker()">Vælg Weekend</button>
         </div>
         <div id="print-popup">
-            <div class="rows6 table" id="generated-table-1"></div>
-            <div class="table" id="generated-table-2"></div>
-            <div class="table" id="generated-table-3"></div>
-            <div class="rows3 table" id="generated-table-4"></div>
+            <div class="table DONT-SHOW" id="generated-table-1"></div>
+            <div class="table DONT-SHOW" id="generated-table-2"></div>
+            <div class="table DONT-SHOW" id="generated-table-3"></div>
+            <div class="table DONT-SHOW" id="generated-table-4"></div>
+            <div class="table DONT-SHOW" id="generated-table-5"></div>
+            <div class="table DONT-SHOW" id="generated-table-6"></div>
         </div>
         <div id="help-menu">
             <div id="help-menu-title">

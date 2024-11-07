@@ -25,15 +25,18 @@ There can be a max of 6 houses.
  * capacity: The amount of room located in that spicifc house. (20 is max)
  * houseName: The name of the spicific house.
  * houseNumber: Used to configere what order the houses are displayed, and assign rooms to a spicifc house.
+ * layout: Determins the layout of the rooms inside the house when printing. If you want to use multiple they should be seperated by a comma(",").
 
- * {capacity:0, houseName:"Name", houseNumber:0}
+ * {capacity:0, houseName:"Name", houseNumber:0, layout:"Numerical"}
 */
 
+//layout?  f_startBottom, f_flipped
+
 const houseLayout = [
-    {capacity:13, houseName:"Asgård", houseNumber:3},
-    {capacity:13, houseName:"Midgård", houseNumber:4},
-    {capacity:13, houseName:"Udgård", houseNumber:2},
-    {capacity:6, houseName:"Valhal", houseNumber:1}
+    {capacity:13, houseName:"Midgård", houseNumber:4, layout:'f_startBottom, f_flipped'},
+    {capacity:13, houseName:"Asgård", houseNumber:3, layout:'f_startBottom'},
+    {capacity:13, houseName:"Udgård", houseNumber:2, layout:'f_startBottom'},
+    {capacity:6, houseName:"Valhal", houseNumber:1, layout:'f_startBottom'}
 ]
 
 /*
